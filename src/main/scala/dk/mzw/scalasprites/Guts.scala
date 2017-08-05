@@ -1,8 +1,6 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.ScalaSprites.{Image, Scene, Sprite, SpriteCanvas}
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLCanvasElement
+import dk.mzw.scalasprites.ScalaSprites.{Image, Scene, Sprite}
 
 object Guts{
 
@@ -16,13 +14,9 @@ object Guts{
         shots : List[Position]
     )
 
-    def run(canvas : HTMLCanvasElement) {
-        ScalaSprites.loadView(Guts.myView, canvas, Guts.onLoad)
-    }
-
-    private def myView(load : String => Image) : GameState => Scene = {
+    def view(load : String => Image) : GameState => Scene = {
         val playerImage = load("assets/piskel.png")
-        //val fireballImage = load("images/fireball.png")
+        val fireballImage = load("assets/fireball.png")
 
         {state =>
             val player = Sprite(
@@ -31,36 +25,36 @@ object Guts{
                 image = playerImage
             )
 
-            /*val shots = state.shots.map { shot =>
+            val shots = state.shots.map { shot =>
                 Sprite(
                     shot.x,
                     shot.y,
                     image = fireballImage
                 )
-            }*/
+            }
             Scene(
-                sprites = player :: List() //shots
+                sprites = player :: shots
             )
         }
     }
 
+    val initialState = GameState(
+        player = Position(0, 0),
+        shots = List()
+    )
 
-    private def onLoad(spriteCanvas : SpriteCanvas[GameState]) : Unit = {
-
-        def loop(elapsed : Double): Unit = {
-            val t = elapsed * 0.001
-            val r = Math.cos(t * 0.2)
-            val speed = 1
-            val state = GameState(
-                player = Position(
-                    x = Math.cos(t * speed) * r,
-                    y = Math.sin(t * speed) * r
-                ),
-                shots = List()
+    def nextState(last : GameState, t : Double, dt : Double) : GameState = {
+        val r = 1
+        val speed = 1
+        val playerPosition = Position(
+            x = Math.cos(t * speed) * r,
+            y = Math.sin(t * speed) * r
+        )
+        GameState(
+            player = playerPosition,
+            shots = List(
+                Position(playerPosition.y, playerPosition.x)
             )
-            spriteCanvas.draw(state)
-            dom.window.requestAnimationFrame(loop _)
-        }
-        loop(0)
+        )
     }
 }

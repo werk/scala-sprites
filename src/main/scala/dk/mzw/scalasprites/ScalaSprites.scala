@@ -1,8 +1,7 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.ScalaSprites._
 import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLCanvasElement
+import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
 object ScalaSprites {
 
@@ -31,33 +30,49 @@ object ScalaSprites {
         canvas : HTMLCanvasElement,
         onLoad : SpriteCanvas[State] => Unit
     ) : Unit = {
-        println("loadView")
         val gl = new WebGl(canvas)
         gl.initSpriteProgram()
-        //var images = Map[String, Int]()
-        var image : String = null
+        var images = Set[String]()
 
         def load(url : String) : Image = {
-            //images += url -> 0 // TODO
             println(s"load $url")
-            image = url
+            images += url
             Image(url)
         }
 
         val makeViewState : State => Scene = view(load)
 
-        def draw(state : State) : Unit = {
+        def draw(textures : Map[String, WebGLTexture])(state : State) : Unit = {
             val viewState = makeViewState(state)
-            val array = viewState.sprites.map{s =>
-                (s.x, s.y, 1.0)
-            }.toArray
-            gl.drawPointSprites(array)
+            gl.clear()
+            viewState.sprites.groupBy(_.image).foreach{case (image, sprites) =>
+                val texture = textures(image.url)
+                gl.activateTexture(texture)
+
+                val array = sprites.map{s =>
+                    (s.x, s.y, 1.0)
+                }.toArray
+                gl.drawPointSprites(array)
+            }
         }
 
-        gl.loadTexture(image, {url =>
-            println(s"loadTexture $url")
-            val spriteCanvas = SpriteCanvas[State](canvas, draw)
+        gl.initTextures(images, {map =>
+            val spriteCanvas = SpriteCanvas[State](canvas, draw(map))
             onLoad(spriteCanvas)
         })
+    }
+
+    def gameLoop[State](spriteCanvas : SpriteCanvas[State], initialState : State, step : (State, Double, Double) => State) : Unit = {
+        var state = initialState
+        var lastTime = System.currentTimeMillis() * 0.001
+        def loop(): Unit = {
+            val time = System.currentTimeMillis() * 0.001
+            val dt = time - lastTime
+            state = step(state, time, dt)
+            spriteCanvas.draw(state)
+            lastTime = time
+            dom.window.requestAnimationFrame{_ => loop()}
+        }
+        loop()
     }
 }
