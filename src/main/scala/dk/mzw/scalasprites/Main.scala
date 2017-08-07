@@ -12,8 +12,8 @@ object Main extends JSApp {
         println("Guts")
         val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
 
-        ScalaSprites.loadView(Guts.view, canvas, { spriteCanvas : SpriteCanvas[Guts.GameState] =>
-            ScalaSprites.gameLoop(spriteCanvas, Guts.initialState, Guts.nextState)
+        ScalaSprites.loadView(PyroMan.view, canvas, { spriteCanvas : SpriteCanvas[PyroMan.GameState] =>
+            ScalaSprites.gameLoop(spriteCanvas, PyroMan.initialState, PyroMan.nextState)
         })
 
     }
