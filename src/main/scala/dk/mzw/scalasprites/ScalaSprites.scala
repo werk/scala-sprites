@@ -15,7 +15,8 @@ object ScalaSprites {
     case class Sprite(
         x : Double,
         y : Double,
-        image : Image
+        image : Image,
+        size : Double
     )
 
     case class SpriteCanvas[S](
@@ -50,9 +51,9 @@ object ScalaSprites {
                 gl.activateTexture(texture)
 
                 val array = sprites.map{s =>
-                    (s.x, s.y, 1.0)
+                    (s.x, s.y, s.size, s.size)
                 }.toArray
-                gl.drawPointSprites(array)
+                gl.drawSprites(array)
             }
         }
 

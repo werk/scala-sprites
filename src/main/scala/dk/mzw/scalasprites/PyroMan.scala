@@ -30,7 +30,8 @@ object PyroMan{
 
     case class GameState(
         player : Player,
-        shots : List[Flame]
+        shots : List[Flame],
+        t : Double
     )
 
     def view(load : String => Image) : GameState => Scene = {
@@ -41,14 +42,17 @@ object PyroMan{
             val player = Sprite(
                 state.player.position.x,
                 state.player.position.y,
-                image = playerImage
+                image = playerImage,
+                size = 40
             )
 
             val shots = state.shots.map { shot =>
+                val age = state.t - shot.born
                 Sprite(
                     shot.position.x,
                     shot.position.y,
-                    image = fireballImage
+                    image = fireballImage,
+                    size = 10 + age * 10
                 )
             }
             Scene(
@@ -59,7 +63,8 @@ object PyroMan{
 
     val initialState = GameState(
         player = Player(Vector(0, 0), Vector(0, 0), 0, 0.1),
-        shots = List()
+        shots = List(),
+        0
     )
 
     def nextState(last : GameState, t : Double, dt : Double) : GameState = {
@@ -102,7 +107,8 @@ object PyroMan{
 
         GameState(
             player = player,
-            shots = newShots
+            shots = newShots,
+            t = t
         )
     }
 }
