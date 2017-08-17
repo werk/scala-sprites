@@ -31,7 +31,7 @@ object ScalaSprites {
         canvas : HTMLCanvasElement,
         onLoad : SpriteCanvas[State] => Unit
     ) : Unit = {
-        val gl = new WebGl(canvas)
+        val gl = new SpriteGl(canvas)
         gl.initSpriteProgram()
         var images = Set[String]()
 

@@ -76,8 +76,8 @@ object PyroMan{
             val position = last.player.position.add(velocity)
             val velocityAngle = velocity.angle
             val lastAngle = last.player.angle
-            val angle = if(lastAngle > velocityAngle) lastAngle - (lastAngle - velocityAngle) * dt * 5
-            else lastAngle + (velocityAngle - lastAngle) * dt * 5
+            val da = Math.atan2(Math.sin(velocityAngle - lastAngle), Math.cos(velocityAngle - lastAngle))
+            val angle = lastAngle + da * dt * 5
             last.player.copy(
                 position = position,
                 velocity = velocity,
