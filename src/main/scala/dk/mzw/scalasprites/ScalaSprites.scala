@@ -1,5 +1,6 @@
 package dk.mzw.scalasprites
 
+import dk.mzw.scalasprites.gl.{PointSpriteGl, QuadGl}
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
@@ -31,7 +32,7 @@ object ScalaSprites {
         canvas : HTMLCanvasElement,
         onLoad : SpriteCanvas[State] => Unit
     ) : Unit = {
-        val gl = new SpriteGl(canvas)
+        val gl = new PointSpriteGl(canvas)
         gl.initSpriteProgram()
         var images = Set[String]()
 
