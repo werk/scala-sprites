@@ -43,7 +43,7 @@ object PyroMan{
                 state.player.position.x,
                 state.player.position.y,
                 image = playerImage,
-                size = 40
+                size = 1
             )
 
             val shots = state.shots.map { shot =>
@@ -52,17 +52,18 @@ object PyroMan{
                     shot.position.x,
                     shot.position.y,
                     image = fireballImage,
-                    size = 10 + age * 10
+                    size = 0.1 + age
                 )
             }
             Scene(
-                sprites = player :: shots
+                sprites = player :: shots,
+                height = 40
             )
         }
     }
 
     val initialState = GameState(
-        player = Player(Vector(0, 0), Vector(0, 0), 0, 0.1),
+        player = Player(Vector(0, 0), Vector(0, 0), 0, 5),
         shots = List(),
         0
     )
@@ -72,8 +73,8 @@ object PyroMan{
             val velocity = Vector(
                 Keys.factor(Keys.leftArrow, Keys.rightArrow),
                 Keys.factor(Keys.downArrow, Keys.upArrow)
-            ).unit.multiply(dt * last.player.speed)
-            val position = last.player.position.add(velocity)
+            ).unit.multiply(last.player.speed)
+            val position = last.player.position.add(velocity.multiply(dt))
             val velocityAngle = velocity.angle
             val lastAngle = last.player.angle
             val da = Math.atan2(Math.sin(velocityAngle - lastAngle), Math.cos(velocityAngle - lastAngle))
@@ -88,14 +89,15 @@ object PyroMan{
         val expiry = t - 3
         val shots = last.shots
             .filter{s => s.born > expiry}
-            .map{s => s.copy(position = s.position.add(s.velocity))}
+            .map{s => s.copy(position = s.position.add(s.velocity.multiply(dt)))}
 
+        val speed = 10
         val newShots = if(Keys(Keys.enter)) {
             val shotCount = Math.round(dt * 1000).toInt
             val newFlames = List.fill(shotCount){
                 val angle = (Random.nextDouble() - 0.5) * 0.2 + player.angle
                 val velocityUnit = Vector(Math.cos(angle), Math.sin(angle))
-                val velocity = velocityUnit.multiply(0.2 * dt).add(player.velocity)
+                val velocity = velocityUnit.multiply(speed).add(player.velocity)
                 Flame(
                     position = player.position.add(velocityUnit.multiply(0.01)),
                     velocity = velocity,

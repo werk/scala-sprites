@@ -10,6 +10,7 @@ object ScalaSprites {
 
     case class Scene(
         sprites : List[Sprite],
+        height : Double,
         backgroundColor : (Double, Double, Double, Double)  = (0, 0, 0, 1)
     )
 
@@ -32,7 +33,7 @@ object ScalaSprites {
         canvas : HTMLCanvasElement,
         onLoad : SpriteCanvas[State] => Unit
     ) : Unit = {
-        val gl = new PointSpriteGl(canvas)
+        val gl = new QuadGl(canvas)
         gl.initSpriteProgram()
         var images = Set[String]()
 
@@ -54,7 +55,7 @@ object ScalaSprites {
                 val array = sprites.map{s =>
                     (s.x, s.y, s.size, s.size)
                 }.toArray
-                gl.drawSprites(array)
+                gl.drawSprites(viewState.height, array)
             }
         }
 
