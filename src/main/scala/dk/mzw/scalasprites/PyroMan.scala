@@ -43,7 +43,8 @@ object PyroMan{
                 state.player.position.x,
                 state.player.position.y,
                 image = playerImage,
-                size = 1
+                size = 1,
+                state.player.angle
             )
 
             val shots = state.shots.map { shot =>
@@ -52,7 +53,8 @@ object PyroMan{
                     shot.position.x,
                     shot.position.y,
                     image = fireballImage,
-                    size = 0.1 + age
+                    size = 0.1 + age,
+                    shot.velocity.angle
                 )
             }
             Scene(

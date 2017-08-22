@@ -25,8 +25,16 @@ class QuadGl(canvas : HTMLCanvasElement) {
             varying vec2 v_textureCoordinates;
 
             void main(void) {
-                gl_Position = vec4(a_coordinates.xy * u_scale + u_offset, 1.0, 1.0);
-                v_textureCoordinates = a_coordinates.zw;
+                float b = a_coordinates.z;
+                float tx = float(b >= 2.0);
+                float ty = float(b == 1.0 || b == 3.0);
+                float angle = a_coordinates.w;
+                float s = sin(angle);
+                float c = cos(angle);
+                mat2 rotate = mat2(c, s, -s, c);
+                vec2 p = rotate * a_coordinates.xy;
+                gl_Position = vec4(p * u_scale + u_offset, 1.0, 1.0);
+                v_textureCoordinates = vec2(tx, ty);
             }
         """
 
@@ -54,7 +62,7 @@ class QuadGl(canvas : HTMLCanvasElement) {
     def initTextures(urls : Iterable[String], onLoad : Map[String, WebGLTexture] => Unit) : Unit = WebGl.initTextures(gl, urls, onLoad)
     def activateTexture(texture : WebGLTexture) = WebGl.activateTexture(gl, texture, samplerUniformLocation)
 
-    def drawSprites(height : Double, points : Array[(Double, Double, Double, Double)]) {
+    def drawSprites(height : Double, points : Array[(Double, Double, Double, Double, Double)]) {
         WebGl.resize(gl)
         val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
         val scaleY = 2 / height
@@ -66,16 +74,16 @@ class QuadGl(canvas : HTMLCanvasElement) {
 
         /*==========Defining and storing the geometry=======*/
 
-        val vertices = js.Array(points.flatMap{case (cx, cy, w, h) =>
+        val vertices = js.Array(points.flatMap{case (cx, cy, w, h, a) =>
             val x = cx - w/2
             val y = cy - h/2
             Array(
-                x, y, 0, 0,
-                x, y + h, 0, 1,
-                x + w, y + h, 1, 1,
-                x, y, 0, 0,
-                x + w, y + h, 1, 1,
-                x + w, y, 1, 0
+                x, y, 1, a,
+                x, y + h, 0, a,
+                x + w, y + h, 2, a,
+                x, y, 1, a,
+                x + w, y + h, 2, a,
+                x + w, y, 3, a
             )
         } : _*)
 

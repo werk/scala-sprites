@@ -9,7 +9,6 @@ import scala.scalajs.js.JSApp
 object Main extends JSApp {
 
     def main() : Unit = {
-        println("Guts")
         val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
 
         ScalaSprites.loadView(PyroMan.view, canvas, { spriteCanvas : SpriteCanvas[PyroMan.GameState] =>
