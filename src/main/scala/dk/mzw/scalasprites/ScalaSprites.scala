@@ -1,5 +1,6 @@
 package dk.mzw.scalasprites
 
+import dk.mzw.scalasprites.gl.WebGl.Shape
 import dk.mzw.scalasprites.gl.{PointSpriteGl, QuadGl}
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
@@ -19,7 +20,11 @@ object ScalaSprites {
         y : Double,
         image : Image,
         size : Double,
-        angle : Double
+        angle : Double,
+        textureX : Double = 0,
+        textureY : Double = 0,
+        textureWidth : Double = 1,
+        textureHeight : Double = 1
     )
 
     case class SpriteCanvas[S](
@@ -54,7 +59,7 @@ object ScalaSprites {
                 gl.activateTexture(texture)
 
                 val array = sprites.map{s =>
-                    (s.x, s.y, s.size, s.size, s.angle)
+                    Shape(s.x, s.y, s.size, s.size, s.angle, s.textureX, s.textureY, s.textureWidth, s.textureHeight)
                 }.toArray
                 gl.drawSprites(viewState.height, array)
             }

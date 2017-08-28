@@ -118,4 +118,16 @@ object WebGl {
         }
     }
 
+    case class Shape(
+        cx : Double,
+        cy : Double,
+        w : Double,
+        h : Double,
+        a : Double,
+        tx : Double,
+        ty : Double,
+        tw : Double,
+        th : Double
+    )
+
 }

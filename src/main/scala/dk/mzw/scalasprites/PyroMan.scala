@@ -35,16 +35,20 @@ object PyroMan{
     )
 
     def view(load : String => Image) : GameState => Scene = {
-        val playerImage = load("assets/piskel.png")
+        val playerImage = load("assets/topman-walking.png")
         val fireballImage = load("assets/fireball.png")
 
         {state =>
+            val walkState = (state.player.position.length * 4).toInt % 4
             val player = Sprite(
                 state.player.position.x,
                 state.player.position.y,
                 image = playerImage,
                 size = 1,
-                state.player.angle
+                state.player.angle - Math.PI / 2,
+                textureX = walkState * (24d/128),
+                textureWidth = 24d/128,
+                textureHeight = 24d/32
             )
 
             val shots = state.shots.map { shot =>
@@ -77,10 +81,14 @@ object PyroMan{
                 Keys.factor(Keys.downArrow, Keys.upArrow)
             ).unit.multiply(last.player.speed)
             val position = last.player.position.add(velocity.multiply(dt))
-            val velocityAngle = velocity.angle
-            val lastAngle = last.player.angle
-            val da = Math.atan2(Math.sin(velocityAngle - lastAngle), Math.cos(velocityAngle - lastAngle))
-            val angle = lastAngle + da * dt * 5
+            val angle = if(velocity.length == 0) {
+                last.player.angle
+            } else {
+                val velocityAngle = velocity.angle
+                val lastAngle = last.player.angle
+                val da = Math.atan2(Math.sin(velocityAngle - lastAngle), Math.cos(velocityAngle - lastAngle))
+                lastAngle + da * dt * 5
+            }
             last.player.copy(
                 position = position,
                 velocity = velocity,
