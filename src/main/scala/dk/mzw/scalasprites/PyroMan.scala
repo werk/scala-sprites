@@ -1,6 +1,6 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.ScalaSprites.{Image, Scene, Sprite}
+import dk.mzw.scalasprites.ScalaSprites.{ImageLoader, Scene, Sprite}
 
 import scala.util.Random
 
@@ -10,22 +10,26 @@ object PyroMan{
         def add(dx : Double, dy : Double) = Vector(x = x + dx, y = y + dy)
         def add(v : Vector) = Vector(x = x + v.x, y = y + v.y)
         def multiply(a : Double) = Vector(x = x * a, y = y * a)
-        def length = Math.sqrt(x*x + y*y)
-        def unit = if(length > 0) multiply(1/length) else this
-        def angle = Math.atan2(y, x)
+        lazy val length = Math.sqrt(x*x + y*y)
+        lazy val unit = if(length > 0) multiply(1/length) else this
+        lazy val angle = Math.atan2(y, x)
     }
 
     case class Player (
         position : Vector,
         velocity : Vector,
         angle : Double,
-        speed : Double
+        speed : Double,
+        shooting : Boolean,
+        walkingDistance : Double
     )
 
     case class Flame(
         position : Vector,
         velocity : Vector,
-        born : Double
+        born : Double,
+        lifetime : Double,
+        rotationSpeed : Double
     )
 
     case class GameState(
@@ -34,32 +38,43 @@ object PyroMan{
         t : Double
     )
 
-    def view(load : String => Image) : GameState => Scene = {
-        val playerImage = load("assets/topman-walking.png")
-        val fireballImage = load("assets/fireball.png")
+    def parabola(x : Double, s : Double = 1) : Double = Math.max(0, (4 - 4 * (x/s)) * (x/s))
+
+    def view(load : ImageLoader) : GameState => Scene = {
+        val topManAnimation = load("assets/topman.png").chop(width = 96, height = 24).split(24, 4)
+        val topManShootingAnimation = load("assets/topman-shooting.png").chop(width = 96, height = 24).split(24, 4)
+        val flameBrightImage = load("assets/flame-bright.png").chop(0, 0, 80, 50)
+        val flameRedImage = load("assets/flame-red.png").chop(0, 0, 50, 50)
 
         {state =>
-            val walkState = (state.player.position.length * 4).toInt % 4
             val player = Sprite(
                 state.player.position.x,
                 state.player.position.y,
-                image = playerImage,
+                image =
+                    if(state.player.shooting) topManShootingAnimation(state.player.walkingDistance)
+                    else topManAnimation(state.player.walkingDistance),
                 size = 1,
-                state.player.angle - Math.PI / 2,
-                textureX = walkState * (24d/128),
-                textureWidth = 24d/128,
-                textureHeight = 24d/32
+                state.player.angle - Math.PI * 0.5
             )
 
-            val shots = state.shots.map { shot =>
+            val shots = state.shots.flatMap { shot =>
                 val age = state.t - shot.born
-                Sprite(
+                val ember = Sprite(
                     shot.position.x,
                     shot.position.y,
-                    image = fireballImage,
-                    size = 0.1 + age,
-                    shot.velocity.angle
+                    image = flameRedImage,
+                    size = 0.2 + parabola(age, shot.lifetime),
+                    shot.velocity.angle + age * shot.rotationSpeed
                 )
+                val flame = if (age < 0.9)
+                List(Sprite(
+                    shot.position.x,
+                    shot.position.y,
+                    image = flameBrightImage,
+                    size = 0.1 + parabola(age, shot.lifetime - 0.3),
+                    shot.velocity.angle
+                )) else List()
+                ember :: flame
             }
             Scene(
                 sprites = player :: shots,
@@ -69,7 +84,14 @@ object PyroMan{
     }
 
     val initialState = GameState(
-        player = Player(Vector(0, 0), Vector(0, 0), 0, 5),
+        player = Player(
+            position = Vector(0, 0),
+            velocity = Vector(0, 0),
+            angle = 0,
+            speed = 5,
+            shooting = false,
+            walkingDistance = 0
+        ),
         shots = List(),
         0
     )
@@ -80,7 +102,8 @@ object PyroMan{
                 Keys.factor(Keys.leftArrow, Keys.rightArrow),
                 Keys.factor(Keys.downArrow, Keys.upArrow)
             ).unit.multiply(last.player.speed)
-            val position = last.player.position.add(velocity.multiply(dt))
+            val deltaPosition = velocity.multiply(dt)
+            val position = last.player.position.add(deltaPosition)
             val angle = if(velocity.length == 0) {
                 last.player.angle
             } else {
@@ -89,29 +112,40 @@ object PyroMan{
                 val da = Math.atan2(Math.sin(velocityAngle - lastAngle), Math.cos(velocityAngle - lastAngle))
                 lastAngle + da * dt * 5
             }
+
+            val walkingDistance : Double = if(velocity.length == 0) {
+                0
+            } else {
+                last.player.walkingDistance + deltaPosition.length
+            }
+
             last.player.copy(
                 position = position,
                 velocity = velocity,
-                angle = angle
+                angle = angle,
+                shooting = Keys(Keys.enter),
+                walkingDistance = walkingDistance
             )
         }
 
-        val expiry = t - 3
         val shots = last.shots
-            .filter{s => s.born > expiry}
+            .filter{s => s.born > t - s.lifetime}
             .map{s => s.copy(position = s.position.add(s.velocity.multiply(dt)))}
 
         val speed = 10
         val newShots = if(Keys(Keys.enter)) {
-            val shotCount = Math.round(dt * 1000).toInt
+            val shotCount = Math.round(dt * 100).toInt
             val newFlames = List.fill(shotCount){
                 val angle = (Random.nextDouble() - 0.5) * 0.2 + player.angle
                 val velocityUnit = Vector(Math.cos(angle), Math.sin(angle))
                 val velocity = velocityUnit.multiply(speed).add(player.velocity)
+                val gunSide = Vector(velocityUnit.y, -velocityUnit.x).multiply(0.2)
                 Flame(
-                    position = player.position.add(velocityUnit.multiply(0.01)),
+                    position = player.position.add(velocityUnit.multiply(0.5)).add(gunSide),
                     velocity = velocity,
-                    born = t
+                    born = t,
+                    lifetime = 0.4 + Random.nextDouble() * 1.2,
+                    rotationSpeed = Random.nextDouble()
                 )
             }
             newFlames ++ shots

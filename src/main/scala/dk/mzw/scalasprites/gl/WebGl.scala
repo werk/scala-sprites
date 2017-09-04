@@ -1,6 +1,6 @@
 package dk.mzw.scalasprites.gl
 
-import org.scalajs.dom.raw._
+import org.scalajs.dom.raw.{WebGLTexture, _}
 import WebGLRenderingContext._
 import org.scalajs.dom
 
@@ -57,27 +57,26 @@ object WebGl {
         gl.uniform1i(uniformLocation, 0)
     }
 
-    def initTexture(gl : WebGLRenderingContext, url : String, onLoad : WebGLTexture => Unit) {
+    def initTexture(gl : WebGLRenderingContext, url : String, onLoad : LoadedTexture => Unit) {
         val texture = gl.createTexture()
         val image = dom.document.createElement("img").asInstanceOf[HTMLImageElement]
         image.onload = { _ : Event =>
-            println(s"image.onload $url")
             gl.bindTexture(TEXTURE_2D, texture)
             gl.texImage2D(TEXTURE_2D, 0, RGBA, RGBA, UNSIGNED_BYTE, image)
             gl.texParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
             gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR_MIPMAP_NEAREST)
             gl.generateMipmap(TEXTURE_2D)
             gl.bindTexture(TEXTURE_2D, null)
-            onLoad(texture)
+            onLoad(LoadedTexture(texture, image.width, image.height))
         }
         image.src = url
     }
 
-    def initTextures(gl : WebGLRenderingContext, urls : Iterable[String], onLoad : Map[String, WebGLTexture] => Unit) : Unit = {
+    def initTextures(gl : WebGLRenderingContext, urls : Iterable[String], onLoad : Map[String, LoadedTexture] => Unit) : Unit = {
         initTextures(gl, urls.toList.distinct, onLoad, Map())
     }
 
-    private def initTextures(gl : WebGLRenderingContext, urls : List[String], onLoad : Map[String, WebGLTexture] => Unit, map : Map[String, WebGLTexture]) : Unit = urls match {
+    private def initTextures(gl : WebGLRenderingContext, urls : List[String], onLoad : Map[String, LoadedTexture] => Unit, map : Map[String, LoadedTexture]) : Unit = urls match {
         case List() => onLoad(map)
         case url :: rest =>
             initTexture(gl, url, {texture =>
@@ -128,6 +127,12 @@ object WebGl {
         ty : Double,
         tw : Double,
         th : Double
+    )
+
+    case class LoadedTexture(
+        texture : WebGLTexture,
+        width : Int,
+        height : Int
     )
 
 }

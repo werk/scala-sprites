@@ -1,5 +1,6 @@
 package dk.mzw.scalasprites.gl
 
+import dk.mzw.scalasprites.gl.WebGl.LoadedTexture
 import org.scalajs.dom
 import org.scalajs.dom.raw.{Event, HTMLCanvasElement, HTMLImageElement, WebGLProgram, WebGLShader, WebGLTexture, WebGLUniformLocation, WebGLRenderingContext => GL}
 
@@ -40,7 +41,7 @@ class PointSpriteGl(canvas : HTMLCanvasElement) {
     }
 
     def clear() = WebGl.clear(gl)
-    def initTextures(urls : Iterable[String], onLoad : Map[String, WebGLTexture] => Unit) : Unit = WebGl.initTextures(gl, urls, onLoad)
+    def initTextures(urls : Iterable[String], onLoad : Map[String, LoadedTexture] => Unit) : Unit = WebGl.initTextures(gl, urls, onLoad)
     def activateTexture(texture : WebGLTexture) = WebGl.activateTexture(gl, texture, samplerUniformLocation)
 
     def drawSprites(points : Array[(Double, Double, Double, Double)]) {

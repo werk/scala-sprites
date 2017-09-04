@@ -5,6 +5,7 @@ import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
 
 import scala.scalajs.js.JSApp
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends JSApp {
 
@@ -14,6 +15,16 @@ object Main extends JSApp {
         ScalaSprites.loadView(PyroMan.view, canvas, { spriteCanvas : SpriteCanvas[PyroMan.GameState] =>
             ScalaSprites.gameLoop(spriteCanvas, PyroMan.initialState, PyroMan.nextState)
         })
+
+        PackImages(List(
+            "assets/topman.png",
+            "assets/topman-shooting.png",
+            "assets/flame-bright.png",
+            "assets/flame-red.png")
+        ).foreach{case (image, mapping) =>
+            mapping.foreach {case (url, r) => println(s"$url: $r")}
+            dom.document.body.appendChild(image)
+        }
 
     }
 
