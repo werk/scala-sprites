@@ -1,7 +1,7 @@
 package dk.mzw.scalasprites.gl
 
 import dk.mzw.scalasprites.gl.WebGl.{LoadedTexture, Shape}
-import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLUniformLocation, WebGLRenderingContext => GL}
+import org.scalajs.dom.raw.{HTMLCanvasElement, HTMLImageElement, WebGLTexture, WebGLUniformLocation, WebGLRenderingContext => GL}
 
 import scala.collection.immutable.Iterable
 import scala.scalajs.js
@@ -61,6 +61,7 @@ class QuadGl(canvas : HTMLCanvasElement) {
 
     def clear() = WebGl.clear(gl)
     def initTextures(urls : Iterable[String], onLoad : Map[String, LoadedTexture] => Unit) : Unit = WebGl.initTextures(gl, urls, onLoad)
+    def bindTexture(loadedImage : HTMLImageElement) = WebGl.bindTexture(gl, loadedImage)
     def activateTexture(texture : WebGLTexture) = WebGl.activateTexture(gl, texture, samplerUniformLocation)
 
     def drawSprites(height : Double, points : Array[Shape]) {

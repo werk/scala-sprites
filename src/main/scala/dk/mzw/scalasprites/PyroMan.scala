@@ -41,10 +41,10 @@ object PyroMan{
     def parabola(x : Double, s : Double = 1) : Double = Math.max(0, (4 - 4 * (x/s)) * (x/s))
 
     def view(load : ImageLoader) : GameState => Scene = {
-        val topManAnimation = load("assets/topman.png").chop(width = 96, height = 24).split(24, 4)
-        val topManShootingAnimation = load("assets/topman-shooting.png").chop(width = 96, height = 24).split(24, 4)
-        val flameBrightImage = load("assets/flame-bright.png").chop(0, 0, 80, 50)
-        val flameRedImage = load("assets/flame-red.png").chop(0, 0, 50, 50)
+        val topManAnimation = load("assets/topman.png").split(24, 4)
+        val topManShootingAnimation = load("assets/topman-shooting.png").split(24, 4)
+        val flameBrightImage = load("assets/flame-bright.png")
+        val flameRedImage = load("assets/flame-red.png")
 
         {state =>
             val player = Sprite(

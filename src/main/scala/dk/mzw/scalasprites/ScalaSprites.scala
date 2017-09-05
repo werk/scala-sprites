@@ -1,9 +1,10 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.gl.WebGl.{LoadedTexture, Shape}
+import dk.mzw.scalasprites.gl.WebGl.Shape
 import dk.mzw.scalasprites.gl.QuadGl
 import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLCanvasElement
+import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ScalaSprites {
 
@@ -77,18 +78,18 @@ object ScalaSprites {
 
         val makeViewState : State => Scene = view(loader)
 
-        def draw(textures : Map[String, LoadedTexture])(state : State) : Unit = {
+        def draw(textures : Map[String, StampTexture])(state : State) : Unit = {
             val viewState = makeViewState(state)
             gl.clear()
-            viewState.sprites.groupBy(_.image.url).foreach{case (url, sprites) =>
-                val texture = textures(url)
-                gl.activateTexture(texture.texture)
+            viewState.sprites.groupBy(s => textures(s.image.url).texture).foreach{ case (texture, sprites) =>
+                gl.activateTexture(texture)
                 val array = sprites.map{sprite =>
+                    val stamp = textures(sprite.image.url)
                     val image = sprite.image
-                    val textureLeft = image.left.toDouble / texture.width
-                    val textureTop = image.top.toDouble / texture.height
-                    val textureWidth = image.width.map(_.toDouble / texture.width).getOrElse(1d)
-                    val textureHeight = image.height.map(_.toDouble / texture.height).getOrElse(1d)
+                    val textureLeft = (image.left + stamp.stampLeft).toDouble / stamp.atlasWidth
+                    val textureTop = (image.top + stamp.stampTop).toDouble / stamp.atlasHeight
+                    val textureWidth = image.width.map(_.toDouble / stamp.stampWidth).getOrElse(1d) * (stamp.stampWidth.toDouble / stamp.atlasWidth)
+                    val textureHeight = image.height.map(_.toDouble / stamp.stampHeight).getOrElse(1d) * (stamp.stampHeight.toDouble / stamp.atlasHeight)
 
                     Shape(sprite.x, sprite.y, sprite.size, sprite.size, sprite.angle, textureLeft, textureTop, textureWidth, textureHeight)
                 }.toArray
@@ -96,11 +97,30 @@ object ScalaSprites {
             }
         }
 
-        gl.initTextures(images, {map =>
+        PackImages(images.toList.distinct).foreach{case (image, mapping) =>
+            val texture = gl.bindTexture(image)
+            val textureMapping = mapping.map{case (url, p) =>
+                url -> StampTexture(p.x, p.y, p.rectangle.width, p.rectangle.height, image.width, image.height, texture)
+            }
+            val spriteCanvas = SpriteCanvas[State](canvas, draw(textureMapping))
+            onLoad(spriteCanvas)
+        }
+
+        /*gl.initTextures(images, {map =>
             val spriteCanvas = SpriteCanvas[State](canvas, draw(map))
             onLoad(spriteCanvas)
-        })
+        })*/
     }
+
+    case class StampTexture(
+        stampLeft : Int,
+        stampTop : Int,
+        stampWidth : Int,
+        stampHeight : Int,
+        atlasWidth : Int,
+        atlasHeight : Int,
+        texture : WebGLTexture
+    )
 
     def gameLoop[State](spriteCanvas : SpriteCanvas[State], initialState : State, step : (State, Double, Double) => State) : Unit = {
         var state = initialState

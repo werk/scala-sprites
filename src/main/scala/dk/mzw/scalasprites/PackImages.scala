@@ -14,8 +14,8 @@ object PackImages {
         Future.sequence(imageUrls.map(loadImage)).flatMap{ loadedImages =>
             val (dimensions, packMap) = PackRectangles(loadedImages.zip(imageUrls), getRectangle, 1024)
             val canvas = dom.document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
-            canvas.width = dimensions.width
-            canvas.height = dimensions.height
+            canvas.width = nextPowerOfTwo(dimensions.width)
+            canvas.height = nextPowerOfTwo(dimensions.height)
             val context = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
             for(((image, _), p) <- packMap) {
                 context.drawImage(image, p.x, p.y, image.width, image.height)
@@ -43,5 +43,11 @@ object PackImages {
             }
             p.future
         }
+    }
+
+    def nextPowerOfTwo(i : Int) : Int = {
+        val ps = List(2,4,8,16,32,64,128,256, 512, 1024).reverse // TODO
+        val p = ps.find(_ <= i).get
+        if(p == i) i else p * 2
     }
 }
