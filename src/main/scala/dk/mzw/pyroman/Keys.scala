@@ -1,9 +1,8 @@
-package dk.mzw.scalasprites
+package dk.mzw.pyroman
 
 import org.scalajs.dom.{KeyboardEvent, document}
 
-object Keys {
-
+class Keys {
     var keys = Set[Int]()
 
     def apply(keyCode : Int) : Boolean = keys(keyCode)
@@ -18,7 +17,9 @@ object Keys {
     document.onkeyup = {event : KeyboardEvent =>
         keys -= event.keyCode
     }
+}
 
+object Keys {
     val backspace = 8
     val tab = 9
     val enter = 13

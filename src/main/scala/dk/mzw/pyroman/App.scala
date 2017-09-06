@@ -1,19 +1,21 @@
-package dk.mzw.scalasprites
+package dk.mzw.pyroman
 
 import dk.mzw.scalasprites.ScalaSprites.SpriteCanvas
+import dk.mzw.scalasprites.{PackImages, ScalaSprites}
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
 
-import scala.scalajs.js.JSApp
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js.JSApp
 
-object Main extends JSApp {
+object App extends JSApp {
 
     def main() : Unit = {
         val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
+        val keys = new Keys()
 
         ScalaSprites.loadView(PyroMan.view, canvas, { spriteCanvas : SpriteCanvas[PyroMan.GameState] =>
-            ScalaSprites.gameLoop(spriteCanvas, PyroMan.initialState, PyroMan.nextState)
+            ScalaSprites.gameLoop(spriteCanvas, PyroMan.initialState, PyroMan.nextState(keys))
         })
 
         PackImages(List(

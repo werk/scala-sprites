@@ -1,19 +1,10 @@
-package dk.mzw.scalasprites
+package dk.mzw.pyroman
 
 import dk.mzw.scalasprites.ScalaSprites.{ImageLoader, Scene, Sprite}
 
 import scala.util.Random
 
 object PyroMan{
-
-    case class Vector(x : Double, y : Double) {
-        def add(dx : Double, dy : Double) = Vector(x = x + dx, y = y + dy)
-        def add(v : Vector) = Vector(x = x + v.x, y = y + v.y)
-        def multiply(a : Double) = Vector(x = x * a, y = y * a)
-        lazy val length = Math.sqrt(x*x + y*y)
-        lazy val unit = if(length > 0) multiply(1/length) else this
-        lazy val angle = Math.atan2(y, x)
-    }
 
     case class Player (
         position : Vector,
@@ -96,11 +87,11 @@ object PyroMan{
         0
     )
 
-    def nextState(last : GameState, t : Double, dt : Double) : GameState = {
+    def nextState(keys : Keys)(last : GameState, t : Double, dt : Double) : GameState = {
         val player = {
             val velocity = Vector(
-                Keys.factor(Keys.leftArrow, Keys.rightArrow),
-                Keys.factor(Keys.downArrow, Keys.upArrow)
+                keys.factor(Keys.leftArrow, Keys.rightArrow),
+                keys.factor(Keys.downArrow, Keys.upArrow)
             ).unit.multiply(last.player.speed)
             val deltaPosition = velocity.multiply(dt)
             val position = last.player.position.add(deltaPosition)
@@ -123,7 +114,7 @@ object PyroMan{
                 position = position,
                 velocity = velocity,
                 angle = angle,
-                shooting = Keys(Keys.enter),
+                shooting = keys(Keys.enter),
                 walkingDistance = walkingDistance
             )
         }
@@ -133,7 +124,7 @@ object PyroMan{
             .map{s => s.copy(position = s.position.add(s.velocity.multiply(dt)))}
 
         val speed = 10
-        val newShots = if(Keys(Keys.enter)) {
+        val newShots = if(keys(Keys.enter)) {
             val shotCount = Math.round(dt * 100).toInt
             val newFlames = List.fill(shotCount){
                 val angle = (Random.nextDouble() - 0.5) * 0.2 + player.angle
