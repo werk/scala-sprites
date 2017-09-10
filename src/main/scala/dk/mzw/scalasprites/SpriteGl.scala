@@ -188,9 +188,6 @@ object SpriteGl {
         // Clear the canvas
         gl.clearColor(0.3, 0.3, 0.3, 1)
 
-        // Enable the depth test
-        //gl.enable(gl.DEPTH_TEST);
-
         // Blending
         gl.blendFunc(ONE, ONE)
         gl.enable(BLEND)
