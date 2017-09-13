@@ -12,6 +12,7 @@ object PackImages {
         val getRectangle = {p : (HTMLImageElement, String) => PackRectangles.Rectangle(p._1.width, p._1.height)}
 
         Future.sequence(imageUrls.map(loadImage)).flatMap{ loadedImages =>
+            println(loadedImages.map(_.src).mkString(", "))
             val (dimensions, packMap) = PackRectangles(loadedImages.zip(imageUrls), getRectangle, 1024)
             val canvas = dom.document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
             canvas.width = nextPowerOfTwo(dimensions.width)

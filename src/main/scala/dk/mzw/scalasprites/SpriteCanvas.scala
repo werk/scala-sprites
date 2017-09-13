@@ -1,43 +1,81 @@
 package dk.mzw.scalasprites
 
 import dk.mzw.scalasprites.SpriteGl.Shape
-import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
-import scala.scalajs.js
 
+import scala.collection.mutable
+import scala.scalajs.js
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import SpriteCanvas._
 
 object SpriteCanvas {
 
     class Loader(canvas: HTMLCanvasElement) {
         val gl = new SpriteGl(canvas)
         gl.initSpriteProgram()
-        private var images = Set[String]()
+        private val images = mutable.Map[String, Image]()
 
         def apply(imageIrl: String): Image = {
-            images += imageIrl
-            Image(imageIrl, 0, 0, None, None)
+            images.getOrElseUpdate(imageIrl, Image(imageIrl, 0, 0, None, None))
         }
 
         def complete: Future[Display] = {
-            PackImages(images.toList.distinct).map { case (image, mapping) =>
-                val texture = gl.bindTexture(image)
-                val textureMapping = mapping.map { case (url, p) =>
-                    url -> StampTexture(p.x, p.y, p.rectangle.width, p.rectangle.height, image.width, image.height, texture)
+            PackImages(images.keys.toList).map { case (atlas, mapping) =>
+                val texture = gl.bindTexture(atlas)
+                mapping.foreach { case (url, p) =>
+                    val image = images(url)
+
+                    val stampLeft = p.x
+                    val stampTop = p.y
+                    val stampWidth = p.rectangle.width
+                    val stampHeight = p.rectangle.height
+                    val atlasWidth = atlas.width
+                    val atlasHeight = atlas.height
+
+                    val stamp = StampTexture(
+                        stampLeft = stampLeft,
+                        stampTop = stampTop,
+                        stampWidth = stampWidth,
+                        stampHeight = stampHeight,
+                        atlasWidth = atlasWidth,
+                        atlasHeight = atlasHeight,
+                        texture = texture,
+                        textureLeft = (image.left + stampLeft).toDouble / atlasWidth,
+                        textureTop = (image.top + stampTop).toDouble / atlasHeight,
+                        textureWidth = image.width.map(_.toDouble / stampWidth).getOrElse(1d) * (stampWidth.toDouble / atlasWidth),
+                        textureHeight = image.height.map(_.toDouble / stampHeight).getOrElse(1d) * (stampHeight.toDouble / atlasHeight)
+                    )
+
+                    image.stamp = stamp
                 }
-                new Display(gl, textureMapping)
+                new Display(gl)
             }
         }
     }
+
+    case class Sprite(var image: Image, var x: Double, var y: Double, var size: Double, var angle: Double)
+
+    case class StampTexture(
+        stampLeft: Int,
+        stampTop: Int,
+        stampWidth: Int,
+        stampHeight: Int,
+        atlasWidth: Int,
+        atlasHeight: Int,
+        texture: WebGLTexture,
+        textureLeft : Double,
+        textureTop : Double,
+        textureWidth : Double,
+        textureHeight : Double
+    )
 
     case class Image(
         url: String,
         top: Int,
         left: Int,
         width: Option[Int],
-        height: Option[Int]
+        height: Option[Int],
+        var stamp : StampTexture = null
     ) {
         def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image = {
             copy(
@@ -59,9 +97,9 @@ object SpriteCanvas {
         }
     }
 
-    class Display(gl: SpriteGl, textures: Map[String, StampTexture]) {
+    class Display(gl: SpriteGl) {
         private val sprites = js.Array[Sprite]()
-        var i = 0
+        private var i = 0
 
         def add(image: Image, x: Double, y: Double, size: Double, angle: Double) {
             if (i < sprites.length) {
@@ -75,40 +113,21 @@ object SpriteCanvas {
             else {
                 sprites.push(Sprite(image, x, y, size, angle))
             }
+            i += 1
         }
 
         def draw(height: Double) {
             gl.clear()
-            sprites/*.view(0, i + 1)*/.groupBy(s => textures(s.image.url).texture).foreach { case (texture, sprites) => // TODO sort in place
-                gl.activateTexture(texture)
-                val array = sprites.map { sprite =>
-                    val stamp = textures(sprite.image.url)
-                    val image = sprite.image
-                    val textureLeft = (image.left + stamp.stampLeft).toDouble / stamp.atlasWidth
-                    val textureTop = (image.top + stamp.stampTop).toDouble / stamp.atlasHeight
-                    val textureWidth = image.width.map(_.toDouble / stamp.stampWidth).getOrElse(1d) * (stamp.stampWidth.toDouble / stamp.atlasWidth)
-                    val textureHeight = image.height.map(_.toDouble / stamp.stampHeight).getOrElse(1d) * (stamp.stampHeight.toDouble / stamp.atlasHeight)
+            gl.drawSprites(height, sprites)
+            /*val array = sprites.map { sprite =>
+                val stamp = sprite.image.stamp
+                gl.activateTexture(stamp.texture)
 
-                    // TODO avoid allocating. Write direct to Float32Array
-                    Shape(sprite.x, sprite.y, sprite.size, sprite.size, sprite.angle, textureLeft, textureTop, textureWidth, textureHeight)
-                }.toArray
-                gl.drawSprites(height, array)
-            }
+                // TODO avoid allocating. Write direct to Float32Array
+                Shape(sprite.x, sprite.y, sprite.size, sprite.size, sprite.angle, stamp.textureLeft, stamp.textureTop, stamp.textureWidth, stamp.textureHeight)
+            }.toArray
+            gl.drawSprites(height, array)*/
             i = 0
         }
-
-        private case class Sprite(var image: Image, var x: Double, var y: Double, var size: Double, var angle: Double)
-
     }
-
-    private case class StampTexture(
-        stampLeft: Int,
-        stampTop: Int,
-        stampWidth: Int,
-        stampHeight: Int,
-        atlasWidth: Int,
-        atlasHeight: Int,
-        texture: WebGLTexture
-    )
-
 }

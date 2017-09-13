@@ -93,7 +93,7 @@ object ScalaSprites {
 
                     Shape(sprite.x, sprite.y, sprite.size, sprite.size, sprite.angle, textureLeft, textureTop, textureWidth, textureHeight)
                 }.toArray
-                gl.drawSprites(viewState.height, array)
+                gl.drawSpritesSlow(viewState.height, array)
             }
         }
 
