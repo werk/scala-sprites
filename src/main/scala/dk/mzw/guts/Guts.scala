@@ -1,8 +1,8 @@
 package dk.mzw.guts
 
-import dk.mzw.guts.entities.BunnyEntity
+import dk.mzw.guts.entities.{BunnyEntity, WallEntity}
 import dk.mzw.guts.system.Entity.Self
-import dk.mzw.guts.system.{GameWorld, Vector2d}
+import dk.mzw.guts.system.{Entity, GameWorld, Vector2d}
 import dk.mzw.scalasprites.SpriteCanvas.Loader
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
@@ -16,8 +16,15 @@ object Guts extends JSApp {
         val loader = new Loader(canvas)
 
         val batmanSprite = loader("bunnymark/rabbitv3_batman.png")
+        val wallSprite = loader("bunnymark/rabbitv3.png")
 
-        val game = new GameWorld(loader, Seq(new BunnyEntity(Self("nananana", "batman"), Vector2d(0, 0), batmanSprite)))
+        val walls = 1 to 100 map { _ =>
+            new WallEntity(Self("wall", "myclient"), Vector2d(Math.random() * 1000 - 500, Math.random() * 1000 - 500), wallSprite)
+        }
+
+        val game = new GameWorld(loader, walls ++ Seq(
+            new BunnyEntity(Self("nananana", "myclient"), Vector2d(0, 0), batmanSprite)
+        ))
 
         loader.complete.foreach { display =>
             println("Loader complete")

@@ -11,7 +11,8 @@ class GameWorld(loader : Loader, entities : Seq[Entity]) {
             }
             entity.internalMessageQueue = Nil
         }
-        entities.foreach(_.onUpdate(delta))
+        val collision = new Collision(entities)
+        entities.foreach(_.onUpdate(collision, delta))
     }
 
     def draw(display : Display) : Unit = {

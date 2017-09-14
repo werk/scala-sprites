@@ -1,15 +1,15 @@
 package dk.mzw.guts.system
 
-object Collision {
+class Collision(entities : Seq[Entity]) {
     
     val moveEpsilon = 0.0001
     val gapEpsilon = 0.00001
 
-    def move(entities : Seq[Entity], entity : PawnEntity, dx : Double, dy : Double) : Unit = {
+    def move(entity : PawnEntity, dx : Double, dy : Double) : Unit = {
 
         if(Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
-            move(entities, entity, dx * 0.5, dy * 0.5)
-            move(entities, entity, dx * 0.5, dy * 0.5)
+            move(entity, dx * 0.5, dy * 0.5)
+            move(entity, dx * 0.5, dy * 0.5)
             return
         }
 
@@ -20,7 +20,7 @@ object Collision {
             var x1 = x0 + dx
             val a1 = r1.position.y - r1.size.y * 0.5
             val a2 = r1.position.y + r1.size.y * 0.5
-            for(r2 <- entities.collect { case e : PawnEntity => e }) if(r2 != r1) {
+            for(r2 <- entities.collect { case e : SolidEntity => e }) if(r2 != r1) {
                 val x2 = r2.position.x + r2.size.x * 0.5
                 if(x2 <= x0) {
                     val b1 = r2.position.y - r2.size.y * 0.5
@@ -38,7 +38,7 @@ object Collision {
             var x1 = x0 + dx
             val a1 = r1.position.y - r1.size.y * 0.5
             val a2 = r1.position.y + r1.size.y * 0.5
-            for(r2 <- entities.collect { case e : PawnEntity => e }) if(r2 != r1) {
+            for(r2 <- entities.collect { case e : SolidEntity => e }) if(r2 != r1) {
                 val x2 = r2.position.x - r2.size.x * 0.5
                 if(x2 >= x0) {
                     val b1 = r2.position.y - r2.size.y * 0.5
@@ -57,7 +57,7 @@ object Collision {
             var y1 = y0 + dy
             val a1 = r1.position.x - r1.size.x * 0.5
             val a2 = r1.position.x + r1.size.x * 0.5
-            for(r2 <- entities.collect { case e : PawnEntity => e }) if(r2 != r1) {
+            for(r2 <- entities.collect { case e : SolidEntity => e }) if(r2 != r1) {
                 val y2 = r2.position.y + r2.size.y * 0.5
                 if(y2 <= y0) {
                     val b1 = r2.position.x - r2.size.x * 0.5
@@ -75,7 +75,7 @@ object Collision {
             var y1 = y0 + dy
             val a1 = r1.position.x - r1.size.x * 0.5
             val a2 = r1.position.x + r1.size.x * 0.5
-            for(r2 <- entities.collect { case e : PawnEntity => e }) if(r2 != r1) {
+            for(r2 <- entities.collect { case e : SolidEntity => e }) if(r2 != r1) {
                 val y2 = r2.position.y - r2.size.y * 0.5
                 if(y2 >= y0) {
                     val b1 = r2.position.x - r2.size.x * 0.5
