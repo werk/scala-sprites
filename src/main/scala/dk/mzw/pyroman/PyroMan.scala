@@ -1,93 +1,56 @@
 package dk.mzw.pyroman
 
-import dk.mzw.scalasprites.ScalaSprites.{ImageLoader, Scene, Sprite}
+import dk.mzw.pyroman.PyroMan.{Flame, GameState, Player}
+import dk.mzw.scalasprites.SpriteCanvas.{Display, Loader}
+import org.scalajs.dom
+import org.scalajs.dom.raw.HTMLCanvasElement
+import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.scalajs.js.JSApp
 import scala.util.Random
 
-object PyroMan{
+class PyroMan(load : Loader, keys: Keys) {
 
-    case class Player (
-        position : Vector,
-        velocity : Vector,
-        angle : Double,
-        speed : Double,
-        shooting : Boolean,
-        walkingDistance : Double
-    )
+    val topManAnimation = load("assets/topman.png").split(24, 4)
+    val topManShootingAnimation = load("assets/topman-shooting.png").split(24, 4)
+    val flameBrightImage = load("assets/flame-bright.png")
+    val flameRedImage = load("assets/flame-red.png")
 
-    case class Flame(
-        position : Vector,
-        velocity : Vector,
-        born : Double,
-        lifetime : Double,
-        rotationSpeed : Double
-    )
+    def draw(display : Display): Unit = {
+        display.add(
+            image = if(state.player.shooting) topManShootingAnimation(state.player.walkingDistance)
+            else topManAnimation(state.player.walkingDistance),
+            x = state.player.position.x,
+            y = state.player.position.y,
+            size = 1,
+            angle = state.player.angle - Math.PI * 0.5
+        )
 
-    case class GameState(
-        player : Player,
-        shots : List[Flame],
-        t : Double
-    )
-
-    def parabola(x : Double, s : Double = 1) : Double = Math.max(0, (4 - 4 * (x/s)) * (x/s))
-
-    def view(load : ImageLoader) : GameState => Scene = {
-        val topManAnimation = load("assets/topman.png").split(24, 4)
-        val topManShootingAnimation = load("assets/topman-shooting.png").split(24, 4)
-        val flameBrightImage = load("assets/flame-bright.png")
-        val flameRedImage = load("assets/flame-red.png")
-
-        {state =>
-            val player = Sprite(
-                state.player.position.x,
-                state.player.position.y,
-                image =
-                    if(state.player.shooting) topManShootingAnimation(state.player.walkingDistance)
-                    else topManAnimation(state.player.walkingDistance),
-                size = 1,
-                state.player.angle - Math.PI * 0.5
+        state.shots.foreach { shot =>
+            val age = state.t - shot.born
+            display.add(
+                image = flameRedImage,
+                x = shot.position.x,
+                y = shot.position.y,
+                size = 0.2 + parabola(age, shot.lifetime),
+                angle = shot.velocity.angle + age * shot.rotationSpeed
             )
 
-            val shots = state.shots.flatMap { shot =>
-                val age = state.t - shot.born
-                val ember = Sprite(
-                    shot.position.x,
-                    shot.position.y,
-                    image = flameRedImage,
-                    size = 0.2 + parabola(age, shot.lifetime),
-                    shot.velocity.angle + age * shot.rotationSpeed
-                )
-                val flame = if (age < 0.9)
-                List(Sprite(
-                    shot.position.x,
-                    shot.position.y,
+            if (age < 0.9) {
+                display.add(
                     image = flameBrightImage,
+                    x = shot.position.x,
+                    y = shot.position.y,
                     size = 0.1 + parabola(age, shot.lifetime - 0.3),
-                    shot.velocity.angle
-                )) else List()
-                ember :: flame
+                    angle = shot.velocity.angle
+                )
             }
-            Scene(
-                sprites = player :: shots,
-                height = 40
-            )
         }
+
+        display.draw(40)
     }
 
-    val initialState = GameState(
-        player = Player(
-            position = Vector(0, 0),
-            velocity = Vector(0, 0),
-            angle = 0,
-            speed = 5,
-            shooting = false,
-            walkingDistance = 0
-        ),
-        shots = List(),
-        0
-    )
-
-    def nextState(keys : Keys)(last : GameState, t : Double, dt : Double) : GameState = {
+    def nextState(last : GameState, t : Double, dt : Double) : GameState = {
         val player = {
             val velocity = Vector(
                 keys.factor(Keys.leftArrow, Keys.rightArrow),
@@ -148,4 +111,71 @@ object PyroMan{
             t = t
         )
     }
+
+    private var state = GameState(
+        player = Player(
+            position = Vector(0, 0),
+            velocity = Vector(0, 0),
+            angle = 0,
+            speed = 5,
+            shooting = false,
+            walkingDistance = 0
+        ),
+        shots = List(),
+        t = 0
+    )
+
+    def update(t : Double, dt : Double): Unit = {
+        state = nextState(state, t, dt)
+    }
+
+    private def parabola(x : Double, s : Double = 1) : Double = Math.max(0, (4 - 4 * (x/s)) * (x/s))
+}
+
+object PyroMan extends JSApp {
+
+    def main() : Unit = {
+        val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
+        val loader = new Loader(canvas)
+        val keys = new Keys()
+        val game = new PyroMan(loader, keys)
+
+        loader.complete.foreach{display =>
+            var lastTime = System.currentTimeMillis() * 0.001
+            def loop(): Unit = {
+                val time = System.currentTimeMillis() * 0.001
+                val dt = time - lastTime
+                game.update(time, dt)
+                game.draw(display)
+
+                lastTime = time
+                dom.window.requestAnimationFrame{_ => loop()}
+            }
+            loop()
+        }
+    }
+
+    case class Player (
+        position : Vector,
+        velocity : Vector,
+        angle : Double,
+        speed : Double,
+        shooting : Boolean,
+        walkingDistance : Double
+    )
+
+    case class Flame(
+        position : Vector,
+        velocity : Vector,
+        born : Double,
+        lifetime : Double,
+        rotationSpeed : Double
+    )
+
+    case class GameState(
+        player : Player,
+        shots : List[Flame],
+        t : Double
+    )
+
 }

@@ -72,64 +72,8 @@ class SpriteGl(canvas : HTMLCanvasElement) {
         }
     }
 
-    def drawSpritesSlow(height : Double, points : Array[Shape]) {
-        SpriteGl.resize(gl)
-        val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
-        val scaleY = 2 / height
-        val scaleX = scaleY * aspectRatio
-
-
-        gl.uniform2fv(scaleUniformLocation, js.Array[Double](scaleX, scaleY))
-        gl.uniform2fv(offsetUniformLocation, js.Array[Double](0, 0))
-
-        /*==========Defining and storing the geometry=======*/
-
-        val coordinates = js.Array(points.flatMap{case Shape(cx, cy, w, h, _, tx, ty, tw, th) =>
-            val x1 = cx - w/2
-            val y1 = cy - h/2
-            val x2 = x1 + w
-            val y2 = y1 + h
-            val tx1 = tx
-            val ty1 = ty + th
-            val tx2 = tx1 + tw
-            val ty2 = ty
-            Array(
-                x1, y1, tx1, ty1,
-                x1, y2, tx1, ty2,
-                x2, y2, tx2, ty2,
-                x1, y1, tx1, ty1,
-                x2, y2, tx2, ty2,
-                x2, y1, tx2, ty1
-            )
-        } : _*)
-
-        val rotations = js.Array(points.flatMap{case Shape(cx, cy, _, _, a, _, _, _, _) =>
-            Array(
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a
-            )
-        } : _*)
-
-        val coordinatesBuffer = gl.createBuffer()
-        gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
-        gl.bufferData(ARRAY_BUFFER, new Float32Array(coordinates), STREAM_DRAW)
-        gl.vertexAttribPointer(coordinatesAttributeLocation, 4, FLOAT, normalized = false, 0, 0)
-        gl.enableVertexAttribArray(coordinatesAttributeLocation)
-
-        val rotationBuffer = gl.createBuffer()
-        gl.bindBuffer(ARRAY_BUFFER, rotationBuffer)
-        gl.bufferData(ARRAY_BUFFER, new Float32Array(rotations), STREAM_DRAW)
-        gl.vertexAttribPointer(rotationsAttributeLocation, 3, FLOAT, normalized = false, 0, 0)
-        gl.enableVertexAttribArray(rotationsAttributeLocation)
-
-        gl.drawArrays(TRIANGLES, 0, points.length * 6)
-    }
-
-    def drawSprites(height : Double, sprites : js.Array[Sprite]) {
+    def drawSprites(height : Double, allSprites : js.Array[Sprite], spriteCount : Int) {
+        val sprites = allSprites.take(spriteCount)
         SpriteGl.resize(gl)
         val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
         val scaleY = 2 / height
@@ -261,11 +205,11 @@ object SpriteGl {
 
     def clear(gl : WebGLRenderingContext): Unit = {
         // Clear the canvas
-        //gl.clearColor(0.3, 0.3, 0.3, 1)
+        gl.clearColor(0.3, 0.3, 0.3, 1)
 
         // Blending
-        //gl.blendFunc(ONE, ONE)
-        gl.blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
+        gl.blendFunc(ONE, ONE)
+        //gl.blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
         gl.enable(BLEND)
         gl.disable(DEPTH_TEST)
 

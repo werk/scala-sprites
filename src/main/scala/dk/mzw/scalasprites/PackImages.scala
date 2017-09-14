@@ -12,7 +12,6 @@ object PackImages {
         val getRectangle = {p : (HTMLImageElement, String) => PackRectangles.Rectangle(p._1.width, p._1.height)}
 
         Future.sequence(imageUrls.map(loadImage)).flatMap{ loadedImages =>
-            println(loadedImages.map(_.src).mkString(", "))
             val (dimensions, packMap) = PackRectangles(loadedImages.zip(imageUrls), getRectangle, 1024)
             val canvas = dom.document.createElement("canvas").asInstanceOf[HTMLCanvasElement]
             canvas.width = nextPowerOfTwo(dimensions.width)
@@ -47,7 +46,7 @@ object PackImages {
     }
 
     def nextPowerOfTwo(i : Int) : Int = {
-        val ps = List(2,4,8,16,32,64,128,256, 512, 1024).reverse // TODO
+        val ps = List(2,4,8,16,32,64,128,256, 512, 1024, 2048).reverse // TODO
         val p = ps.find(_ <= i).get
         if(p == i) i else p * 2
     }
