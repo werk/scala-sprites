@@ -1,6 +1,5 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.SpriteGl.Shape
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
 import scala.collection.mutable
@@ -10,45 +9,96 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SpriteCanvas {
 
+    trait Image{
+        val url: String
+        val top: Int
+        val left: Int
+        val width: Option[Int]
+        val height: Option[Int]
+        def stamp : StampTexture
+
+        def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image
+        def splitArray(width: Int, frames: Int): Array[Image]
+        def split(width: Int, frames: Int): Double => Image
+    }
+
     class Loader(canvas: HTMLCanvasElement) {
         val gl = new SpriteGl(canvas)
         gl.initSpriteProgram()
-        private val images = mutable.Map[String, Image]()
+        private var images = List[MutableImage]()
+        private var completed = false
 
         def apply(imageIrl: String): Image = {
-            images.getOrElseUpdate(imageIrl, Image(imageIrl, 0, 0, None, None))
+            val image = MutableImage(imageIrl, 0, 0, None, None)
+            images ::= image
+            image
         }
 
         def complete: Future[Display] = {
-            PackImages(images.keys.toList).map { case (atlas, mapping) =>
+            PackImages(images.map(_.url).distinct).map { case (atlas, mapping) =>
+                completed = true
                 val texture = gl.bindTexture(atlas)
-                mapping.foreach { case (url, p) =>
-                    val image = images(url)
 
-                    val stampLeft = p.x
-                    val stampTop = p.y
-                    val stampWidth = p.rectangle.width
-                    val stampHeight = p.rectangle.height
-                    val atlasWidth = atlas.width
-                    val atlasHeight = atlas.height
+                images.groupBy(_.url).foreach{case (url, group) =>
+                    val p = mapping(url)
+                    group.foreach{image =>
+                        val stampLeft = p.x
+                        val stampTop = p.y
+                        val stampWidth = p.rectangle.width
+                        val stampHeight = p.rectangle.height
+                        val atlasWidth = atlas.width
+                        val atlasHeight = atlas.height
 
-                    val stamp = StampTexture(
-                        stampLeft = stampLeft,
-                        stampTop = stampTop,
-                        stampWidth = stampWidth,
-                        stampHeight = stampHeight,
-                        atlasWidth = atlasWidth,
-                        atlasHeight = atlasHeight,
-                        texture = texture,
-                        textureLeft = (image.left + stampLeft).toDouble / atlasWidth,
-                        textureTop = (image.top + stampTop).toDouble / atlasHeight,
-                        textureWidth = image.width.map(_.toDouble / stampWidth).getOrElse(1d) * (stampWidth.toDouble / atlasWidth),
-                        textureHeight = image.height.map(_.toDouble / stampHeight).getOrElse(1d) * (stampHeight.toDouble / atlasHeight)
-                    )
+                        val stamp = StampTexture(
+                            stampLeft = stampLeft,
+                            stampTop = stampTop,
+                            stampWidth = stampWidth,
+                            stampHeight = stampHeight,
+                            atlasWidth = atlasWidth,
+                            atlasHeight = atlasHeight,
+                            texture = texture,
+                            textureLeft = (image.left + stampLeft).toDouble / atlasWidth,
+                            textureTop = (image.top + stampTop).toDouble / atlasHeight,
+                            textureWidth = image.width.map(_.toDouble / stampWidth).getOrElse(1d) * (stampWidth.toDouble / atlasWidth),
+                            textureHeight = image.height.map(_.toDouble / stampHeight).getOrElse(1d) * (stampHeight.toDouble / atlasHeight)
+                        )
 
-                    image.stamp = stamp
+                        image.stamp = stamp
+                    }
                 }
+
                 new Display(gl)
+            }
+        }
+
+        private case class MutableImage(
+            url: String,
+            top: Int,
+            left: Int,
+            width: Option[Int],
+            height: Option[Int],
+            var stamp : StampTexture = null
+        ) extends Image {
+
+            def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image = {
+                val image = copy(
+                    top = this.top + top,
+                    left = this.left + left,
+                    width = if (width <= 0) this.width.map(_ - left) else Some(width),
+                    height = if (height <= 0) this.height.map(_ - top) else Some(height)
+                )
+                images ::= image // TODO: This is the only reason why this class in nested in the loader. Consider removing this method from the class.
+                image
+            }
+
+            def splitArray(width: Int, frames: Int): Array[Image] = {
+                (for (i <- 0 to frames) yield chop(left = i * width, width = width)).toArray
+            }
+
+            def split(width: Int, frames: Int): Double => Image = {
+                val images: Array[Image] = splitArray(width, frames)
+
+                { f: Double => images(((f % 1) * frames).toInt) }
             }
         }
     }
@@ -68,34 +118,6 @@ object SpriteCanvas {
         textureWidth : Double,
         textureHeight : Double
     )
-
-    case class Image(
-        url: String,
-        top: Int,
-        left: Int,
-        width: Option[Int],
-        height: Option[Int],
-        var stamp : StampTexture = null
-    ) {
-        def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image = {
-            copy(
-                top = this.top + top,
-                left = this.left + left,
-                width = if (width <= 0) this.width.map(_ - left) else Some(width),
-                height = if (height <= 0) this.height.map(_ - top) else Some(height)
-            )
-        }
-
-        def splitArray(width: Int, frames: Int): Array[Image] = {
-            (for (i <- 0 to frames) yield chop(left = i * width, width = width)).toArray
-        }
-
-        def split(width: Int, frames: Int): Double => Image = {
-            val images: Array[Image] = splitArray(width, frames)
-
-            { f: Double => images(((f % 1) * frames).toInt) }
-        }
-    }
 
     class Display(gl: SpriteGl) {
         private val sprites = js.Array[Sprite]()
@@ -118,15 +140,7 @@ object SpriteCanvas {
 
         def draw(height: Double) {
             gl.clear()
-            gl.drawSprites(height, sprites)
-            /*val array = sprites.map { sprite =>
-                val stamp = sprite.image.stamp
-                gl.activateTexture(stamp.texture)
-
-                // TODO avoid allocating. Write direct to Float32Array
-                Shape(sprite.x, sprite.y, sprite.size, sprite.size, sprite.angle, stamp.textureLeft, stamp.textureTop, stamp.textureWidth, stamp.textureHeight)
-            }.toArray
-            gl.drawSprites(height, array)*/
+            gl.drawSprites(height, sprites, i)
             i = 0
         }
     }
