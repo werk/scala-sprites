@@ -1,5 +1,6 @@
 package dk.mzw.scalasprites
 
+import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
 import scala.collection.mutable
@@ -36,6 +37,7 @@ object SpriteCanvas {
 
         def complete: Future[Display] = {
             PackImages(images.map(_.url).distinct).map { case (atlas, mapping) =>
+                dom.document.body.appendChild(atlas) // TODO remove this
                 completed = true
                 val texture = gl.bindTexture(atlas)
 
@@ -123,17 +125,17 @@ object SpriteCanvas {
         private val sprites = js.Array[Sprite]()
         private var i = 0
 
-        def add(image: Image, x: Double, y: Double, size: Double, angle: Double) {
+        def add(image: Image, x: Double, y: Double, height: Double, angle: Double) {
             if (i < sprites.length) {
                 val sprite = sprites(i)
                 sprite.image = image
                 sprite.x = x
                 sprite.y = y
-                sprite.size = size
+                sprite.size = height
                 sprite.angle = angle
             }
             else {
-                sprites.push(Sprite(image, x, y, size, angle))
+                sprites.push(Sprite(image, x, y, height, angle))
             }
             i += 1
         }

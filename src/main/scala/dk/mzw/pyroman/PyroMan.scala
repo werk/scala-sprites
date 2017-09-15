@@ -22,7 +22,7 @@ class PyroMan(load : Loader, keys: Keys) {
             else topManAnimation(state.player.walkingDistance),
             x = state.player.position.x,
             y = state.player.position.y,
-            size = 1,
+            height = 1,
             angle = state.player.angle - Math.PI * 0.5
         )
 
@@ -32,7 +32,7 @@ class PyroMan(load : Loader, keys: Keys) {
                 image = flameRedImage,
                 x = shot.position.x,
                 y = shot.position.y,
-                size = 0.2 + parabola(age, shot.lifetime),
+                height = 0.2 + parabola(age, shot.lifetime),
                 angle = shot.velocity.angle + age * shot.rotationSpeed
             )
 
@@ -41,7 +41,7 @@ class PyroMan(load : Loader, keys: Keys) {
                     image = flameBrightImage,
                     x = shot.position.x,
                     y = shot.position.y,
-                    size = 0.1 + parabola(age, shot.lifetime - 0.3),
+                    height = 0.1 + parabola(age, shot.lifetime - 0.3),
                     angle = shot.velocity.angle
                 )
             }

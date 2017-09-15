@@ -85,13 +85,13 @@ class SpriteGl(canvas : HTMLCanvasElement) {
 
         /*==========Defining and storing the geometry=======*/
 
-        val coordinates = js.Array(sprites.flatMap{case Sprite(image, cx, cy, w, _) =>
+        val coordinates = js.Array(sprites.flatMap{case Sprite(image, cx, cy, h, _) =>
             activateTexture(image.stamp.texture)
             val tx = image.stamp.textureLeft
             val ty = image.stamp.textureTop
             val tw = image.stamp.textureWidth
             val th = image.stamp.textureHeight
-            val h = w // TODO
+            val w = h * image.stamp.stampWidth / image.stamp.stampHeight
             val x1 = cx - w/2
             val y1 = cy - h/2
             val x2 = x1 + w

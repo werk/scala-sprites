@@ -8,8 +8,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object PackImages {
 
-    def apply(imageUrls : List[String]) : Future[(HTMLImageElement, Map[String, PackRectangles.Position])] = {
-        val getRectangle = {p : (HTMLImageElement, String) => PackRectangles.Rectangle(p._1.width, p._1.height)}
+    def apply(imageUrls : List[String]) : Future[(HTMLImageElement, Map[String, PackRectangles.Chop])] = {
+        val getRectangle = {p : (HTMLImageElement, String) => PackRectangles.Box(p._1.width, p._1.height)}
 
         Future.sequence(imageUrls.map(loadImage)).flatMap{ loadedImages =>
             val (dimensions, packMap) = PackRectangles(loadedImages.zip(imageUrls), getRectangle, 1024)

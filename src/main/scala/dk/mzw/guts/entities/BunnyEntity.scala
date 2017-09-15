@@ -12,7 +12,7 @@ class BunnyEntity(
     val sprite : Image
 ) extends Entity with PawnEntity with PhysicalEntity {
 
-    val size = Vector2d(20, 20)
+    val size = Vector2d(25, 32)
 
     override def onUpdate(collision : Collision, delta : Double) : Unit = {
         val velocity = Vector2d(0, 0)
@@ -29,7 +29,7 @@ class BunnyEntity(
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
-        display.add(sprite, position.x, position.y, 20.0, 0)
+        display.add(sprite, position.x, position.y, 32, 0)
     }
 }
 
