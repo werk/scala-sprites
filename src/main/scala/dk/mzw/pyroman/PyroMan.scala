@@ -16,6 +16,8 @@ class PyroMan(load : Loader, keys: Keys) {
     val flameBrightImage = load("assets/flame-bright.png")
     val flameRedImage = load("assets/flame-red.png")
 
+    val clearColor = (0.3, 0.3, 0.3, 1.0)
+
     def draw(display : Display): Unit = {
         display.add(
             image = if(state.player.shooting) topManShootingAnimation(state.player.walkingDistance)
@@ -47,7 +49,7 @@ class PyroMan(load : Loader, keys: Keys) {
             }
         }
 
-        display.draw(40)
+        display.draw(clearColor, 40)
     }
 
     def nextState(last : GameState, t : Double, dt : Double) : GameState = {

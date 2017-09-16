@@ -22,9 +22,8 @@ object Guts extends JSApp {
             new WallEntity(Self("wall", "myclient"), Vector2d(Math.random() * 1000 - 500, Math.random() * 1000 - 500), wallSprite)
         }
 
-        val game = new GameWorld(loader, walls ++ Seq(
-            new BunnyEntity(Self("nananana", "myclient"), Vector2d(0, 0), batmanSprite)
-        ))
+        val bunny = new BunnyEntity(Self("nananana", "myclient"), Vector2d(0, 0), batmanSprite)
+        val game = new GameWorld(loader, walls ++ Seq(bunny))
 
         loader.complete.foreach { display =>
             println("Loader complete")
@@ -34,7 +33,7 @@ object Guts extends JSApp {
                 val delta = now - last
                 if(delta < 1) {
                     game.update(delta)
-                    game.draw(display)
+                    game.draw(display, bunny.position.x, bunny.position.y)
                 }
                 dom.window.requestAnimationFrame{_ => loop(now)}
             }

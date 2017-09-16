@@ -1,6 +1,7 @@
 package dk.mzw.scalasprites
 
 import org.scalajs.dom
+import org.scalajs.dom.raw.{WebGLRenderingContext => GL}
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
 import scala.collection.mutable
@@ -9,6 +10,17 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object SpriteCanvas {
+
+    case class Blending(
+        equation : Int,
+        sourceFactor : Int,
+        destinationFactor : Int
+    )
+
+    object Blending {
+        val top = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
+        val additive = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
+    }
 
     trait Image{
         val url: String
@@ -105,7 +117,16 @@ object SpriteCanvas {
         }
     }
 
-    case class Sprite(var image: Image, var x: Double, var y: Double, var size: Double, var angle: Double)
+    case class Sprite(
+        var image: Image,
+        var x: Double,
+        var y: Double,
+        var size: Double,
+        var angle: Double,
+        var depth : Double,
+        var blending : Blending,
+        var index : Int
+    )
 
     case class StampTexture(
         stampLeft: Int,
@@ -125,7 +146,7 @@ object SpriteCanvas {
         private val sprites = js.Array[Sprite]()
         private var i = 0
 
-        def add(image: Image, x: Double, y: Double, height: Double, angle: Double) {
+        def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
             if (i < sprites.length) {
                 val sprite = sprites(i)
                 sprite.image = image
@@ -133,16 +154,58 @@ object SpriteCanvas {
                 sprite.y = y
                 sprite.size = height
                 sprite.angle = angle
+                sprite.depth = depth
+                sprite.blending = blending
+                sprite.index = i
             }
             else {
-                sprites.push(Sprite(image, x, y, height, angle))
+                sprites.push(Sprite(image, x, y, height, angle, depth, blending, i))
             }
             i += 1
         }
 
-        def draw(height: Double) {
-            gl.clear()
-            gl.drawSprites(height, sprites, i)
+        def compare(a : Sprite, b : Sprite) : Int = {
+            // Preserve element positions after the draw window
+            if(a.index >= i && b.index >= i) return a.index - b.index
+            if(a.index >= i) return 1
+            if(b.index >= i) return -1
+
+            val depth = a.depth - b.depth
+            if(depth != 0) return Math.signum(depth).toInt
+
+            val equation = a.blending.equation - b.blending.equation
+            if(depth != 0) return equation
+
+            val sourceFactor = a.blending.sourceFactor- b.blending.sourceFactor
+            if(depth != 0) return sourceFactor
+
+            val destinationFactor = a.blending.destinationFactor - b.blending.destinationFactor
+            if(depth != 0) return destinationFactor
+
+            a.index - b.index // Make it stable
+        }
+
+        def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
+            gl.clear(clearColor)
+
+            sprites.sort(compare)
+
+            if(sprites.length == 0) return // TODO
+
+            var lastSprite = sprites(0)
+
+            for(spriteIndex <- 0 until i) {
+                val sprite = sprites(spriteIndex)
+                if(lastSprite.blending != sprite.blending || spriteIndex == i - 1) {
+                    gl.gl.blendEquation(sprite.blending.equation)
+                    gl.gl.blendFunc(sprite.blending.sourceFactor, sprite.blending.destinationFactor)
+
+                    gl.drawSprites(sprites, lastSprite.index, spriteIndex, height, centerX, centerY)
+                    lastSprite = sprite
+                }
+            }
+
+            //gl.drawSprites(sprites, i, height, centerX, centerY)
             i = 0
         }
     }
