@@ -19,7 +19,7 @@ object SpriteCanvas {
 
     object Blending {
         val top = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
-        val additive = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
+        val additive = Blending(GL.FUNC_ADD, GL.ONE, GL.ONE)
     }
 
     trait Image{
@@ -164,7 +164,7 @@ object SpriteCanvas {
             i += 1
         }
 
-        def compare(a : Sprite, b : Sprite) : Int = {
+        private def compare(a : Sprite, b : Sprite) : Int = {
             // Preserve element positions after the draw window
             if(a.index >= i && b.index >= i) return a.index - b.index
             if(a.index >= i) return 1
@@ -185,10 +185,18 @@ object SpriteCanvas {
             a.index - b.index // Make it stable
         }
 
+        var first = true
         def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
             gl.clear(clearColor)
 
             sprites.sort(compare)
+
+            if(first) {
+                sprites.foreach{s =>
+                    val blending = if(s.blending == Blending.top) "TOP" else if (s.blending == Blending.additive) "ADD" else s.blending.toString
+                    println(s"${s.depth} ${s.image.url} $blending")
+                }
+            }
 
             if(sprites.length == 0) return // TODO
 
@@ -197,9 +205,10 @@ object SpriteCanvas {
             for(spriteIndex <- 0 until i) {
                 val sprite = sprites(spriteIndex)
                 if(lastSprite.blending != sprite.blending || spriteIndex == i - 1) {
-                    gl.gl.blendEquation(sprite.blending.equation)
-                    gl.gl.blendFunc(sprite.blending.sourceFactor, sprite.blending.destinationFactor)
+                    gl.gl.blendEquation(lastSprite.blending.equation)
+                    gl.gl.blendFunc(lastSprite.blending.sourceFactor, sprite.blending.destinationFactor)
 
+                    if(first) println(s"gl.drawSprites(${sprites.length}, ${lastSprite.index}, $spriteIndex, ... ")
                     gl.drawSprites(sprites, lastSprite.index, spriteIndex, height, centerX, centerY)
                     lastSprite = sprite
                 }
@@ -207,6 +216,7 @@ object SpriteCanvas {
 
             //gl.drawSprites(sprites, i, height, centerX, centerY)
             i = 0
+            first = false
         }
     }
 }
