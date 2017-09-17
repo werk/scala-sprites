@@ -156,11 +156,16 @@ class SpriteGl(canvas : HTMLCanvasElement) {
             }
         }
 
+        val fromC = from * vertexPerSprite * coordinatesBufferItemSize
+        val toC = (to + 1) * vertexPerSprite * coordinatesBufferItemSize
+        val fromR = from * vertexPerSprite * rotationsBufferItemSize
+        val toR = (to + 1) * vertexPerSprite * rotationsBufferItemSize
+
         gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
-        gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(0, spriteCount * vertexPerSprite * coordinatesBufferItemSize), DYNAMIC_DRAW)
+        gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW)
 
         gl.bindBuffer(ARRAY_BUFFER, rotationBuffer)
-        gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(0, spriteCount * vertexPerSprite * rotationsBufferItemSize), DYNAMIC_DRAW)
+        gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW)
 
         gl.drawArrays(TRIANGLES, 0, spriteCount * vertexPerSprite)
     }

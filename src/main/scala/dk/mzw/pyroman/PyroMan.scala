@@ -1,11 +1,11 @@
 package dk.mzw.pyroman
 
 import dk.mzw.pyroman.PyroMan.{Flame, GameState, Player}
-import dk.mzw.scalasprites.SpriteCanvas.{Display, Loader}
+import dk.mzw.scalasprites.SpriteCanvas.{Blending, Display, Loader}
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.JSApp
 import scala.util.Random
 
@@ -35,7 +35,8 @@ class PyroMan(load : Loader, keys: Keys) {
                 x = shot.position.x,
                 y = shot.position.y,
                 height = 0.2 + parabola(age, shot.lifetime),
-                angle = shot.velocity.angle + age * shot.rotationSpeed
+                angle = shot.velocity.angle + age * shot.rotationSpeed,
+                blending = Blending.additive
             )
 
             if (age < 0.9) {
@@ -44,7 +45,8 @@ class PyroMan(load : Loader, keys: Keys) {
                     x = shot.position.x,
                     y = shot.position.y,
                     height = 0.1 + parabola(age, shot.lifetime - 0.3),
-                    angle = shot.velocity.angle
+                    angle = shot.velocity.angle,
+                    blending = Blending.additive
                 )
             }
         }

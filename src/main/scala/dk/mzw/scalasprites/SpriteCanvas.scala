@@ -15,7 +15,9 @@ object SpriteCanvas {
         equation : Int,
         sourceFactor : Int,
         destinationFactor : Int
-    )
+    ) {
+        def show : String = if(this == Blending.top) "TOP" else if (this == Blending.additive) "ADD" else toString
+    }
 
     object Blending {
         val top = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
@@ -185,22 +187,22 @@ object SpriteCanvas {
             a.index - b.index // Make it stable
         }
 
-        var first = true
+        var firstDraw = true
         def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
             gl.clear(clearColor)
 
             sprites.sort(compare)
 
-            if(first) {
+            if(firstDraw) {
                 sprites.foreach{s =>
-                    val blending = if(s.blending == Blending.top) "TOP" else if (s.blending == Blending.additive) "ADD" else s.blending.toString
-                    println(s"${s.depth} ${s.image.url} $blending")
+                    println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
                 }
             }
 
             if(sprites.length == 0) return // TODO
 
-            var lastSprite = sprites(0)
+            var lastIndex = 0
+            var lastSprite = sprites(lastIndex)
 
             for(spriteIndex <- 0 until i) {
                 val sprite = sprites(spriteIndex)
@@ -208,15 +210,17 @@ object SpriteCanvas {
                     gl.gl.blendEquation(lastSprite.blending.equation)
                     gl.gl.blendFunc(lastSprite.blending.sourceFactor, sprite.blending.destinationFactor)
 
-                    if(first) println(s"gl.drawSprites(${sprites.length}, ${lastSprite.index}, $spriteIndex, ... ")
-                    gl.drawSprites(sprites, lastSprite.index, spriteIndex, height, centerX, centerY)
+                    if(firstDraw) println(s"gl.drawSprites(${sprites.length}, $lastIndex, $spriteIndex, ${lastSprite.blending.show}")
+                    gl.drawSprites(sprites, lastIndex, spriteIndex, height, centerX, centerY)
+
+                    lastIndex = spriteIndex
                     lastSprite = sprite
                 }
             }
 
             //gl.drawSprites(sprites, i, height, centerX, centerY)
             i = 0
-            first = false
+            firstDraw = false
         }
     }
 }
