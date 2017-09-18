@@ -1,6 +1,6 @@
 package dk.mzw.guts
 
-import dk.mzw.guts.entities.{BunnyEntity, WallEntity}
+import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system.{Entity, GameWorld, Vector2d}
@@ -18,6 +18,7 @@ object Guts extends JSApp {
 
         val batmanSprite = loader("bunnymark/rabbitv3_batman.png")
         val wallSprite = loader("assets/wall.png")
+        val floorSprite = loader("assets/floor.png")
 
         val tileMapSize = 20
         val tileMapWidth = 100
@@ -33,12 +34,17 @@ object Guts extends JSApp {
             new WallEntity(Self("wall-" + x + "," + y, Entity.localClientId), position, wallSprite)
         }
 
-/*        val walls = 1 to 100 map { _ =>
-            new WallEntity(Self("wall", Entity.localClientId), Vector2d(Math.random() * 1000 - 500, Math.random() * 1000 - 500), wallSprite)
-        }*/
+        val floors = for {
+            x <- 0 until tileMapWidth
+            y <- 0 until tileMapHeight
+            if tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
+        } yield {
+            val position = Vector2d(x * tileMapSize, y * tileMapSize)
+            new FloorEntity(Self("floor-" + x + "," + y, Entity.localClientId), position, floorSprite)
+        }
 
         val bunny = new BunnyEntity(Self("nananana", Entity.localClientId), Vector2d(0, 0), batmanSprite)
-        val game = new GameWorld(loader, walls ++ Seq(bunny))
+        val game = new GameWorld(loader, walls ++ floors ++ Seq(bunny))
 
         loader.complete.foreach { display =>
             println("Loader complete")
