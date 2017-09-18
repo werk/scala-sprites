@@ -27,35 +27,35 @@ class BunnyEntity(
             if (!leftArrow) {
                 leftArrow = true
                 rightArrow = false
-                messageFrom(self, SetXVelocity(-100))
+                sendMessageTo(this, SetXVelocity(-100))
             }
         } else if(keys(Keys.rightArrow)) {
             if(!rightArrow) {
                 rightArrow = true
                 leftArrow = false
-                messageFrom(self, SetXVelocity(100))
+                sendMessageTo(this, SetXVelocity(100))
             }
         } else if(leftArrow || rightArrow) {
             leftArrow = false
             rightArrow = false
-            messageFrom(self, SetXVelocity(0))
+            sendMessageTo(this, SetXVelocity(0))
         }
         if(keys(Keys.downArrow)) {
             if(!downArrow) {
                 downArrow = true
                 upArrow = false
-                messageFrom(self, SetYVelocity(-100))
+                sendMessageTo(this, SetYVelocity(-100))
             }
         } else if(keys(Keys.upArrow)) {
             if(!upArrow) {
                 upArrow = true
                 downArrow = false
-                messageFrom(self, SetYVelocity(100))
+                sendMessageTo(this, SetYVelocity(100))
             }
         } else if(downArrow || upArrow) {
             upArrow = false
             downArrow = false
-            messageFrom(self, SetYVelocity(0))
+            sendMessageTo(this, SetYVelocity(0))
         }
     }
 

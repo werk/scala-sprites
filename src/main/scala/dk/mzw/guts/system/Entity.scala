@@ -9,10 +9,10 @@ abstract class Entity {
 
     var internalMessageQueue : List[Message] = Nil
 
-    def messageFrom(sender : Self, message : Message) : Unit = {
-        if(sender.clientId == Entity.localClientId) {
-            internalMessageQueue = message :: internalMessageQueue
-            Entity.broadcastMessageTo(self, message)
+    def sendMessageTo(recipient : Entity, message : Message) : Unit = {
+        if(self.clientId == Entity.localClientId) {
+            recipient.internalMessageQueue = message :: internalMessageQueue
+            Entity.broadcastMessageTo(recipient.self, message)
         }
     }
 
