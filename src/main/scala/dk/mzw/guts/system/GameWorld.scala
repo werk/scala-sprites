@@ -12,6 +12,7 @@ class GameWorld(loader : Loader, entities : Seq[Entity]) {
         case Nil =>
         case message :: rest =>
             consumeMessages(entity, rest)
+            println(message)
             entity.onMessage(message)
     }
 
@@ -19,6 +20,7 @@ class GameWorld(loader : Loader, entities : Seq[Entity]) {
         entities.collect { case e : ControlledEntity => e }.foreach(_.onInput(keys))
         entities.foreach { entity =>
             if(entity.internalMessageQueue.nonEmpty) {
+                println("Messages for " + entity.self + ":")
                 consumeMessages(entity, entity.internalMessageQueue)
                 entity.internalMessageQueue = Nil
             }
