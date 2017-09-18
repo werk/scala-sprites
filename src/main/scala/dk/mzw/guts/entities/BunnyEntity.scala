@@ -1,5 +1,6 @@
 package dk.mzw.guts.entities
 
+import dk.mzw.guts.entities.BunnyEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
 import dk.mzw.pyroman.Keys
@@ -10,22 +11,63 @@ class BunnyEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity with PawnEntity with PhysicalEntity {
+) extends Entity with PawnEntity with CollidingEntity with ControlledEntity {
 
     val size = Vector2d(25, 32)
+    val velocity = Vector2d(0, 0)
+    val movement = Vector2d(0, 0)
 
-    override def onUpdate(collision : Collision, delta : Double) : Unit = {
-        val velocity = Vector2d(0, 0)
-        velocity.set(
-            if(BunnyEntity.keys(Keys.leftArrow)) -100
-            else if(BunnyEntity.keys(Keys.rightArrow)) 100
-            else 0,
-            if(BunnyEntity.keys(Keys.downArrow)) -100
-            else if(BunnyEntity.keys(Keys.upArrow)) 100
-            else 0
-        )
-        velocity.multiply(delta)
-        move(collision, velocity)
+    var leftArrow = false
+    var rightArrow = false
+    var upArrow = false
+    var downArrow = false
+
+    override def onInput(keys : Keys) : Unit = {
+        if(keys(Keys.leftArrow)) {
+            if (!leftArrow) {
+                leftArrow = true
+                rightArrow = false
+                messageFrom(self, SetXVelocity(-100))
+            }
+        } else if(keys(Keys.rightArrow)) {
+            if(!rightArrow) {
+                rightArrow = true
+                leftArrow = false
+                messageFrom(self, SetXVelocity(100))
+            }
+        } else if(leftArrow || rightArrow) {
+            leftArrow = false
+            rightArrow = false
+            messageFrom(self, SetXVelocity(0))
+        }
+        if(keys(Keys.downArrow)) {
+            if(!downArrow) {
+                downArrow = true
+                upArrow = false
+                messageFrom(self, SetYVelocity(-100))
+            }
+        } else if(keys(Keys.upArrow)) {
+            if(!upArrow) {
+                upArrow = true
+                downArrow = false
+                messageFrom(self, SetYVelocity(100))
+            }
+        } else if(downArrow || upArrow) {
+            upArrow = false
+            downArrow = false
+            messageFrom(self, SetYVelocity(0))
+        }
+    }
+
+    override def onMessage(message : Entity.Message) : Unit = message match {
+        case SetXVelocity(x) => velocity.x = x
+        case SetYVelocity(y) => velocity.y = y
+    }
+
+    override def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {
+        movement.set(velocity)
+        movement.multiply(delta)
+        move(entities, position, size, movement)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
@@ -34,5 +76,6 @@ class BunnyEntity(
 }
 
 object BunnyEntity {
-    val keys = new Keys()
+    case class SetXVelocity(value : Double) extends Entity.Message
+    case class SetYVelocity(value : Double) extends Entity.Message
 }

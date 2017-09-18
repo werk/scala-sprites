@@ -18,7 +18,7 @@ abstract class Entity {
 
     def onMessage(message : Message) : Unit = {}
 
-    def onUpdate(collision : Collision, delta : Double) : Unit = {}
+    def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {}
 
     def onDraw(display : Display) : Unit = {}
 

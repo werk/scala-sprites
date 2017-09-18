@@ -19,11 +19,11 @@ object Guts extends JSApp {
         val wallSprite = loader("bunnymark/rabbitv3.png")
 
         val walls = 1 to 100 map { _ =>
-            new WallEntity(Self("wall", "myclient"), Vector2d(Math.random() * 1000 - 500, Math.random() * 1000 - 500), wallSprite)
+            new WallEntity(Self("wall", Entity.localClientId), Vector2d(Math.random() * 1000 - 500, Math.random() * 1000 - 500), wallSprite)
         }
 
         val game = new GameWorld(loader, walls ++ Seq(
-            new BunnyEntity(Self("nananana", "myclient"), Vector2d(0, 0), batmanSprite)
+            new BunnyEntity(Self("nananana", Entity.localClientId), Vector2d(0, 0), batmanSprite)
         ))
 
         loader.complete.foreach { display =>
