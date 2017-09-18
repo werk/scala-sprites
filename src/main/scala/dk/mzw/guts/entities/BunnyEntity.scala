@@ -13,7 +13,7 @@ class BunnyEntity(
     val sprite : Image
 ) extends Entity with PawnEntity with CollidingEntity with ControlledEntity {
 
-    val size = Vector2d(25, 32)
+    val size = Vector2d(16, 16)
     val velocity = Vector2d(0, 0)
     val movement = Vector2d(0, 0)
 
@@ -71,7 +71,7 @@ class BunnyEntity(
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
-        display.add(sprite, position.x, position.y, 32, 0)
+        display.add(sprite, position.x, position.y, 16, 0)
     }
 }
 

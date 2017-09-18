@@ -1,25 +1,11 @@
 package dk.mzw.guts.system
 
-import dk.mzw.guts.system.HittableEntity.Hit
-import dk.mzw.guts.system.CollidingEntity.{CollisionData, Movement}
-
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
 
-    def move(entities : Seq[Entity], result : Vector2d, size : Vector2d, deltaMovement : Vector2d) : Unit = {
-        CollidingEntity.move(entities, result, size, deltaMovement.x, deltaMovement.y)
-        //val movement = checkMovement(collision : Collision, direction)
-        //position.set(movement.position)
-        //sendMovementHitMessage(direction, movement.firstCollision)
-        //sendMovementHitMessage(direction, movement.secondCollision)
-        //movement
+    def move(entities : Seq[Entity], position : Vector2d, size : Vector2d, deltaMovement : Vector2d) : Unit = {
+        CollidingEntity.move(entities, position, size, deltaMovement.x, deltaMovement.y)
     }
-
-    /*def sendMovementHitMessage(direction : Vector2d, collision : Option[CollisionData]) : Unit = collision match {
-        case Some(CollisionData(point, that : HittableEntity)) =>
-            that.messageFrom(this.self, Hit(point, direction, self));
-        case _ =>
-    }*/
 
 }
 
@@ -32,15 +18,15 @@ object CollidingEntity {
     val moveEpsilon = 0.0001
     val gapEpsilon = 0.00001
 
-    def move(entities : Seq[Entity], result : Vector2d, size : Vector2d, dx : Double, dy : Double) : Unit = {
+    def move(entities : Seq[Entity], position : Vector2d, size : Vector2d, dx : Double, dy : Double) : Unit = {
 
         if(Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
-            move(entities, result, size, dx * 0.5, dy * 0.5)
-            move(entities, result, size, dx * 0.5, dy * 0.5)
+            move(entities, position, size, dx * 0.5, dy * 0.5)
+            move(entities, position, size, dx * 0.5, dy * 0.5)
             return
         }
 
-        val r1 = result
+        val r1 = position
 
         if(dx < -moveEpsilon) {
             val x0 = r1.x - size.x * 0.5
