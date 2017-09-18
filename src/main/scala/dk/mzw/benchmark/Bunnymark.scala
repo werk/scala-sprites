@@ -65,11 +65,12 @@ private class Bunnymark(loader : Loader) {
         bunnies.foreach(_.update())
     }
 
+    val clearColor = (1d, 1d, 1d, 1d)
     def draw(display : Display): Unit = {
         bunnies.foreach{bunny =>
             display.add(bunny.image, bunny.x, bunny.y, 25, 0)
         }
-        display.draw(600)
+        display.draw(clearColor, 600)
         frames += 1
     }
 
@@ -85,7 +86,7 @@ private class Bunnymark(loader : Loader) {
         }
         bunnyCountElement.innerHTML = bunnies.size.toString
     }
-    for(_ <- 0 until 10) {
+    for(_ <- 0 until 100) {
         addBunnies(100)
     }
 

@@ -26,9 +26,11 @@ class GameWorld(loader : Loader, entities : Seq[Entity]) {
         entities.foreach(_.onUpdate(entities, delta))
     }
 
-    def draw(display : Display) : Unit = {
+    private val clearColor = (0.3, 0.3, 0.3, 1.0)
+
+    def draw(display : Display, centerX : Double, centerY : Double) : Unit = {
         entities.foreach(_.onDraw(display))
-        display.draw(600)
+        display.draw(clearColor, 600, centerX, centerY)
     }
 
 }

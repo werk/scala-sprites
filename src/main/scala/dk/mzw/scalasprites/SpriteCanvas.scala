@@ -1,6 +1,7 @@
 package dk.mzw.scalasprites
 
 import org.scalajs.dom
+import org.scalajs.dom.raw.{WebGLRenderingContext => GL}
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
 import scala.collection.mutable
@@ -9,6 +10,19 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object SpriteCanvas {
+
+    case class Blending(
+        equation : Int,
+        sourceFactor : Int,
+        destinationFactor : Int
+    ) {
+        def show : String = if(this == Blending.top) "TOP" else if (this == Blending.additive) "ADD" else toString
+    }
+
+    object Blending {
+        val top = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
+        val additive = Blending(GL.FUNC_ADD, GL.ONE, GL.ONE)
+    }
 
     trait Image{
         val url: String
@@ -105,7 +119,16 @@ object SpriteCanvas {
         }
     }
 
-    case class Sprite(var image: Image, var x: Double, var y: Double, var size: Double, var angle: Double)
+    case class Sprite(
+        var image: Image,
+        var x: Double,
+        var y: Double,
+        var size: Double,
+        var angle: Double,
+        var depth : Double,
+        var blending : Blending,
+        var index : Int
+    )
 
     case class StampTexture(
         stampLeft: Int,
@@ -125,7 +148,7 @@ object SpriteCanvas {
         private val sprites = js.Array[Sprite]()
         private var i = 0
 
-        def add(image: Image, x: Double, y: Double, height: Double, angle: Double) {
+        def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
             if (i < sprites.length) {
                 val sprite = sprites(i)
                 sprite.image = image
@@ -133,17 +156,71 @@ object SpriteCanvas {
                 sprite.y = y
                 sprite.size = height
                 sprite.angle = angle
+                sprite.depth = depth
+                sprite.blending = blending
+                sprite.index = i
             }
             else {
-                sprites.push(Sprite(image, x, y, height, angle))
+                sprites.push(Sprite(image, x, y, height, angle, depth, blending, i))
             }
             i += 1
         }
 
-        def draw(height: Double) {
-            gl.clear()
-            gl.drawSprites(height, sprites, i)
+        private def compare(a : Sprite, b : Sprite) : Int = {
+            // Preserve element positions after the draw window
+            if(a.index >= i && b.index >= i) return a.index - b.index
+            if(a.index >= i) return 1
+            if(b.index >= i) return -1
+
+            val depth = a.depth - b.depth
+            if(depth != 0) return Math.signum(depth).toInt
+
+            val equation = a.blending.equation - b.blending.equation
+            if(depth != 0) return equation
+
+            val sourceFactor = a.blending.sourceFactor- b.blending.sourceFactor
+            if(depth != 0) return sourceFactor
+
+            val destinationFactor = a.blending.destinationFactor - b.blending.destinationFactor
+            if(depth != 0) return destinationFactor
+
+            a.index - b.index // Make it stable
+        }
+
+        var firstDraw = true
+        def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
+            gl.clear(clearColor)
+
+            sprites.sort(compare)
+
+            if(firstDraw) {
+                sprites.foreach{s =>
+                    println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
+                }
+            }
+
+            if(sprites.length == 0) return // TODO
+
+            var lastIndex = 0
+            var lastSprite = sprites(lastIndex)
+
+            for(spriteIndex <- 0 until i) {
+                val sprite = sprites(spriteIndex)
+                if(lastSprite.blending != sprite.blending || spriteIndex == i - 1) {
+                    gl.gl.blendEquation(lastSprite.blending.equation)
+                    gl.gl.blendFunc(lastSprite.blending.sourceFactor, sprite.blending.destinationFactor)
+
+                    if(firstDraw) println(s"gl.drawSprites(${sprites.length}, $lastIndex, $spriteIndex, ${lastSprite.blending.show}")
+                    gl.drawSprites(sprites, lastIndex, spriteIndex, height, centerX, centerY)
+
+                    lastIndex = spriteIndex
+                    lastSprite = sprite
+                }
+            }
+
+            //gl.drawSprites(sprites, i, height, centerX, centerY)
             i = 0
+            firstDraw = false
         }
     }
 }

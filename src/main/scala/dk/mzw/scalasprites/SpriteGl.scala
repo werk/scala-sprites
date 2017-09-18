@@ -4,7 +4,7 @@ import dk.mzw.scalasprites.SpriteCanvas.Sprite
 import dk.mzw.scalasprites.SpriteGl.Shape
 import org.scalajs.dom
 import org.scalajs.dom.raw.WebGLRenderingContext._
-import org.scalajs.dom.raw.{HTMLCanvasElement, HTMLImageElement, WebGLProgram, WebGLRenderingContext, WebGLShader, WebGLTexture, WebGLUniformLocation}
+import org.scalajs.dom.raw._
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
@@ -61,7 +61,7 @@ class SpriteGl(canvas : HTMLCanvasElement) {
         offsetUniformLocation = gl.getUniformLocation(program, "u_offset")
     }
 
-    def clear() = SpriteGl.clear(gl)
+    def clear(clearColor : (Double, Double, Double, Double)) = SpriteGl.clear(gl, clearColor)
     def bindTexture(loadedImage : HTMLImageElement) = SpriteGl.bindTexture(gl, loadedImage)
 
     private var activeTexture : WebGLTexture = null
@@ -72,73 +72,103 @@ class SpriteGl(canvas : HTMLCanvasElement) {
         }
     }
 
-    def drawSprites(height : Double, allSprites : js.Array[Sprite], spriteCount : Int) {
-        val sprites = allSprites.take(spriteCount)
+
+    val vertexPerSprite = 6
+    var maxSpriteCount = 100
+
+    val coordinatesBuffer : WebGLBuffer = gl.createBuffer()
+    gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
+    gl.vertexAttribPointer(coordinatesAttributeLocation, 4, FLOAT, normalized = false, 0, 0)
+    gl.enableVertexAttribArray(coordinatesAttributeLocation)
+    val coordinatesBufferItemSize = 4
+    var coordinatesBufferArray : Float32Array = _
+
+    val rotationBuffer : WebGLBuffer = gl.createBuffer()
+    val rotationsBufferItemSize = 3
+    var rotationsBufferArray : Float32Array = _
+
+    resizeBuffers(maxSpriteCount)
+
+    def resizeBuffers(spriteCount : Int): Unit = {
+        coordinatesBufferArray = new Float32Array(spriteCount * vertexPerSprite * coordinatesBufferItemSize)
+        rotationsBufferArray = new Float32Array(spriteCount * vertexPerSprite * rotationsBufferItemSize)
+        maxSpriteCount = spriteCount
+        println(s"maxSpriteCount = $maxSpriteCount")
+    }
+
+    def drawSprites(sprites : js.Array[Sprite], from : Int, to : Int, height : Double, centerX : Double, centerY : Double) {
+        val spriteCount = to - from + 1
+        //println(s"drawSprites from=$from, to=$to, count=$spriteCount, sprites.length=${sprites.length}")
         SpriteGl.resize(gl)
         val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
         val scaleY = 2 / height
         val scaleX = scaleY * aspectRatio
 
-
         gl.uniform2fv(scaleUniformLocation, js.Array[Double](scaleX, scaleY))
-        gl.uniform2fv(offsetUniformLocation, js.Array[Double](0, 0))
+        gl.uniform2fv(offsetUniformLocation, js.Array[Double](-centerX * scaleX, -centerY * scaleY))
 
         /*==========Defining and storing the geometry=======*/
 
-        val coordinates = js.Array(sprites.flatMap{case Sprite(image, cx, cy, h, _) =>
+        if(spriteCount > maxSpriteCount) resizeBuffers(spriteCount)
+
+        for(spriteIndex <- from to to) {
+            val Sprite(image, cx, cy, h, angle, _, _, _) = sprites(spriteIndex)
             activateTexture(image.stamp.texture)
-            val tx = image.stamp.textureLeft
-            val ty = image.stamp.textureTop
-            val tw = image.stamp.textureWidth
-            val th = image.stamp.textureHeight
-            val w = h * image.stamp.stampWidth / image.stamp.stampHeight
-            val x1 = cx - w/2
-            val y1 = cy - h/2
-            val x2 = x1 + w
-            val y2 = y1 + h
-            val tx1 = tx
-            val ty1 = ty + th
-            val tx2 = tx1 + tw
-            val ty2 = ty
-            Array(
-                x1, y1, tx1, ty1,
-                x1, y2, tx1, ty2,
-                x2, y2, tx2, ty2,
-                x1, y1, tx1, ty1,
-                x2, y2, tx2, ty2,
-                x2, y1, tx2, ty1
-            )
-        } : _*)
 
-        val rotations = js.Array(sprites.flatMap{sprite =>
-            val cx = sprite.x
-            val cy = sprite.y
-            val a = sprite.angle
-            Array(
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a,
-                cx, cy, a
-            )
-        } : _*)
+            // Update coordinate data
+            {
+                val tx = image.stamp.textureLeft
+                val ty = image.stamp.textureTop
+                val tw = image.stamp.textureWidth
+                val th = image.stamp.textureHeight
+                val w = h * image.stamp.stampWidth / image.stamp.stampHeight
+                val x1 = (cx - w/2).toFloat
+                val y1 = (cy - h/2).toFloat
+                val x2 = (x1 + w).toFloat
+                val y2 = (y1 + h).toFloat
+                val tx1 = tx.toFloat
+                val ty1 = (ty + th).toFloat
+                val tx2 = (tx1 + tw).toFloat
+                val ty2 = ty.toFloat
+                val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
+                val c = coordinatesBufferArray
+                c.update(i +  0, x1); c.update(i +  1, y1); c.update(i +  2, tx1); c.update(i +  3, ty1)
+                c.update(i +  4, x1); c.update(i +  5, y2); c.update(i +  6, tx1); c.update(i +  7, ty2)
+                c.update(i +  8, x2); c.update(i +  9, y2); c.update(i + 10, tx2); c.update(i + 11, ty2)
+                c.update(i + 12, x1); c.update(i + 13, y1); c.update(i + 14, tx1); c.update(i + 15, ty1)
+                c.update(i + 16, x2); c.update(i + 17, y2); c.update(i + 18, tx2); c.update(i + 19, ty2)
+                c.update(i + 20, x2); c.update(i + 21, y1); c.update(i + 22, tx2); c.update(i + 23, ty1)
+            }
 
-        val coordinatesBuffer = gl.createBuffer()
+            // Update rotation data
+            {
+                val a = angle.toFloat
+                val x = cx.toFloat
+                val y = cy.toFloat
+                val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
+                val r = rotationsBufferArray
+                r.update(i +  0, x); r.update(i +  1, y); r.update(i +  2, a)
+                r.update(i +  3, x); r.update(i +  4, y); r.update(i +  5, a)
+                r.update(i +  6, x); r.update(i +  7, y); r.update(i +  8, a)
+                r.update(i +  9, x); r.update(i + 10, y); r.update(i + 11, a)
+                r.update(i + 12, x); r.update(i + 13, y); r.update(i + 14, a)
+                r.update(i + 15, x); r.update(i + 16, y); r.update(i + 17, a)
+            }
+        }
+
+        val fromC = from * vertexPerSprite * coordinatesBufferItemSize
+        val toC = (to + 1) * vertexPerSprite * coordinatesBufferItemSize
+        val fromR = from * vertexPerSprite * rotationsBufferItemSize
+        val toR = (to + 1) * vertexPerSprite * rotationsBufferItemSize
+
         gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
-        gl.bufferData(ARRAY_BUFFER, new Float32Array(coordinates), STREAM_DRAW)
-        gl.vertexAttribPointer(coordinatesAttributeLocation, 4, FLOAT, normalized = false, 0, 0)
-        gl.enableVertexAttribArray(coordinatesAttributeLocation)
+        gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW)
 
-        val rotationBuffer = gl.createBuffer()
         gl.bindBuffer(ARRAY_BUFFER, rotationBuffer)
-        gl.bufferData(ARRAY_BUFFER, new Float32Array(rotations), STREAM_DRAW)
-        gl.vertexAttribPointer(rotationsAttributeLocation, 3, FLOAT, normalized = false, 0, 0)
-        gl.enableVertexAttribArray(rotationsAttributeLocation)
+        gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW)
 
-        gl.drawArrays(TRIANGLES, 0, sprites.length * 6)
+        gl.drawArrays(TRIANGLES, 0, spriteCount * vertexPerSprite)
     }
-
 }
 
 object SpriteGl {
@@ -203,17 +233,16 @@ object SpriteGl {
         texture
     }
 
-    def clear(gl : WebGLRenderingContext): Unit = {
-        // Clear the canvas
-        gl.clearColor(0.3, 0.3, 0.3, 1)
+    def clear(gl : WebGLRenderingContext, clearColor : (Double, Double, Double, Double)): Unit = {
 
         // Blending
-        gl.blendFunc(ONE, ONE)
-        //gl.blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
+        //gl.blendFunc(ONE, ONE)
+        gl.blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)
         gl.enable(BLEND)
         gl.disable(DEPTH_TEST)
 
-        // Clear the color buffer bit
+        val (r, g, b, a) = clearColor
+        gl.clearColor(r, g, b, a)
         gl.clear(COLOR_BUFFER_BIT)
 
         // Set the view port
