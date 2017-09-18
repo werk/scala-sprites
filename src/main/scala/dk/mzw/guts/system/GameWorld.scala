@@ -17,7 +17,11 @@ class GameWorld(loader : Loader, entities : Seq[Entity]) {
     }
 
     def update(delta : Double) : Unit = {
-        entities.collect { case e : ControlledEntity => e }.foreach(_.onInput(keys))
+        entities.foreach {
+            case e : ControlledEntity if e.self.clientId == Entity.localClientId =>
+                e.onInput(keys)
+            case _ =>
+        }
         entities.foreach { entity =>
             if(entity.internalMessageQueue.nonEmpty) {
                 println("Messages for " + entity.self + ":")
