@@ -27,41 +27,41 @@ class BunnyEntity(
             if (!leftArrow) {
                 leftArrow = true
                 rightArrow = false
-                sendMessageTo(this, SetXVelocity(-100))
+                sendMessageTo(this, SetXVelocity(position.x, -100))
             }
         } else if(keys(Keys.rightArrow)) {
             if(!rightArrow) {
                 rightArrow = true
                 leftArrow = false
-                sendMessageTo(this, SetXVelocity(100))
+                sendMessageTo(this, SetXVelocity(position.x, 100))
             }
         } else if(leftArrow || rightArrow) {
             leftArrow = false
             rightArrow = false
-            sendMessageTo(this, SetXVelocity(0))
+            sendMessageTo(this, SetXVelocity(position.x, 0))
         }
         if(keys(Keys.downArrow)) {
             if(!downArrow) {
                 downArrow = true
                 upArrow = false
-                sendMessageTo(this, SetYVelocity(-100))
+                sendMessageTo(this, SetYVelocity(position.y, -100))
             }
         } else if(keys(Keys.upArrow)) {
             if(!upArrow) {
                 upArrow = true
                 downArrow = false
-                sendMessageTo(this, SetYVelocity(100))
+                sendMessageTo(this, SetYVelocity(position.y, 100))
             }
         } else if(downArrow || upArrow) {
             upArrow = false
             downArrow = false
-            sendMessageTo(this, SetYVelocity(0))
+            sendMessageTo(this, SetYVelocity(position.y, 0))
         }
     }
 
     override def onMessage(message : Entity.Message) : Unit = message match {
-        case SetXVelocity(x) => velocity.x = x
-        case SetYVelocity(y) => velocity.y = y
+        case SetXVelocity(x, vx) => position.x = x; velocity.x = vx
+        case SetYVelocity(y, vy) => position.y = y; velocity.y = vy
     }
 
     override def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {
@@ -76,6 +76,6 @@ class BunnyEntity(
 }
 
 object BunnyEntity {
-    case class SetXVelocity(value : Double) extends Entity.Message
-    case class SetYVelocity(value : Double) extends Entity.Message
+    case class SetXVelocity(x : Double, vx : Double) extends Entity.Message
+    case class SetYVelocity(y : Double, vy : Double) extends Entity.Message
 }
