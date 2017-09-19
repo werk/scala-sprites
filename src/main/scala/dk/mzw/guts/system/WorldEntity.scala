@@ -2,9 +2,9 @@ package dk.mzw.guts.system
 
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.pyroman.Keys
-import dk.mzw.scalasprites.SpriteCanvas.{Display, Loader}
+import dk.mzw.scalasprites.SpriteCanvas.Display
 
-class WorldEntity(val self : Self, loader : Loader, val entities : Seq[Entity]) extends Entity {
+class WorldEntity(val self : Self, val entities : Seq[Entity]) extends Entity {
 
     val keys = new Keys()
 

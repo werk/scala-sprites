@@ -44,7 +44,7 @@ object Guts extends JSApp {
         }
 
         val bunny = new BunnyEntity(Self("nananana", Entity.localClientId), Vector2d(0, 0), batmanSprite)
-        val world = new WorldEntity(Self("world", Entity.localClientId), loader, walls ++ floors ++ Seq(bunny))
+        val world = new WorldEntity(Self("world", Entity.localClientId), walls ++ floors ++ Seq(bunny))
 
         loader.complete.foreach { display =>
             println("Loader complete")
