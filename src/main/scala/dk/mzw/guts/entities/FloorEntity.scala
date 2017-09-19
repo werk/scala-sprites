@@ -9,7 +9,7 @@ class FloorEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity {
+) extends Entity with DrawableEntity {
 
     val size = Vector2d(20, 20)
 

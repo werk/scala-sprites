@@ -4,6 +4,6 @@ import dk.mzw.pyroman.Keys
 
 trait ControlledEntity extends Entity {
 
-    def onInput(keys : Keys) : Unit
+    def onInput(world : WorldEntity, keys: Keys) : Unit
 
 }

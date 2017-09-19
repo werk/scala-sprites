@@ -9,7 +9,7 @@ class WallEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity with SolidEntity {
+) extends Entity with SolidEntity with DrawableEntity {
 
     val size = Vector2d(20, 20)
 

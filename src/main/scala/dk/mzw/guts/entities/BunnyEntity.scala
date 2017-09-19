@@ -11,7 +11,7 @@ class BunnyEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity with PawnEntity with CollidingEntity with ControlledEntity {
+) extends Entity with PawnEntity with CollidingEntity with ControlledEntity with ReceivingEntity with UpdateableEntity with DrawableEntity {
 
     val size = Vector2d(16, 16)
     val velocity = Vector2d(0, 0)
@@ -22,7 +22,7 @@ class BunnyEntity(
     var upArrow = false
     var downArrow = false
 
-    override def onInput(keys : Keys) : Unit = {
+    override def onInput(world : WorldEntity, keys : Keys) : Unit = {
         if(keys(Keys.leftArrow)) {
             if (!leftArrow) {
                 leftArrow = true
@@ -64,10 +64,10 @@ class BunnyEntity(
         case SetYVelocity(y, vy) => position.y = y; velocity.y = vy
     }
 
-    override def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {
+    override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
         movement.set(velocity)
         movement.multiply(delta)
-        move(entities, position, size, movement)
+        move(world.entities, position, size, movement)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {

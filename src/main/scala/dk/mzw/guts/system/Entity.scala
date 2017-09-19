@@ -7,20 +7,12 @@ abstract class Entity {
 
     val self : Self
 
-    var internalMessageQueue : List[Message] = Nil
-
-    def sendMessageTo(recipient : Entity, message : Message) : Unit = {
+    def sendMessageTo(recipient : ReceivingEntity, message : Message) : Unit = {
         if(self.clientId == Entity.localClientId) {
-            recipient.internalMessageQueue = message :: internalMessageQueue
+            recipient.internalMessageQueue = message :: recipient.internalMessageQueue
             Entity.broadcastMessageTo(recipient.self, message)
         }
     }
-
-    def onMessage(message : Message) : Unit = {}
-
-    def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {}
-
-    def onDraw(display : Display) : Unit = {}
 
 }
 

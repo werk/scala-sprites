@@ -3,7 +3,7 @@ package dk.mzw.guts
 import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
-import dk.mzw.guts.system.{Entity, GameWorld, Vector2d}
+import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}
 import dk.mzw.scalasprites.SpriteCanvas.Loader
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
@@ -44,7 +44,7 @@ object Guts extends JSApp {
         }
 
         val bunny = new BunnyEntity(Self("nananana", Entity.localClientId), Vector2d(0, 0), batmanSprite)
-        val game = new GameWorld(loader, walls ++ floors ++ Seq(bunny))
+        val world = new WorldEntity(Self("world", Entity.localClientId), loader, walls ++ floors ++ Seq(bunny))
 
         loader.complete.foreach { display =>
             println("Loader complete")
@@ -53,8 +53,8 @@ object Guts extends JSApp {
                 val now = secondsElapsed()
                 val delta = now - last
                 if(delta < 1) {
-                    game.update(delta)
-                    game.draw(display, bunny.position.x, bunny.position.y)
+                    world.internalUpdate(delta)
+                    world.internalDraw(display, bunny.position.x, bunny.position.y)
                 }
                 dom.window.requestAnimationFrame{_ => loop(now)}
             }
