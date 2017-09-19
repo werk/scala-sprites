@@ -37,7 +37,7 @@ object Guts extends JSApp {
         val floors = for {
             x <- 0 until tileMapWidth
             y <- 0 until tileMapHeight
-            if tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
+            if false // tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
         } yield {
             val position = Vector2d(x * tileMapSize, y * tileMapSize)
             new FloorEntity(Self("floor-" + x + "," + y, Entity.localClientId), position, floorSprite)

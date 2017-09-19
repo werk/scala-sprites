@@ -195,7 +195,7 @@ object SpriteCanvas {
 
             if(firstDraw) {
                 sprites.foreach{s =>
-                    println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
+                    //println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
                 }
             }
 
@@ -210,7 +210,7 @@ object SpriteCanvas {
                     gl.gl.blendEquation(lastSprite.blending.equation)
                     gl.gl.blendFunc(lastSprite.blending.sourceFactor, sprite.blending.destinationFactor)
 
-                    if(firstDraw) println(s"gl.drawSprites(${sprites.length}, $lastIndex, $spriteIndex, ${lastSprite.blending.show}")
+                    //if(firstDraw) println(s"gl.drawSprites(${sprites.length}, $lastIndex, $spriteIndex, ${lastSprite.blending.show}")
                     gl.drawSprites(sprites, lastIndex, spriteIndex, height, centerX, centerY)
 
                     lastIndex = spriteIndex
