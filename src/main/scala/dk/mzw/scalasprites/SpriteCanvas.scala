@@ -58,10 +58,10 @@ object SpriteCanvas {
                 images.groupBy(_.url).foreach{case (url, group) =>
                     val p = mapping(url)
                     group.foreach{image =>
-                        val stampLeft = p.x
-                        val stampTop = p.y
-                        val stampWidth = p.rectangle.width
-                        val stampHeight = p.rectangle.height
+                        val stampLeft = p.x + image.left
+                        val stampTop = p.y + image.top
+                        val stampWidth = image.width.getOrElse(p.rectangle.width)
+                        val stampHeight = image.height.getOrElse(p.rectangle.height)
                         val atlasWidth = atlas.width
                         val atlasHeight = atlas.height
 
@@ -73,10 +73,10 @@ object SpriteCanvas {
                             atlasWidth = atlasWidth,
                             atlasHeight = atlasHeight,
                             texture = texture,
-                            textureLeft = (image.left + stampLeft).toDouble / atlasWidth,
-                            textureTop = (image.top + stampTop).toDouble / atlasHeight,
-                            textureWidth = image.width.map(_.toDouble / stampWidth).getOrElse(1d) * (stampWidth.toDouble / atlasWidth),
-                            textureHeight = image.height.map(_.toDouble / stampHeight).getOrElse(1d) * (stampHeight.toDouble / atlasHeight)
+                            textureLeft = stampLeft.toDouble / atlasWidth,
+                            textureTop = stampTop.toDouble / atlasHeight,
+                            textureWidth = stampWidth.toDouble / atlasWidth,
+                            textureHeight = stampHeight.toDouble / atlasHeight
                         )
 
                         image.stamp = stamp
@@ -123,7 +123,7 @@ object SpriteCanvas {
         var image: Image,
         var x: Double,
         var y: Double,
-        var size: Double,
+        var height: Double,
         var angle: Double,
         var depth : Double,
         var blending : Blending,
@@ -154,7 +154,7 @@ object SpriteCanvas {
                 sprite.image = image
                 sprite.x = x
                 sprite.y = y
-                sprite.size = height
+                sprite.height = height
                 sprite.angle = angle
                 sprite.depth = depth
                 sprite.blending = blending
@@ -187,7 +187,7 @@ object SpriteCanvas {
             a.index - b.index // Make it stable
         }
 
-        var firstDraw = true
+        var firstDraw = false
         def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
             gl.clear(clearColor)
 
@@ -218,7 +218,6 @@ object SpriteCanvas {
                 }
             }
 
-            //gl.drawSprites(sprites, i, height, centerX, centerY)
             i = 0
             firstDraw = false
         }
