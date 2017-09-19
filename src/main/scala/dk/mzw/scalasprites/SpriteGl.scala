@@ -121,7 +121,7 @@ class SpriteGl(canvas : HTMLCanvasElement) {
                 val ty = image.stamp.textureTop
                 val tw = image.stamp.textureWidth
                 val th = image.stamp.textureHeight
-                val w = h * image.stamp.stampWidth / image.stamp.stampHeight
+                val w = h * image.stamp.stampWidth.toDouble / image.stamp.stampHeight
                 val x1 = (cx - w/2).toFloat
                 val y1 = (cy - h/2).toFloat
                 val x2 = (x1 + w).toFloat
