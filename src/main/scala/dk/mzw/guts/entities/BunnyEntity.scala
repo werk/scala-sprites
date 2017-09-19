@@ -75,7 +75,7 @@ class BunnyEntity(
             for(_ <- 0 until shotCount) {
                 val p = position.copy()
                 val a = velocity.angle
-                val s = velocity.magnitude * 2
+                val s = Math.max(velocity.magnitude * 2, 100)
                 sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
             }
         }
