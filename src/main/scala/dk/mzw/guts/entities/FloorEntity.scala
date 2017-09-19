@@ -5,11 +5,11 @@ import dk.mzw.guts.system._
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
 
-class WallEntity(
+class FloorEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity with SolidEntity {
+) extends Entity {
 
     val size = Vector2d(20, 20)
 

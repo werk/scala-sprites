@@ -1,18 +1,35 @@
 package dk.mzw.guts.system
 
+import dk.mzw.guts.system.Entity.Message
+import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas.{Display, Loader}
 
 class GameWorld(loader : Loader, entities : Seq[Entity]) {
 
+    val keys = new Keys()
+
+    def consumeMessages(entity : Entity, messages : List[Message]) : Unit = messages match {
+        case Nil =>
+        case message :: rest =>
+            consumeMessages(entity, rest)
+            println(message)
+            entity.onMessage(message)
+    }
+
     def update(delta : Double) : Unit = {
-        entities.foreach { entity =>
-            entity.internalMessageQueue.foreach { message =>
-                entity.onMessage(message)
-            }
-            entity.internalMessageQueue = Nil
+        entities.foreach {
+            case e : ControlledEntity if e.self.clientId == Entity.localClientId =>
+                e.onInput(keys)
+            case _ =>
         }
-        val collision = new Collision(entities)
-        entities.foreach(_.onUpdate(collision, delta))
+        entities.foreach { entity =>
+            if(entity.internalMessageQueue.nonEmpty) {
+                println("Messages for " + entity.self + ":")
+                consumeMessages(entity, entity.internalMessageQueue)
+                entity.internalMessageQueue = Nil
+            }
+        }
+        entities.foreach(_.onUpdate(entities, delta))
     }
 
     private val clearColor = (0.3, 0.3, 0.3, 1.0)

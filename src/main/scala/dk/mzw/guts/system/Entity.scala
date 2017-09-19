@@ -9,16 +9,16 @@ abstract class Entity {
 
     var internalMessageQueue : List[Message] = Nil
 
-    def messageFrom(sender : Self, message : Message) : Unit = {
-        if(sender.clientId == Entity.localClientId) {
-            internalMessageQueue = message :: internalMessageQueue
-            Entity.broadcastMessageTo(self, message)
+    def sendMessageTo(recipient : Entity, message : Message) : Unit = {
+        if(self.clientId == Entity.localClientId) {
+            recipient.internalMessageQueue = message :: internalMessageQueue
+            Entity.broadcastMessageTo(recipient.self, message)
         }
     }
 
     def onMessage(message : Message) : Unit = {}
 
-    def onUpdate(collision : Collision, delta : Double) : Unit = {}
+    def onUpdate(entities : Seq[Entity], delta : Double) : Unit = {}
 
     def onDraw(display : Display) : Unit = {}
 

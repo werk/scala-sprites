@@ -2,8 +2,10 @@ package dk.mzw.pyroman
 
 import org.scalajs.dom.{KeyboardEvent, document}
 
+import scala.collection.mutable
+
 class Keys {
-    var keys = Set[Int]()
+    private val keys : mutable.Set[Int] = mutable.Set()
 
     def apply(keyCode : Int) : Boolean = keys(keyCode)
 
