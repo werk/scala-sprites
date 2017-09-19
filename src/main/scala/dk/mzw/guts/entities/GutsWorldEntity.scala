@@ -17,6 +17,8 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) 
             entities += new WallEntity(thatSelf, position, sprites.wall)
         case SpawnFloor(thatSelf, position) =>
             entities += new FloorEntity(thatSelf, position, sprites.floor)
+        case SpawnFlame(thatSelf, position, angle, speed) =>
+            entities += new FlameEntity(thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage)
     }
 
 }
@@ -26,4 +28,5 @@ object GutsWorldEntity {
     case class SpawnBunny(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnFloor(self : Self, position : Vector2d) extends Message
+    case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
 }

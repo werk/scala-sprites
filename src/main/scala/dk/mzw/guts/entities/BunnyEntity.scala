@@ -1,6 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.BunnyEntity.{SetXVelocity, SetYVelocity}
+import dk.mzw.guts.entities.GutsWorldEntity.SpawnFlame
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
 import dk.mzw.pyroman.Keys
@@ -22,7 +23,11 @@ class BunnyEntity(
     var upArrow = false
     var downArrow = false
 
+    var space = false
+
     override def onInput(world : WorldEntity, keys : Keys) : Unit = {
+        space = keys(Keys.space)
+
         if(keys(Keys.leftArrow)) {
             if (!leftArrow) {
                 leftArrow = true
@@ -65,6 +70,16 @@ class BunnyEntity(
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
+        if(space) {
+            val shotCount = Math.round(delta * 100).toInt
+            for(_ <- 0 until shotCount) {
+                val p = position.copy()
+                val a = velocity.angle
+                val s = velocity.magnitude * 2
+                sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
+            }
+        }
+
         movement.set(velocity)
         movement.multiply(delta)
         move(world.entities, position, size, movement)

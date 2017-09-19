@@ -66,7 +66,8 @@ object Guts extends JSApp {
         }
     }
 
-    private def secondsElapsed() : Double = {
+    def secondsElapsed() : Double = {
         scalajs.js.Dynamic.global.performance.now().asInstanceOf[Double] * 0.001
     }
+
 }

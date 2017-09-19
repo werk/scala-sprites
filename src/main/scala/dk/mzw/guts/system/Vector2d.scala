@@ -5,6 +5,7 @@ case class Vector2d(var x : Double, var y : Double) {
     def set(v : Vector2d) : Unit = { this.x = v.x; this.y = v.y }
     def add(dx : Double, dy : Double) : Unit = { x += dx; y += dy }
     def add(v : Vector2d) : Unit = { x += v.x; y += v.y }
+    def addMultiplied(v : Vector2d, factor : Double) : Unit = { x += v.x * factor; y += v.y * factor }
     def multiply(a : Double) : Unit = { x *= a; y *= a }
     def unit() : Unit = if(x != 0 || y != 0) multiply(1 / magnitude)
     def magnitude : Double = Math.sqrt(x*x + y*y)
