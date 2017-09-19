@@ -1,6 +1,7 @@
 package dk.mzw.guts
 
-import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, WallEntity}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnBunny, SpawnFloor, SpawnWall}
+import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, GutsWorldEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}
@@ -16,9 +17,9 @@ object Guts extends JSApp {
         val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
         val loader = new Loader(canvas)
 
-        val batmanSprite = loader("bunnymark/rabbitv3_batman.png")
-        val wallSprite = loader("assets/wall.png")
-        val floorSprite = loader("assets/floor.png")
+        val sprites = new Sprites(loader)
+
+        val world = new GutsWorldEntity(Self("world", Entity.localClientId), sprites)
 
         val tileMapSize = 20
         val tileMapWidth = 100
@@ -31,7 +32,7 @@ object Guts extends JSApp {
             if !tileMap.contains(x + "," + y)
         } yield {
             val position = Vector2d(x * tileMapSize, y * tileMapSize)
-            new WallEntity(Self("wall-" + x + "," + y, Entity.localClientId), position, wallSprite)
+            SpawnWall(Self("wall-" + x + "," + y, Entity.localClientId), position)
         }
 
         val floors = for {
@@ -40,11 +41,14 @@ object Guts extends JSApp {
             if false // tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
         } yield {
             val position = Vector2d(x * tileMapSize, y * tileMapSize)
-            new FloorEntity(Self("floor-" + x + "," + y, Entity.localClientId), position, floorSprite)
+            SpawnFloor(Self("floor-" + x + "," + y, Entity.localClientId), position)
         }
 
-        val bunny = new BunnyEntity(Self("nananana", Entity.localClientId), Vector2d(0, 0), batmanSprite)
-        val world = new WorldEntity(Self("world", Entity.localClientId), walls ++ floors ++ Seq(bunny))
+        val bunny = SpawnBunny(Self("nananana", Entity.localClientId), Vector2d(0, 0))
+
+        for(m <- walls ++ floors ++ Seq(bunny)) {
+            world.sendMessageTo(world, m)
+        }
 
         loader.complete.foreach { display =>
             println("Loader complete")

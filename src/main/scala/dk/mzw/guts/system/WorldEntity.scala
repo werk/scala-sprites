@@ -1,10 +1,15 @@
 package dk.mzw.guts.system
 
+import dk.mzw.guts.Sprites
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas.Display
 
-class WorldEntity(val self : Self, val entities : Seq[Entity]) extends Entity {
+import scala.collection.mutable
+
+abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity {
+
+    val entities = mutable.ListBuffer[Entity](this)
 
     val keys = new Keys()
 
@@ -46,5 +51,7 @@ class WorldEntity(val self : Self, val entities : Seq[Entity]) extends Entity {
         }
         display.draw(clearColor, 600, centerX, centerY)
     }
+
+    override def onMessage(message : Message) : Unit
 
 }
