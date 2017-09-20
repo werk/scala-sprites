@@ -2,6 +2,7 @@ package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.BunnyEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.entities.GutsWorldEntity.SpawnFlame
+import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
 import dk.mzw.pyroman.Keys
@@ -17,6 +18,7 @@ class BunnyEntity(
     val size = Vector2d(16, 16)
     val velocity = Vector2d(0, 0)
     val movement = Vector2d(0, 0)
+    val collision = Collision()
 
     var leftArrow = false
     var rightArrow = false
@@ -80,8 +82,8 @@ class BunnyEntity(
             }
         }
 
-        movement.setMultiplied(velocity, delta)
-        move(world.solidEntities, position, size, movement)
+        movement.set(velocity)
+        move(world.solidEntities, position, size, movement, delta, collision)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {

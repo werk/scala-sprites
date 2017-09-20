@@ -1,36 +1,41 @@
 package dk.mzw.guts.system
 
+import dk.mzw.guts.system.CollidingEntity.Collision
+
 import scala.collection.mutable
 import scala.scalajs.js
 
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
 
-    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, deltaMovement : Vector2d) : Unit = {
-        CollidingEntity.move(entities, position, size, deltaMovement.x, deltaMovement.y)
+    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
+        CollidingEntity.move(entities, position, size, velocity, factor, collision : Collision)
     }
 
 }
 
 object CollidingEntity {
 
-    case class Movement(position : Vector2d, firstCollision : Option[CollisionData], secondCollision : Option[CollisionData])
-
-    case class CollisionData(point : Vector2d, that : Entity)
+    case class Collision(var hitX : Boolean = false, var hitY : Boolean = false)
 
     val maxMovement = 100
     val moveEpsilon = 0.0001
     val gapEpsilon = 0.00001
 
-    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, dx : Double, dy : Double) : Unit = {
+    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
+
+        val dx = velocity.x * factor
+        val dy = velocity.y * factor
 
         if(Math.abs(dx) > maxMovement || Math.abs(dy) > maxMovement) {
-            move(entities, position, size, dx * 0.5, dy * 0.5)
-            move(entities, position, size, dx * 0.5, dy * 0.5)
+            move(entities, position, size, velocity, factor * 0.5, collision)
+            move(entities, position, size, velocity, factor * 0.5, collision)
             return
         }
 
         val r1 = position
+        var hitX = false
+        var hitY = false
 
         if(dx < -moveEpsilon) {
             val x0 = r1.x - size.x * 0.5
@@ -47,6 +52,7 @@ object CollidingEntity {
                             val b2 = r2.position.y + r2.size.y * 0.5
                             if(a1 <= b2 && b1 <= a2 && x2 >= x1) {
                                 x1 = x2
+                                hitX = true
                             }
                         }
                     case _ =>
@@ -71,6 +77,7 @@ object CollidingEntity {
                             val b2 = r2.position.y + r2.size.y * 0.5
                             if (a1 <= b2 && b1 <= a2 && x2 <= x1) {
                                 x1 = x2
+                                hitX = true
                             }
                         }
                     case _ =>
@@ -96,6 +103,7 @@ object CollidingEntity {
                             val b2 = r2.position.x + r2.size.x * 0.5
                             if (a1 <= b2 && b1 <= a2 && y2 >= y1) {
                                 y1 = y2
+                                hitY = true
                             }
                         }
                     case _ =>
@@ -120,6 +128,7 @@ object CollidingEntity {
                             val b2 = r2.position.x + r2.size.x * 0.5
                             if (a1 <= b2 && b1 <= a2 && y2 <= y1) {
                                 y1 = y2
+                                hitY = true
                             }
                         }
                     case _ =>
@@ -129,6 +138,13 @@ object CollidingEntity {
             val y3 = y1 - size.y * 0.5 - gapEpsilon
             if(y3 > r1.y) r1.y = y3
         }
+
+        // Stop on hitting a wall
+        if(hitX) velocity.x = 0
+        if(hitY) velocity.y = 0
+
+        collision.hitX = hitX
+        collision.hitY = hitY
 
     }
 

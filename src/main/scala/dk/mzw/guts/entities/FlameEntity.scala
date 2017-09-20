@@ -2,6 +2,7 @@ package dk.mzw.guts.entities
 
 import dk.mzw.guts.Guts
 import dk.mzw.guts.entities.GutsWorldEntity.Unspawn
+import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
 import dk.mzw.scalasprites.SpriteCanvas
@@ -20,15 +21,17 @@ class FlameEntity(
     val velocity = Vector2d(Math.cos(velocityAngle), Math.sin(velocityAngle))
     velocity.multiply(speed)
 
-    val size = Vector2d(20, 20)
+    val size = Vector2d(10, 10)
     val lifeTime = 0.4 + Math.random() * 1.2
     val rotationSpeed = Math.random()
     val born = Guts.secondsElapsed()
-    val movement = Vector2d(0, 0)
+
+    val collision = Collision()
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
-        movement.setMultiplied(velocity, delta)
-        move(world.solidEntities, position, size, movement)
+        move(world.solidEntities, position, size, velocity, delta, collision)
+        if(collision.hitX) velocity.y *= 0.2
+        if(collision.hitY) velocity.x *= 0.2
 
         if(Guts.secondsElapsed() - born > lifeTime) {
             sendMessageTo(world, Unspawn(self))
