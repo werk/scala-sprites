@@ -41,7 +41,7 @@ class FlameEntity(
             y = position.y,
             height = (0.2 + parabola(age, lifeTime)) * 600 / 40,
             angle = velocity.angle + age * rotationSpeed,
-            blending = Blending.top // Blending.additive
+            blending = Blending.additive
         )
 
         if (age < 0.9) {
@@ -51,7 +51,7 @@ class FlameEntity(
                 y = position.y,
                 height = (0.1 + parabola(age, lifeTime - 0.3)) * 600 / 40,
                 angle = velocity.angle,
-                blending = Blending.top // Blending.additive
+                blending = Blending.additive
             )
         }
     }

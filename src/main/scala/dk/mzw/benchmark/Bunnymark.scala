@@ -86,7 +86,7 @@ private class Bunnymark(loader : Loader) {
         }
         bunnyCountElement.innerHTML = bunnies.size.toString
     }
-    for(_ <- 0 until 100) {
+    for(_ <- 0 until 200) {
         addBunnies(100)
     }
 
