@@ -80,8 +80,7 @@ class BunnyEntity(
             }
         }
 
-        movement.set(velocity)
-        movement.multiply(delta)
+        movement.setMultiplied(velocity, delta)
         move(world.entities, position, size, movement)
     }
 

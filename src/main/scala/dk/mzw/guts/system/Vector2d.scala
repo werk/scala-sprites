@@ -3,6 +3,7 @@ package dk.mzw.guts.system
 case class Vector2d(var x : Double, var y : Double) {
     def set(x : Double, y : Double) : Unit = { this.x = x; this.y = y }
     def set(v : Vector2d) : Unit = { this.x = v.x; this.y = v.y }
+    def setMultiplied(v : Vector2d, factor : Double) : Unit = { this.x = v.x * factor; this.y = v.y * factor }
     def add(dx : Double, dy : Double) : Unit = { x += dx; y += dy }
     def add(v : Vector2d) : Unit = { x += v.x; y += v.y }
     def addMultiplied(v : Vector2d, factor : Double) : Unit = { x += v.x * factor; y += v.y * factor }

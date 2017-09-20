@@ -178,7 +178,7 @@ object SpriteCanvas {
             val equation = a.blending.equation - b.blending.equation
             if(depth != 0) return equation
 
-            val sourceFactor = a.blending.sourceFactor- b.blending.sourceFactor
+            val sourceFactor = a.blending.sourceFactor - b.blending.sourceFactor
             if(depth != 0) return sourceFactor
 
             val destinationFactor = a.blending.destinationFactor - b.blending.destinationFactor
@@ -193,11 +193,11 @@ object SpriteCanvas {
 
             sprites.sort(compare)
 
-            if(firstDraw) {
+            /*if(firstDraw) {
                 sprites.foreach{s =>
-                    //println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
+                    println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
                 }
-            }
+            }*/
 
             if(sprites.length == 0) return // TODO
 
