@@ -81,7 +81,7 @@ class BunnyEntity(
         }
 
         movement.setMultiplied(velocity, delta)
-        move(world.entities, position, size, movement)
+        move(world.solidEntities, position, size, movement)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {

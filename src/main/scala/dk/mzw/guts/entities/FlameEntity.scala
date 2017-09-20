@@ -14,7 +14,7 @@ class FlameEntity(
     val speed : Double,
     val flameRedImage : Image,
     val flameBrightImage : Image
-) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity {
+) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity {
 
     val velocityAngle = (Math.random() - 0.5) * 0.2 + angle
     val velocity = Vector2d(Math.cos(velocityAngle), Math.sin(velocityAngle))
@@ -24,9 +24,11 @@ class FlameEntity(
     val lifeTime = 0.4 + Math.random() * 1.2
     val rotationSpeed = Math.random()
     val born = Guts.secondsElapsed()
+    val movement = Vector2d(0, 0)
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
-        position.addMultiplied(velocity, delta)
+        movement.setMultiplied(velocity, delta)
+        move(world.solidEntities, position, size, movement)
 
         if(Guts.secondsElapsed() - born > lifeTime) {
             sendMessageTo(world, Unspawn(self))

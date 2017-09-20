@@ -10,6 +10,7 @@ import scala.scalajs.js
 
 abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity {
 
+    val solidEntities = js.Array[SolidEntity]()
     val entities = js.Array[Entity](this)
 
     val keys = new Keys()
@@ -18,7 +19,7 @@ abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity 
         case Nil =>
         case message :: rest =>
             consumeMessages(entity, rest)
-            println(message)
+            //println(message)
             entity.onMessage(message)
     }
 
@@ -37,10 +38,19 @@ abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity 
             entities(i) match {
                 case e : ReceivingEntity =>
                     if (e.internalMessageQueue.nonEmpty) {
-                        println("Messages for " + e.self + ":")
+                        //println("Messages for " + e.self + ":")
                         consumeMessages(e, e.internalMessageQueue)
                         e.internalMessageQueue = Nil
                     }
+                case _ =>
+            }
+            i += 1
+        }
+        solidEntities.length = 0
+        i = 0
+        while(i < entities.length) {
+            entities(i) match {
+                case e : SolidEntity => solidEntities.push(e)
                 case _ =>
             }
             i += 1

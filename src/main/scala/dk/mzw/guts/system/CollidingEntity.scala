@@ -6,7 +6,7 @@ import scala.scalajs.js
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
 
-    def move(entities : js.Array[Entity], position : Vector2d, size : Vector2d, deltaMovement : Vector2d) : Unit = {
+    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, deltaMovement : Vector2d) : Unit = {
         CollidingEntity.move(entities, position, size, deltaMovement.x, deltaMovement.y)
     }
 
@@ -18,12 +18,13 @@ object CollidingEntity {
 
     case class CollisionData(point : Vector2d, that : Entity)
 
+    val maxMovement = 100
     val moveEpsilon = 0.0001
     val gapEpsilon = 0.00001
 
-    def move(entities : js.Array[Entity], position : Vector2d, size : Vector2d, dx : Double, dy : Double) : Unit = {
+    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, dx : Double, dy : Double) : Unit = {
 
-        if(Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        if(Math.abs(dx) > maxMovement || Math.abs(dy) > maxMovement) {
             move(entities, position, size, dx * 0.5, dy * 0.5)
             move(entities, position, size, dx * 0.5, dy * 0.5)
             return
