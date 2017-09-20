@@ -192,12 +192,6 @@ object SpriteCanvas {
             gl.resize(height, centerX, centerY)
             //spriteBuffer.sort(compare)
 
-            if(firstDraw) {
-                spriteBuffer.foreach{s =>
-                    //println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
-                }
-            }
-
             if(spriteBuffer.length == 0) return // TODO
 
             var segmentStart = 0

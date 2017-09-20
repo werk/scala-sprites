@@ -9,16 +9,21 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) 
 
     override def onMessage(message : Message) : Unit = message match {
         case Unspawn(thatSelf) =>
-            val i = entities.indexWhere(_.self == thatSelf)
-            if(i != -1) entities.remove(i)
+            var i = 0
+            while(i < entities.length) {
+                if(entities(i).self == thatSelf) {
+                    entities.splice(i, 1)
+                }
+                i += 1
+            }
         case SpawnBunny(thatSelf, position) =>
-            entities += new BunnyEntity(thatSelf, position, sprites.bunny)
+            entities.push(new BunnyEntity(thatSelf, position, sprites.bunny))
         case SpawnWall(thatSelf, position) =>
-            entities += new WallEntity(thatSelf, position, sprites.wall)
+            entities.push(new WallEntity(thatSelf, position, sprites.wall))
         case SpawnFloor(thatSelf, position) =>
-            entities += new FloorEntity(thatSelf, position, sprites.floor)
+            entities.push(new FloorEntity(thatSelf, position, sprites.floor))
         case SpawnFlame(thatSelf, position, angle, speed) =>
-            entities += new FlameEntity(thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage)
+            entities.push(new FlameEntity(thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
     }
 
 }
