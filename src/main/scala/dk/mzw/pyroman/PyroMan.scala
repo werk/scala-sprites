@@ -26,7 +26,7 @@ class PyroMan(load : Loader, keys: Keys) {
             y = state.player.position.y,
             height = 1,
             angle = state.player.angle - Math.PI * 0.5,
-            blending = Blending.additive
+            blending = Blending.top
         )
 
         state.shots.foreach { shot =>

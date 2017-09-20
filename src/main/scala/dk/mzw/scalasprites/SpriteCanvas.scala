@@ -4,7 +4,6 @@ import org.scalajs.dom
 import org.scalajs.dom.raw.{WebGLRenderingContext => GL}
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
 
-import scala.collection.mutable
 import scala.scalajs.js
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -145,12 +144,12 @@ object SpriteCanvas {
     )
 
     class Display(gl: SpriteGl) {
-        private val sprites = js.Array[Sprite]()
-        private var i = 0
+        private val spriteBuffer = js.Array[Sprite]()
+        private var addedSprites = 0
 
         def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
-            if (i < sprites.length) {
-                val sprite = sprites(i)
+            if (addedSprites < spriteBuffer.length) {
+                val sprite = spriteBuffer(addedSprites)
                 sprite.image = image
                 sprite.x = x
                 sprite.y = y
@@ -158,31 +157,31 @@ object SpriteCanvas {
                 sprite.angle = angle
                 sprite.depth = depth
                 sprite.blending = blending
-                sprite.index = i
+                sprite.index = addedSprites
             }
             else {
-                sprites.push(Sprite(image, x, y, height, angle, depth, blending, i))
+                spriteBuffer.push(Sprite(image, x, y, height, angle, depth, blending, addedSprites))
             }
-            i += 1
+            addedSprites += 1
         }
 
         private def compare(a : Sprite, b : Sprite) : Int = {
             // Preserve element positions after the draw window
-            if(a.index >= i && b.index >= i) return a.index - b.index
-            if(a.index >= i) return 1
-            if(b.index >= i) return -1
+            if(a.index >= addedSprites && b.index >= addedSprites) return a.index - b.index
+            if(a.index >= addedSprites) return 1
+            if(b.index >= addedSprites) return -1
 
             val depth = a.depth - b.depth
             if(depth != 0) return Math.signum(depth).toInt
 
             val equation = a.blending.equation - b.blending.equation
-            if(depth != 0) return equation
+            if(equation != 0) return equation
 
-            val sourceFactor = a.blending.sourceFactor - b.blending.sourceFactor
-            if(depth != 0) return sourceFactor
+            val sourceFactor = a.blending.sourceFactor- b.blending.sourceFactor
+            if(sourceFactor != 0) return sourceFactor
 
             val destinationFactor = a.blending.destinationFactor - b.blending.destinationFactor
-            if(depth != 0) return destinationFactor
+            if(destinationFactor != 0) return destinationFactor
 
             a.index - b.index // Make it stable
         }
@@ -190,35 +189,32 @@ object SpriteCanvas {
         var firstDraw = false
         def draw(clearColor : (Double, Double, Double, Double), height: Double, centerX : Double = 0, centerY : Double = 0) {
             gl.clear(clearColor)
+            gl.resize(height, centerX, centerY)
+            //spriteBuffer.sort(compare)
 
-            sprites.sort(compare)
+            if(spriteBuffer.length == 0) return // TODO
 
-            /*if(firstDraw) {
-                sprites.foreach{s =>
-                    println(s"${s.index} ${s.depth} ${s.image.url} ${s.blending.show}")
+            var segmentStart = 0
+            var segmentLength = 0
+            var segmentSprite = spriteBuffer(segmentStart)
+
+            var i = 0
+            while(i < addedSprites) {
+                val sprite = spriteBuffer(i)
+                if(segmentSprite.blending != sprite.blending) {
+                    gl.drawSprites(spriteBuffer, segmentStart, segmentLength)
+
+                    segmentStart = i
+                    segmentLength = 0
+                    segmentSprite = sprite
                 }
-            }*/
 
-            if(sprites.length == 0) return // TODO
-
-            var lastIndex = 0
-            var lastSprite = sprites(lastIndex)
-
-            for(spriteIndex <- 0 until i) {
-                val sprite = sprites(spriteIndex)
-                if(lastSprite.blending != sprite.blending || spriteIndex == i - 1) {
-                    gl.gl.blendEquation(lastSprite.blending.equation)
-                    gl.gl.blendFunc(lastSprite.blending.sourceFactor, sprite.blending.destinationFactor)
-
-                    //if(firstDraw) println(s"gl.drawSprites(${sprites.length}, $lastIndex, $spriteIndex, ${lastSprite.blending.show}")
-                    gl.drawSprites(sprites, lastIndex, spriteIndex, height, centerX, centerY)
-
-                    lastIndex = spriteIndex
-                    lastSprite = sprite
-                }
+                segmentLength += 1
+                i += 1
             }
+            gl.drawSprites(spriteBuffer, segmentStart, segmentLength)
 
-            i = 0
+            addedSprites = 0
             firstDraw = false
         }
     }

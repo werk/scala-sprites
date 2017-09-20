@@ -70,7 +70,7 @@ private class BlendingTest(loader : Loader) {
 
     def draw(display : Display): Unit = {
         val t = System.currentTimeMillis() * 0.001
-        /*Random.shuffle*/(man :: walls ++ fire ++ clouds).foreach{_.draw(t, display)}
+        Random.shuffle(walls ++ List(man) ++ fire ++ clouds).foreach{_.draw(t, display)}
         display.draw(clearColor, 20)
     }
 
