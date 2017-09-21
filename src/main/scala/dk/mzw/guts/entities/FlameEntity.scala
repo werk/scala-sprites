@@ -17,7 +17,7 @@ class FlameEntity(
     val flameBrightImage : Image
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity {
 
-    val velocityAngle = (Math.random() - 0.5) * 0.2 + angle
+    val velocityAngle = angle + (Math.random() * Math.random() - 0.25) * 0.2
     val velocity = Vector2d(Math.cos(velocityAngle), Math.sin(velocityAngle))
     velocity.multiply(speed)
 
