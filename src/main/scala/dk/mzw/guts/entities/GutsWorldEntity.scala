@@ -4,8 +4,24 @@ import dk.mzw.guts.Sprites
 import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.system.{Vector2d, WorldEntity}
+import dk.mzw.scalasprites.SpriteCanvas
+import dk.mzw.scalasprites.SpriteCanvas.Blending
 
 class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) {
+
+    override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {
+        for(x <- (-10) to 10; y <- (-10) to 10) {
+            display.add(
+                image = sprites.ground,
+                x = 200 * x,
+                y = 200 * y,
+                height = 200,
+                angle = 0,
+                blending = Blending.top
+            )
+        }
+        super.internalDraw(display, centerX, centerY)
+    }
 
     override def onMessage(message : Message) : Unit = message match {
         case Unspawn(thatSelf) =>
