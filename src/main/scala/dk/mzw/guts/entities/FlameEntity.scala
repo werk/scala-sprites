@@ -22,7 +22,7 @@ class FlameEntity(
     velocity.multiply(speed)
 
     val size = Vector2d(10, 10)
-    val lifeTime = 0.4 + Math.random() * 1.2
+    var lifeTime = 0.4 + Math.random() * 1.2
     val rotationSpeed = Math.random()
     val born = Guts.secondsElapsed()
 
@@ -32,6 +32,7 @@ class FlameEntity(
         move(world.solidEntities, position, size, velocity, delta, collision)
         if(collision.hitX) velocity.y *= 0.2
         if(collision.hitY) velocity.x *= 0.2
+        if(collision.hitX || collision.hitY) lifeTime -= (lifeTime - (Guts.secondsElapsed() - born)) * 0.5
 
         if(Guts.secondsElapsed() - born > lifeTime) {
             sendMessageTo(world, Unspawn(self))
@@ -49,12 +50,13 @@ class FlameEntity(
             blending = Blending.additive
         )
 
-        if (age < 0.9) {
+        val brightHeight = (0.1 + parabola(age, lifeTime - 0.3)) * 600 / 40
+        if(brightHeight > 5) {
             display.add(
                 image = flameBrightImage,
                 x = position.x,
                 y = position.y,
-                height = (0.1 + parabola(age, lifeTime - 0.3)) * 600 / 40,
+                height = brightHeight,
                 angle = velocity.angle,
                 blending = Blending.additive
             )
