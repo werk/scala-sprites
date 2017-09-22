@@ -28,8 +28,9 @@ object PackRectangles {
         case (_, first) :: _ =>
             var x = 0
             val row = sorted.toStream.map({case (e, r) =>
-                val result = (e, Chop(x, offsetY, r)) -> x
+                val x1 = x
                 x += r.width
+                val result = (e, Chop(x1, offsetY, r)) -> x
                 result
             }).takeWhile(_._2 <= maxWidth).map(_._1)
             rows(packed ++ row.toList, sorted.drop(row.size), maxWidth, offsetY + first.height)

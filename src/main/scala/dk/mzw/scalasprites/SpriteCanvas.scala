@@ -21,6 +21,7 @@ object SpriteCanvas {
     object Blending {
         val top = Blending(GL.FUNC_ADD, GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
         val additive = Blending(GL.FUNC_ADD, GL.ONE, GL.ONE)
+        val substractive = Blending(GL.FUNC_SUBTRACT, GL.ONE, GL.ONE)
     }
 
     trait Image{
