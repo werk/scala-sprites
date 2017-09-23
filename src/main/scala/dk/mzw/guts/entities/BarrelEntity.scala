@@ -17,8 +17,8 @@ class BarrelEntity(
     override def onHit(world : WorldEntity, that : HittableEntity) = if(that.isInstanceOf[FlameEntity]) {
         for(_ <- 1 to 20) {
             val angle = Math.random() * Math.PI * 2
-            val speed = Math.random() * 10 + 10
-            sendMessageTo(world, SpawnFlame(Self(Math.random().toString, Entity.localClientId), position, angle, speed))
+            val speed = Math.random() * 20 + 20
+            sendMessageTo(world, SpawnFlame(Self(Math.random().toString, Entity.localClientId), position.copy(), angle, speed))
         }
         sendMessageTo(world, Unspawn(self))
     }
