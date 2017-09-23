@@ -1,7 +1,6 @@
 package dk.mzw.guts.system
 
 import dk.mzw.guts.system.Entity._
-import dk.mzw.scalasprites.SpriteCanvas.Display
 
 abstract class Entity {
 
@@ -9,7 +8,7 @@ abstract class Entity {
 
     def sendMessageTo(recipient : ReceivingEntity, message : Message) : Unit = {
         if(self.clientId == Entity.localClientId) {
-            recipient.internalMessageQueue = message :: recipient.internalMessageQueue
+            recipient.internalMessageQueue.push(message)
             Entity.broadcastMessageTo(recipient.self, message)
         }
     }

@@ -13,7 +13,13 @@ class BunnyEntity(
     val self : Self,
     val position : Vector2d,
     val sprite : Image
-) extends Entity with PawnEntity with CollidingEntity with ControlledEntity with ReceivingEntity with UpdateableEntity with DrawableEntity {
+) extends Entity
+    with PawnEntity
+    with CollidingEntity
+    with ControlledEntity
+    with ReceivingEntity
+    with UpdateableEntity
+    with DrawableEntity {
 
     val size = Vector2d(16, 16)
     val velocity = Vector2d(0, 0)

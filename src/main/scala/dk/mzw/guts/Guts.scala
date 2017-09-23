@@ -1,6 +1,6 @@
 package dk.mzw.guts
 
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnBunny, SpawnFloor, SpawnWall}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnBarrel, SpawnBunny, SpawnFloor, SpawnWall}
 import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, GutsWorldEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
@@ -46,7 +46,11 @@ object Guts extends JSApp {
 
         val bunny = SpawnBunny(Self("nananana", Entity.localClientId), Vector2d(0, 0))
 
-        for(m <- walls ++ floors ++ Seq(bunny)) {
+        val barrels = for(_ <- 1 to 20) yield {
+            SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 1000, Math.random() * 1000))
+        }
+
+        for(m <- walls ++ floors ++ barrels ++ Seq(bunny)) {
             world.sendMessageTo(world, m)
         }
 

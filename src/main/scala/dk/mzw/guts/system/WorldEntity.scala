@@ -11,17 +11,10 @@ import scala.scalajs.js
 abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity {
 
     val solidEntities = js.Array[SolidEntity]()
+    val hittableEntities = js.Array[HittableEntity]()
     val entities = js.Array[Entity](this)
 
     val keys = new Keys()
-
-    private def consumeMessages(entity : ReceivingEntity, messages : List[Message]) : Unit = messages match {
-        case Nil =>
-        case message :: rest =>
-            consumeMessages(entity, rest)
-            //println(message)
-            entity.onMessage(message)
-    }
 
     def internalUpdate(delta : Double) : Unit = {
         var i = 0
@@ -37,20 +30,29 @@ abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity 
         while(i < entities.length) {
             entities(i) match {
                 case e : ReceivingEntity =>
-                    if (e.internalMessageQueue.nonEmpty) {
+                    if(e.internalMessageQueue.length != 0) {
                         //println("Messages for " + e.self + ":")
-                        consumeMessages(e, e.internalMessageQueue)
-                        e.internalMessageQueue = Nil
+                        var j = 0
+                        while(j < e.internalMessageQueue.length) {
+                            e.onMessage(e.internalMessageQueue(j))
+                            j += 1
+                        }
+                        e.internalMessageQueue.length = 0
                     }
                 case _ =>
             }
             i += 1
         }
         solidEntities.length = 0
+        hittableEntities.length = 0
         i = 0
         while(i < entities.length) {
             entities(i) match {
                 case e : SolidEntity => solidEntities.push(e)
+                case _ =>
+            }
+            entities(i) match {
+                case e : HittableEntity => hittableEntities.push(e)
                 case _ =>
             }
             i += 1
@@ -59,6 +61,10 @@ abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity 
         while(i < entities.length) {
             entities(i) match {
                 case e : UpdateableEntity => e.onUpdate(this, delta)
+                case _ =>
+            }
+            entities(i) match {
+                case e : HittingEntity => e.internalEmitHits(this, hittableEntities)
                 case _ =>
             }
             i += 1
