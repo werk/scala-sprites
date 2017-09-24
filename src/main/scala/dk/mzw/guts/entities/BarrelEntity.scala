@@ -13,14 +13,16 @@ class BarrelEntity(
 ) extends Entity with DrawableEntity with HittingEntity {
 
     val size = Vector2d(20, 20)
+    var alive = true
 
-    override def onHit(world : WorldEntity, that : HittableEntity) = if(that.isInstanceOf[FlameEntity]) {
+    override def onHit(world : WorldEntity, that : HittableEntity) = if(alive && that.isInstanceOf[FlameEntity]) {
         for(_ <- 1 to 30) {
             val angle = Math.random() * Math.PI * 2
             val speed = Math.pow(Math.random(), 3) * 300 + 1
             sendMessageTo(world, SpawnFlame(Self(Math.random().toString, Entity.localClientId), position.copy(), angle, speed))
         }
         sendMessageTo(world, Unspawn(self))
+        alive = false
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
