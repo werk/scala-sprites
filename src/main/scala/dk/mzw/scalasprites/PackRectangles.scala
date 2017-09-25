@@ -13,7 +13,7 @@ object PackRectangles {
         rectangle: Box
     )
 
-    def apply[E](elements : List[E], getBox : E => Box, maxWidth : Int, emptyBorder : Int = 2) : (Box, List[(E, Chop)]) = {
+    def apply[E](elements : List[E], getBox : E => Box, maxWidth : Int, emptyBorder : Int = 10) : (Box, List[(E, Chop)]) = {
         val rectangles = elements.map(e => e -> withBorder(emptyBorder, getBox(e)))
         val sorted = rectangles.sortBy(-_._2.height)
         val (height, list) = rows(List(), sorted, maxWidth, 0)

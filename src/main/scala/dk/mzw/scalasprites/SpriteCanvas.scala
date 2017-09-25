@@ -30,6 +30,7 @@ object SpriteCanvas {
         val left: Int
         val width: Option[Int]
         val height: Option[Int]
+        val repeat : Boolean
         def stamp : StampTexture
 
         def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image
@@ -43,44 +44,43 @@ object SpriteCanvas {
         private var images = List[MutableImage]()
         private var completed = false
 
-        def apply(imageIrl: String): Image = {
-            val image = MutableImage(imageIrl, 0, 0, None, None)
+        def apply(imageIrl: String, repeat : Boolean = false): Image = {
+            val image = MutableImage(imageIrl, 0, 0, None, None, repeat)
             images ::= image
             image
         }
 
         def complete: Future[Display] = {
-            PackImages(images.map(_.url).distinct).map { case (atlas, mapping) =>
+            // TODO remove duplicates
+            PackImages(images).map { case (atlas, mapping) =>
                 dom.document.body.appendChild(atlas) // TODO remove this
                 completed = true
                 val texture = gl.bindTexture(atlas)
 
-                images.groupBy(_.url).foreach{case (url, group) =>
-                    val p = mapping(url)
-                    group.foreach{image =>
-                        val stampLeft = p.x + image.left
-                        val stampTop = p.y + image.top
-                        val stampWidth = image.width.getOrElse(p.rectangle.width)
-                        val stampHeight = image.height.getOrElse(p.rectangle.height)
-                        val atlasWidth = atlas.width
-                        val atlasHeight = atlas.height
+                mapping.foreach{case (i, p) =>
+                    val image = i.asInstanceOf[MutableImage]
+                    val stampLeft = p.x + image.left
+                    val stampTop = p.y + image.top
+                    val stampWidth = image.width.getOrElse(p.rectangle.width)
+                    val stampHeight = image.height.getOrElse(p.rectangle.height)
+                    val atlasWidth = atlas.width
+                    val atlasHeight = atlas.height
 
-                        val stamp = StampTexture(
-                            stampLeft = stampLeft,
-                            stampTop = stampTop,
-                            stampWidth = stampWidth,
-                            stampHeight = stampHeight,
-                            atlasWidth = atlasWidth,
-                            atlasHeight = atlasHeight,
-                            texture = texture,
-                            textureLeft = stampLeft.toDouble / atlasWidth,
-                            textureTop = stampTop.toDouble / atlasHeight,
-                            textureWidth = stampWidth.toDouble / atlasWidth,
-                            textureHeight = stampHeight.toDouble / atlasHeight
-                        )
+                    val stamp = StampTexture(
+                        stampLeft = stampLeft,
+                        stampTop = stampTop,
+                        stampWidth = stampWidth,
+                        stampHeight = stampHeight,
+                        atlasWidth = atlasWidth,
+                        atlasHeight = atlasHeight,
+                        texture = texture,
+                        textureLeft = stampLeft.toDouble / atlasWidth,
+                        textureTop = stampTop.toDouble / atlasHeight,
+                        textureWidth = stampWidth.toDouble / atlasWidth,
+                        textureHeight = stampHeight.toDouble / atlasHeight
+                    )
 
-                        image.stamp = stamp
-                    }
+                    image.stamp = stamp
                 }
 
                 new Display(gl)
@@ -93,6 +93,7 @@ object SpriteCanvas {
             left: Int,
             width: Option[Int],
             height: Option[Int],
+            repeat : Boolean,
             var stamp : StampTexture = null
         ) extends Image {
 
