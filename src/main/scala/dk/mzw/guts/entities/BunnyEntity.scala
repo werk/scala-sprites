@@ -23,7 +23,6 @@ class BunnyEntity(
 
     val size = Vector2d(16, 16)
     val velocity = Vector2d(0, 0)
-    val movement = Vector2d(0, 0)
     val collision = Collision()
 
     var leftArrow = false
@@ -88,8 +87,8 @@ class BunnyEntity(
             }
         }
 
-        movement.set(velocity)
-        move(world, position, size, movement, delta, collision)
+        temporary.set(velocity)
+        move(world, position, size, temporary, delta, collision)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {

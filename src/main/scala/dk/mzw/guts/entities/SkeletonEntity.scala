@@ -19,7 +19,6 @@ class SkeletonEntity(
     velocity.setAngle(Math.random() * Math.PI * 2, 50)
     val delayedVelocity = Vector2d(0, 0)
     delayedVelocity.set(velocity)
-    val temporary = Vector2d(0, 0)
 
     val size = Vector2d(15, 15)
 

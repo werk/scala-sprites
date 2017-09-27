@@ -6,4 +6,5 @@ import dk.mzw.guts.system.Entity._
 trait PawnEntity extends Entity {
     val position : Vector2d
     val size : Vector2d
+    val temporary = Vector2d(0, 0)
 }
