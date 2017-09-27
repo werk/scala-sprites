@@ -8,6 +8,8 @@ import CollidingEntity._
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
 
+    def canCollideWith(entity : Entity) : Boolean = true
+
     def move(world : WorldEntity, position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
 
         val dx = velocity.x * factor
@@ -32,7 +34,7 @@ trait CollidingEntity extends PawnEntity {
             var i = 0
             while(i < entities.length) {
                 entities(i) match {
-                    case r2 : SolidEntity if r2 != r1 =>
+                    case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x + r2.size.x * 0.5
                         if(x2 <= x0) {
                             val b1 = r2.position.y - r2.size.y * 0.5
@@ -57,7 +59,7 @@ trait CollidingEntity extends PawnEntity {
             var i = 0
             while(i < entities.length) {
                 entities(i) match {
-                    case r2 : SolidEntity if r2 != r1 =>
+                    case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x - r2.size.x * 0.5
                         if (x2 >= x0) {
                             val b1 = r2.position.y - r2.size.y * 0.5
@@ -83,7 +85,7 @@ trait CollidingEntity extends PawnEntity {
             var i = 0
             while(i < entities.length) {
                 entities(i) match {
-                    case r2 : SolidEntity if r2 != r1 =>
+                    case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y + r2.size.y * 0.5
                         if (y2 <= y0) {
                             val b1 = r2.position.x - r2.size.x * 0.5
@@ -108,7 +110,7 @@ trait CollidingEntity extends PawnEntity {
             var i = 0
             while(i < entities.length) {
                 entities(i) match {
-                    case r2 : SolidEntity if r2 != r1 =>
+                    case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y - r2.size.y * 0.5
                         if (y2 >= y0) {
                             val b1 = r2.position.x - r2.size.x * 0.5
