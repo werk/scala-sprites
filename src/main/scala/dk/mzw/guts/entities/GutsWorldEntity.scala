@@ -34,6 +34,8 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) 
             }
         case SpawnBunny(thatSelf, position) =>
             entities.push(new BunnyEntity(thatSelf, position, sprites.bunny))
+        case SpawnSkeleton(thatSelf, position) =>
+            entities.push(new SkeletonEntity(thatSelf, position, sprites.skeleton))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(thatSelf, position, sprites.wall))
         case SpawnFloor(thatSelf, position) =>
@@ -49,6 +51,7 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) 
 object GutsWorldEntity {
     case class Unspawn(self : Self) extends Message
     case class SpawnBunny(self : Self, position : Vector2d) extends Message
+    case class SpawnSkeleton(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnFloor(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
