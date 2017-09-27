@@ -89,7 +89,7 @@ class BunnyEntity(
         }
 
         movement.set(velocity)
-        move(world.solidEntities, position, size, movement, delta, collision)
+        move(world, position, size, movement, delta, collision)
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {

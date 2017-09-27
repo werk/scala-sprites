@@ -29,7 +29,7 @@ class FlameEntity(
     val collision = Collision()
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
-        move(world.solidEntities, position, size, velocity, delta, collision)
+        move(world, position, size, velocity, delta, collision)
         if(collision.hitX) velocity.y *= 0.2
         if(collision.hitY) velocity.x *= 0.2
         if(collision.hitX || collision.hitY) lifeTime -= (lifeTime - (Guts.secondsElapsed() - born)) * 0.5

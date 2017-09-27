@@ -2,40 +2,27 @@ package dk.mzw.guts.system
 
 import dk.mzw.guts.system.CollidingEntity.Collision
 
-import scala.collection.mutable
 import scala.scalajs.js
+import CollidingEntity._
 
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
 
-    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
-        CollidingEntity.move(entities, position, size, velocity, factor, collision : Collision)
-    }
-
-}
-
-object CollidingEntity {
-
-    case class Collision(var hitX : Boolean = false, var hitY : Boolean = false)
-
-    val maxMovement = 100
-    val moveEpsilon = 0.0001
-    val gapEpsilon = 0.00001
-
-    def move(entities : js.Array[SolidEntity], position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
+    def move(world : WorldEntity, position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
 
         val dx = velocity.x * factor
         val dy = velocity.y * factor
 
         if(Math.abs(dx) > maxMovement || Math.abs(dy) > maxMovement) {
-            move(entities, position, size, velocity, factor * 0.5, collision)
-            move(entities, position, size, velocity, factor * 0.5, collision)
+            move(world, position, size, velocity, factor * 0.5, collision)
+            move(world, position, size, velocity, factor * 0.5, collision)
             return
         }
 
+        val entities = world.solidEntities
         val r1 = position
-        var hitX = false
-        var hitY = false
+        var hitX : Entity = null
+        var hitY : Entity = null
 
         if(dx < -moveEpsilon) {
             val x0 = r1.x - size.x * 0.5
@@ -52,7 +39,7 @@ object CollidingEntity {
                             val b2 = r2.position.y + r2.size.y * 0.5
                             if(a1 <= b2 && b1 <= a2 && x2 >= x1) {
                                 x1 = x2
-                                hitX = true
+                                hitX = r2
                             }
                         }
                     case _ =>
@@ -77,7 +64,7 @@ object CollidingEntity {
                             val b2 = r2.position.y + r2.size.y * 0.5
                             if (a1 <= b2 && b1 <= a2 && x2 <= x1) {
                                 x1 = x2
-                                hitX = true
+                                hitX = r2
                             }
                         }
                     case _ =>
@@ -103,7 +90,7 @@ object CollidingEntity {
                             val b2 = r2.position.x + r2.size.x * 0.5
                             if (a1 <= b2 && b1 <= a2 && y2 >= y1) {
                                 y1 = y2
-                                hitY = true
+                                hitY = r2
                             }
                         }
                     case _ =>
@@ -128,7 +115,7 @@ object CollidingEntity {
                             val b2 = r2.position.x + r2.size.x * 0.5
                             if (a1 <= b2 && b1 <= a2 && y2 <= y1) {
                                 y1 = y2
-                                hitY = true
+                                hitY = r2
                             }
                         }
                     case _ =>
@@ -140,12 +127,48 @@ object CollidingEntity {
         }
 
         // Stop on hitting a wall
-        if(hitX) velocity.x = 0
-        if(hitY) velocity.y = 0
+        if(hitX != null) velocity.x = 0
+        if(hitY != null) velocity.y = 0
 
-        collision.hitX = hitX
-        collision.hitY = hitY
+        collision.hitX = hitX != null
+        collision.hitY = hitY != null
+
+        this match {
+            case e1 : HittingEntity =>
+                if(hitX != null) hitX match {
+                    case e2 : HittableEntity => e1.onHit(world, e2)
+                    case _ =>
+                }
+                if(hitY != null) hitY match {
+                    case e2 : HittableEntity => e1.onHit(world, e2)
+                    case _ =>
+                }
+            case _ =>
+        }
+
+        this match {
+            case e1 : HittableEntity =>
+                if(hitX != null) hitX match {
+                    case e2 : HittingEntity => e2.onHit(world, e1)
+                    case _ =>
+                }
+                if(hitY != null) hitY match {
+                    case e2 : HittingEntity => e2.onHit(world, e1)
+                    case _ =>
+                }
+            case _ =>
+        }
 
     }
+
+}
+
+object CollidingEntity {
+
+    case class Collision(var hitX : Boolean = false, var hitY : Boolean = false)
+
+    val maxMovement = 100
+    val moveEpsilon = 0.0001
+    val gapEpsilon = 0.00001
 
 }
