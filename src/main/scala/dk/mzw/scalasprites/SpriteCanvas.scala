@@ -10,6 +10,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SpriteCanvas {
 
+    trait BoundingBox {
+        def x1 : Double
+        def y1 : Double
+        def x2 : Double
+        def y2 : Double
+    }
+
     case class Blending(
         equation : Int,
         sourceFactor : Int,
@@ -148,6 +155,8 @@ object SpriteCanvas {
     class Display(gl: SpriteGl) {
         private val spriteBuffer = js.Array[Sprite]()
         private var addedSprites = 0
+
+        val boundingBox = gl.boundingBox
 
         def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
             if (addedSprites < spriteBuffer.length) {

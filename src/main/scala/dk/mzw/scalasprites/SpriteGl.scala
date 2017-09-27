@@ -1,6 +1,6 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.scalasprites.SpriteCanvas.Sprite
+import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Sprite}
 import org.scalajs.dom
 import org.scalajs.dom.raw.WebGLRenderingContext._
 import org.scalajs.dom.raw._
@@ -11,6 +11,15 @@ import scala.scalajs.js.typedarray.Float32Array
 class SpriteGl(canvas : HTMLCanvasElement) {
 
     val gl = SpriteGl.getContexts(canvas)
+    private val mutableBoundingBox = MutableBoundingBox(-1, -1, 1, 1)
+    val boundingBox : BoundingBox = mutableBoundingBox
+
+    private case class MutableBoundingBox(
+        var x1 : Double,
+        var y1 : Double,
+        var x2 : Double,
+        var y2 : Double
+    ) extends BoundingBox
 
     private var samplerUniformLocation : WebGLUniformLocation = _
     private var scaleUniformLocation : WebGLUniformLocation = _
@@ -85,15 +94,19 @@ class SpriteGl(canvas : HTMLCanvasElement) {
         }
     }
 
-    def resize(height : Double, centerX : Double, centerY : Double): Unit = {
+    def resize(height : Double, centerX : Double, centerY : Double) : Unit = {
         SpriteGl.resize(gl)
         val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
         val scaleY = 2 / height
         val scaleX = scaleY * aspectRatio
+        val width = height / aspectRatio
+        mutableBoundingBox.x1 = centerX - width * 0.5
+        mutableBoundingBox.x2 = centerX + width * 0.5
+        mutableBoundingBox.y1 = centerY - height * 0.5
+        mutableBoundingBox.y2 = centerY + height * 0.5
 
         gl.uniform2fv(scaleUniformLocation, js.Array[Double](scaleX, scaleY))
         gl.uniform2fv(offsetUniformLocation, js.Array[Double](-centerX * scaleX, -centerY * scaleY))
-
     }
 
     def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) {
