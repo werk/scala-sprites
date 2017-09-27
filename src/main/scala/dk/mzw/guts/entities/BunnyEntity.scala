@@ -21,7 +21,7 @@ class BunnyEntity(
     with UpdateableEntity
     with DrawableEntity {
 
-    val speed = 6
+    val speed = 4
     val size = Vector2d(0.8, 0.8)
     val velocity = Vector2d(0, 0)
     val collision = Collision()
@@ -83,7 +83,7 @@ class BunnyEntity(
             for(_ <- 0 until shotCount) {
                 val p = position.copy()
                 val a = velocity.angle
-                val s = Math.max(velocity.magnitude * 2, 10)
+                val s = Math.max(velocity.magnitude * 2, speed * 2.5)
                 sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
             }
         }

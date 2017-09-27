@@ -7,7 +7,7 @@ import dk.mzw.guts.system.{Vector2d, WorldEntity}
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Blending
 
-class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 30) {
+class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 20) {
 
     override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {
         for(x <- (-10) to 10; y <- (-10) to 10) {
