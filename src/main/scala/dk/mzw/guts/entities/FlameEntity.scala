@@ -45,12 +45,12 @@ class FlameEntity(
             image = flameRedImage,
             x = position.x,
             y = position.y,
-            height = 0.2 + parabola(age, lifeTime),
+            height = 0.1 + parabola(age, lifeTime),
             angle = velocity.angle + age * rotationSpeed,
             blending = Blending.additive
         )
 
-        val brightHeight = 0.1 + parabola(age, lifeTime - 0.3)
+        val brightHeight = 0.05 + parabola(age, lifeTime - 0.3)
         if(brightHeight > 0.25) {
             display.add(
                 image = flameBrightImage,

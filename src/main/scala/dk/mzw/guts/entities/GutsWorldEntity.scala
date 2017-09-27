@@ -10,12 +10,13 @@ import dk.mzw.scalasprites.SpriteCanvas.Blending
 class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 20) {
 
     override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {
-        for(x <- (-10) to 10; y <- (-10) to 10) {
+        val size = 6.3
+        for(x <- (-4) to 4; y <- (-4) to 4) {
             display.add(
                 image = sprites.ground,
-                x = 10 * x,
-                y = 10 * y,
-                height = 10,
+                x = centerX + size * x - centerX % size,
+                y = centerY + size * y - centerY % size,
+                height = size,
                 angle = 0,
                 blending = Blending.top
             )
