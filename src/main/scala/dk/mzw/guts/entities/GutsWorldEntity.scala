@@ -7,15 +7,15 @@ import dk.mzw.guts.system.{Vector2d, WorldEntity}
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Blending
 
-class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) {
+class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 30) {
 
     override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {
         for(x <- (-10) to 10; y <- (-10) to 10) {
             display.add(
                 image = sprites.ground,
-                x = 200 * x,
-                y = 200 * y,
-                height = 200,
+                x = 10 * x,
+                y = 10 * y,
+                height = 10,
                 angle = 0,
                 blending = Blending.top
             )
@@ -38,8 +38,6 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self) 
             entities.push(new SkeletonEntity(thatSelf, position, sprites.skeleton))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(thatSelf, position, sprites.wall))
-        case SpawnFloor(thatSelf, position) =>
-            entities.push(new FloorEntity(thatSelf, position, sprites.floor))
         case SpawnBarrel(thatSelf, position) =>
             entities.push(new BarrelEntity(thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
@@ -53,7 +51,6 @@ object GutsWorldEntity {
     case class SpawnBunny(self : Self, position : Vector2d) extends Message
     case class SpawnSkeleton(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
-    case class SpawnFloor(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
 }

@@ -1,7 +1,7 @@
 package dk.mzw.guts
 
 import dk.mzw.guts.entities.GutsWorldEntity._
-import dk.mzw.guts.entities.{BunnyEntity, FloorEntity, GutsWorldEntity, WallEntity}
+import dk.mzw.guts.entities.{BunnyEntity, GutsWorldEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}
@@ -21,7 +21,7 @@ object Guts extends JSApp {
 
         val world = new GutsWorldEntity(Self("world", Entity.localClientId), sprites)
 
-        val tileMapSize = 20
+        val tileMapSize = 1
         val tileMapWidth = 100
         val tileMapHeight = 100
         val tileMap = TownGenerator.generate(tileMapWidth, tileMapHeight)
@@ -35,24 +35,24 @@ object Guts extends JSApp {
             SpawnWall(Self("wall-" + x + "," + y, Entity.localClientId), position)
         }
 
-        val floors = for {
+        /*val floors = for {
             x <- 0 until tileMapWidth
             y <- 0 until tileMapHeight
             if false // tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
         } yield {
             val position = Vector2d(x * tileMapSize, y * tileMapSize)
             SpawnFloor(Self("floor-" + x + "," + y, Entity.localClientId), position)
-        }
+        }*/
 
         val bunny = SpawnBunny(Self("nananana", Entity.localClientId), Vector2d(0, 0))
 
         val barrels = for(_ <- 1 to 20) yield {
-            SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 1000, Math.random() * 1000))
+            SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 100, Math.random() * 100))
         }
 
-        val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(100, 100))
+        val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(25, 25))
 
-        for(m <- walls ++ floors ++ barrels ++ Seq(bunny, skeleton)) {
+        for(m <- walls ++ barrels ++ Seq(bunny, skeleton)) {
             world.sendMessageTo(world, m)
         }
 

@@ -8,7 +8,7 @@ import dk.mzw.scalasprites.SpriteCanvas.Display
 import scala.collection.mutable
 import scala.scalajs.js
 
-abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity {
+abstract class WorldEntity(val self : Self, val screenHeight : Double) extends Entity with ReceivingEntity {
 
     val solidEntities = js.Array[SolidEntity]()
     val hittableEntities = js.Array[HittableEntity]()
@@ -82,7 +82,7 @@ abstract class WorldEntity(val self : Self) extends Entity with ReceivingEntity 
             }
             i += 1
         }
-        display.draw(clearColor, 600, centerX, centerY)
+        display.draw(clearColor, screenHeight, centerX, centerY)
     }
 
     override def onMessage(message : Message) : Unit

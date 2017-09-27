@@ -11,9 +11,9 @@ class WallEntity(
     val sprite : Image
 ) extends Entity with SolidEntity with DrawableEntity {
 
-    val size = Vector2d(20, 20)
+    val size = Vector2d(1, 1)
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
-        display.add(sprite, position.x, position.y, 20, 0)
+        display.add(sprite, position.x, position.y, 1, 0)
     }
 }

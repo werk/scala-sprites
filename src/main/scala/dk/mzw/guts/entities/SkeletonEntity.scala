@@ -16,11 +16,11 @@ class SkeletonEntity(
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with ReceivingEntity {
 
     val velocity = Vector2d(0, 0)
-    velocity.setAngle(Math.random() * Math.PI * 2, 50)
+    velocity.setAngle(Math.random() * Math.PI * 2, 4)
     val delayedVelocity = Vector2d(0, 0)
     delayedVelocity.set(velocity)
 
-    val size = Vector2d(15, 15)
+    val size = Vector2d(0.8, 0.8)
 
     val health = 100
 
@@ -40,7 +40,7 @@ class SkeletonEntity(
         if(collision.hitY) velocity.x *= 0.2
         if(collision.hitX || collision.hitY || Math.random() < 0.001) {
             val angle = Math.random() * Math.PI * 2
-            temporary.setAngle(angle, 50)
+            temporary.setAngle(angle, 4)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
         delayedVelocity.delay(velocity, 5, 5, delta)
@@ -53,10 +53,10 @@ class SkeletonEntity(
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
         val age = Guts.secondsElapsed() - born
         display.add(
-            image = skeletonImage(age),
+            image = skeletonImage(age * 1.5),
             x = position.x,
             y = position.y,
-            height = 20,
+            height = 1,
             angle = delayedVelocity.angle - Math.PI * 0.5,
             blending = Blending.top
         )

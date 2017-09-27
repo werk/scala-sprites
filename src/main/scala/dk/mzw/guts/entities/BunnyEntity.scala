@@ -21,7 +21,8 @@ class BunnyEntity(
     with UpdateableEntity
     with DrawableEntity {
 
-    val size = Vector2d(16, 16)
+    val speed = 6
+    val size = Vector2d(0.8, 0.8)
     val velocity = Vector2d(0, 0)
     val collision = Collision()
 
@@ -39,13 +40,13 @@ class BunnyEntity(
             if (!leftArrow) {
                 leftArrow = true
                 rightArrow = false
-                sendMessageTo(this, SetXVelocity(position.x, -100))
+                sendMessageTo(this, SetXVelocity(position.x, -speed))
             }
         } else if(keys(Keys.rightArrow)) {
             if(!rightArrow) {
                 rightArrow = true
                 leftArrow = false
-                sendMessageTo(this, SetXVelocity(position.x, 100))
+                sendMessageTo(this, SetXVelocity(position.x, speed))
             }
         } else if(leftArrow || rightArrow) {
             leftArrow = false
@@ -56,13 +57,13 @@ class BunnyEntity(
             if(!downArrow) {
                 downArrow = true
                 upArrow = false
-                sendMessageTo(this, SetYVelocity(position.y, -100))
+                sendMessageTo(this, SetYVelocity(position.y, -speed))
             }
         } else if(keys(Keys.upArrow)) {
             if(!upArrow) {
                 upArrow = true
                 downArrow = false
-                sendMessageTo(this, SetYVelocity(position.y, 100))
+                sendMessageTo(this, SetYVelocity(position.y, speed))
             }
         } else if(downArrow || upArrow) {
             upArrow = false
@@ -82,7 +83,7 @@ class BunnyEntity(
             for(_ <- 0 until shotCount) {
                 val p = position.copy()
                 val a = velocity.angle
-                val s = Math.max(velocity.magnitude * 2, 100)
+                val s = Math.max(velocity.magnitude * 2, 10)
                 sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
             }
         }
@@ -92,7 +93,7 @@ class BunnyEntity(
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
-        display.add(sprite, position.x, position.y, 16, 0)
+        display.add(sprite, position.x, position.y, 0.8, 0)
     }
 }
 

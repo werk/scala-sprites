@@ -21,7 +21,7 @@ class FlameEntity(
     val velocity = Vector2d(Math.cos(velocityAngle), Math.sin(velocityAngle))
     velocity.multiply(speed)
 
-    val size = Vector2d(10, 10)
+    val size = Vector2d(0.5, 0.5)
     var lifeTime = 0.4 + Math.random() * 1.2
     val rotationSpeed = Math.random()
     val born = Guts.secondsElapsed()
@@ -45,13 +45,13 @@ class FlameEntity(
             image = flameRedImage,
             x = position.x,
             y = position.y,
-            height = (0.2 + parabola(age, lifeTime)) * 600 / 40,
+            height = 0.2 + parabola(age, lifeTime),
             angle = velocity.angle + age * rotationSpeed,
             blending = Blending.additive
         )
 
-        val brightHeight = (0.1 + parabola(age, lifeTime - 0.3)) * 600 / 40
-        if(brightHeight > 5) {
+        val brightHeight = 0.1 + parabola(age, lifeTime - 0.3)
+        if(brightHeight > 0.25) {
             display.add(
                 image = flameBrightImage,
                 x = position.x,
