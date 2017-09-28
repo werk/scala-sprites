@@ -25,6 +25,7 @@ class SkeletonEntity(
     val health = 100
 
     val born = Guts.secondsElapsed()
+    var lastCollision = born
 
     val collision = Collision()
 
@@ -38,8 +39,15 @@ class SkeletonEntity(
         move(world, position, size, velocity, delta, collision)
         if(collision.hitX) velocity.y *= 0.2
         if(collision.hitY) velocity.x *= 0.2
-        if(collision.hitX || collision.hitY || Math.random() < 0.001) {
+        val distracted = Guts.secondsElapsed() - lastCollision < 3
+        if(collision.hitX || collision.hitY) {
+            if(!distracted) lastCollision = Guts.secondsElapsed()
             val angle = Math.random() * Math.PI * 2
+            temporary.setAngle(angle, 4)
+            sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
+        }
+        if(!distracted && Math.random() < 0.1) {
+            val angle = world.entities.collectFirst { case e : BunnyEntity => position.angleTo(e.position) }.get
             temporary.setAngle(angle, 4)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
