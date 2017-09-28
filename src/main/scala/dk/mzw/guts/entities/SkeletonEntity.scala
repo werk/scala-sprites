@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.{Guts, Sprites}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnSkeleton, Unspawn}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorpse, SpawnSkeleton, Unspawn}
 import dk.mzw.guts.entities.MortalEntity.Damage
 import dk.mzw.guts.entities.SkeletonEntity.SetVelocity
 import dk.mzw.guts.system.CollidingEntity.Collision
@@ -56,10 +56,6 @@ class SkeletonEntity(
             }
         }
         delayedVelocity.delay(velocity, 5, 5, delta)
-
-        if(health < 0) {
-            sendMessageTo(world, Unspawn(self))
-        }
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
@@ -77,14 +73,14 @@ class SkeletonEntity(
     override def onHit(world : WorldEntity, that : HittableEntity) : Unit = that match {
         case _ : FlameEntity => sendMessageTo(this, Damage(0.1))
         case _ : PelletEntity => sendMessageTo(this, Damage(1))
-        case e : PlayerEntity => sendMessageTo(e, Damage(5))
+        case e : PlayerEntity => sendMessageTo(e, Damage(1))
         case _ =>
     }
 
     override def onDie() = {
         sendMessageTo(world, Unspawn(self))
         val age = Guts.secondsElapsed() - born
-        sendMessageTo(world, SpawnCorps(Self(), position, velocity.angle, 1, skeletonImage(age * 1.5)))
+        sendMessageTo(world, SpawnCorpse(Self(), position, velocity.angle, 1, skeletonImage(age * 1.5)))
     }
 
 }

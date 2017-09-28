@@ -6,7 +6,7 @@ import dk.mzw.guts.system._
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
 
-class CorpsEntity(
+class CorpseEntity(
     val world : WorldEntity,
     val self : Self,
     val position : Vector2d,
