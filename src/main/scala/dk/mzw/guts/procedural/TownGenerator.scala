@@ -27,8 +27,8 @@ object TownGenerator {
             for(_ <- 0 until 3000) {
                 val x1 = (Math.random() * width * 0.5).toInt * 2 + 1
                 val y1 = (Math.random() * height * 0.5).toInt * 2 + 1
-                val w = (Math.pow(Math.random(), 2) * 20 + 5).toInt * 2 + 1
-                val h = (Math.pow(Math.random(), 2) * 20 + 5).toInt * 2 + 1
+                val w = (Math.pow(Math.random(), 2) * 10 + 5).toInt * 2 + 1
+                val h = (Math.pow(Math.random(), 2) * 10 + 5).toInt * 2 + 1
                 if(!occupied(x1, y1, w, h)) {
                     rooms += Room(x = x1, y = y1, width = w, height = h)
                     for(x <- x1 until (x1 + w)) {
@@ -77,7 +77,7 @@ object TownGenerator {
             }
         }
         def placeDoors() {
-            for(room <- rooms) {
+            for(room <- rooms; _ <- 1 to 4) {
                 val o = Math.random()
                 if(o < 0.25) placeDoor(room.x - 1, (room.y + Math.random() * room.height).toInt)
                 else if(o < 0.50) placeDoor(room.x + room.width, (room.y + Math.random() * room.height).toInt)

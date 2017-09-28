@@ -16,7 +16,7 @@ class BarrelEntity(
     val size = Vector2d(1, 1)
     var alive = true
 
-    override def onHit(world : WorldEntity, that : HittableEntity) = if(alive && that.isInstanceOf[FlameEntity]) {
+    override def onHit(world : WorldEntity, that : HittableEntity) = if(alive && (that.isInstanceOf[FlameEntity] || that.isInstanceOf[PelletEntity])) {
         for(_ <- 1 to 30) {
             val angle = Math.random() * Math.PI * 2
             val speed = Math.pow(Math.random(), 3) * 20 + 1

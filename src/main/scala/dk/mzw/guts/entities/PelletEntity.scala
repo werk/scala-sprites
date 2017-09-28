@@ -29,7 +29,7 @@ class PelletEntity(
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
         move(world, position, size, velocity, delta, collision)
 
-        if(Guts.secondsElapsed() - born > lifeTime) {
+        if(Guts.secondsElapsed() - born > lifeTime || collision.hitX || collision.hitY) {
             sendMessageTo(world, Unspawn(self))
         }
     }
