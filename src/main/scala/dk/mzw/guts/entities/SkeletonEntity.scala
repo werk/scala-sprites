@@ -1,7 +1,8 @@
 package dk.mzw.guts.entities
 
-import dk.mzw.guts.Guts
+import dk.mzw.guts.{Guts, Sprites}
 import dk.mzw.guts.entities.GutsWorldEntity.Unspawn
+import dk.mzw.guts.entities.MortalEntity.Damage
 import dk.mzw.guts.entities.SkeletonEntity.SetVelocity
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.{Message, Self}
@@ -10,11 +11,13 @@ import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 
 class SkeletonEntity(
+    val world : WorldEntity,
     val self : Self,
     val position : Vector2d,
     val speed : Double,
+    var health : Double,
     val skeletonImage : Double => Image
-) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with SolidEntity with ReceivingEntity {
+) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with HittingEntity with SolidEntity with ReceivingEntity with MortalEntity {
 
     val velocity = Vector2d(0, 0)
     velocity.setAngle(Math.random() * Math.PI * 2, speed)
@@ -22,8 +25,6 @@ class SkeletonEntity(
     delayedVelocity.set(velocity)
 
     val size = Vector2d(0.8, 0.8)
-
-    val health = 100
 
     val born = Guts.secondsElapsed()
     var lastCollision = born
@@ -34,6 +35,7 @@ class SkeletonEntity(
         case SetVelocity(x, y, vx, vy) =>
             position.set(x, y)
             velocity.set(vx, vy)
+        case m => super.onMessage(m)
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
@@ -69,6 +71,15 @@ class SkeletonEntity(
             angle = delayedVelocity.angle - Math.PI * 0.5,
             blending = Blending.top
         )
+    }
+
+    override def onHit(world: WorldEntity, that: HittableEntity): Unit = that match {
+        case e : FlameEntity => sendMessageTo(this, Damage(5))
+        case _ =>
+    }
+
+    override def onDie() = {
+        sendMessageTo(world, Unspawn(self))
     }
 
 }

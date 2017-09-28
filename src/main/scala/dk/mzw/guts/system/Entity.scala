@@ -5,6 +5,7 @@ import dk.mzw.guts.system.Entity._
 abstract class Entity {
 
     val self : Self
+    val world : WorldEntity
 
     def sendMessageTo(recipient : ReceivingEntity, message : Message) : Unit = {
         if(self.clientId == Entity.localClientId) {

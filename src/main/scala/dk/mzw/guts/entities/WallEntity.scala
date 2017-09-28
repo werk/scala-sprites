@@ -6,6 +6,7 @@ import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
 
 class WallEntity(
+    val world : WorldEntity,
     val self : Self,
     val position : Vector2d,
     val sprite : Image

@@ -9,6 +9,8 @@ import dk.mzw.scalasprites.SpriteCanvas.Blending
 
 class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 20) {
 
+    val world = this
+
     override def internalUpdate(boundingBox : SpriteCanvas.BoundingBox, delta : Double) : Unit = {
         if(Math.random() < 0.3 * delta) {
             var r = Math.random()
@@ -53,21 +55,21 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
                 i += 1
             }
         case SpawnBunny(thatSelf, position) =>
-            entities.push(new PlayerEntity(thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
+            entities.push(new PlayerEntity(this, thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
         case SpawnSkeleton(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, 4, sprites.skeleton))
+            entities.push(new SkeletonEntity(this, thatSelf, position, 4, 100, sprites.skeleton))
         case SpawnZombie(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, 2, sprites.zombie))
+            entities.push(new SkeletonEntity(this, thatSelf, position, 2, 100, sprites.zombie))
         case SpawnScorpion(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, 3, sprites.scorpion))
+            entities.push(new SkeletonEntity(this, thatSelf, position, 3, 50, sprites.scorpion))
         case SpawnWolf(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, 5, sprites.wolf))
+            entities.push(new SkeletonEntity(this, thatSelf, position, 5, 200, sprites.wolf))
         case SpawnWall(thatSelf, position) =>
-            entities.push(new WallEntity(thatSelf, position, sprites.wall))
+            entities.push(new WallEntity(this, thatSelf, position, sprites.wall))
         case SpawnBarrel(thatSelf, position) =>
-            entities.push(new BarrelEntity(thatSelf, position, sprites.barrel))
+            entities.push(new BarrelEntity(this, thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
-            entities.push(new FlameEntity(thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
+            entities.push(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
     }
 
 }

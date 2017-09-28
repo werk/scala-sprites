@@ -24,7 +24,8 @@ object SpriteCanvas {
     case class Blending(
         equation : Int,
         sourceFactor : Int,
-        destinationFactor : Int
+        destinationFactor : Int,
+        constantColor : Option[(Double, Double, Double, Double)] = None
     ) {
         def show : String = if(this == Blending.top) "TOP" else if (this == Blending.additive) "ADD" else toString
     }

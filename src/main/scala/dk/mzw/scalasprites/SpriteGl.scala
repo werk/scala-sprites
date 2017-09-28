@@ -118,6 +118,10 @@ class SpriteGl(canvas : HTMLCanvasElement) {
             val Sprite(image, cx, cy, h, angle, _, blending, _) = sprites(spriteIndex)
             activateTexture(image.stamp.texture)
 
+            blending.constantColor match {
+                case Some((r, g, b, a)) => gl.blendColor(r, g, b, a)
+                case _ =>
+            }
             gl.blendEquation(blending.equation)
             gl.blendFunc(blending.sourceFactor, blending.destinationFactor)
 

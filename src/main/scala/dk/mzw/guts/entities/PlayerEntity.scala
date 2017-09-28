@@ -12,6 +12,7 @@ import dk.mzw.scalasprites.SpriteCanvas.Image
 import scala.util.Random
 
 class PlayerEntity(
+    val world : WorldEntity,
     val self : Self,
     val position : Vector2d,
     val walkingImage : Double => Image,

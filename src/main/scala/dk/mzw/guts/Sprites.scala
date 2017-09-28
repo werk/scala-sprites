@@ -1,6 +1,6 @@
 package dk.mzw.guts
 
-import dk.mzw.scalasprites.SpriteCanvas.Loader
+import dk.mzw.scalasprites.SpriteCanvas.{Blending, Loader}
 
 class Sprites(loader : Loader) {
 
@@ -17,5 +17,9 @@ class Sprites(loader : Loader) {
     val topManShootingAnimation = loader("assets/topman-shooting.png").split(24, 4)
     val flameBrightImage = loader("assets/flame-bright.png")
     val flameRedImage = loader("assets/flame-red.png")
+}
 
+object Sprites {
+    import org.scalajs.dom.raw.{WebGLRenderingContext => GL}
+    val deathBlending = Blending(GL.FUNC_ADD, GL.CONSTANT_COLOR, GL.ONE_MINUS_SRC_ALPHA, Some((0.4, 0.3, 0.3, 1)))
 }
