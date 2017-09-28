@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
-import dk.mzw.guts.entities.GutsWorldEntity.SpawnFlame
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnFlame, Unspawn}
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
@@ -23,8 +23,12 @@ class PlayerEntity(
     with ControlledEntity
     with ReceivingEntity
     with UpdateableEntity
-    with DrawableEntity {
+    with HittableEntity
+    with DrawableEntity
+    with MortalEntity
+{
 
+    var health = 100
     val speed = 4
     val size = Vector2d(0.8, 0.8)
     val velocity = Vector2d(0, 0)
@@ -58,6 +62,11 @@ class PlayerEntity(
     override def onMessage(message : Entity.Message) : Unit = message match {
         case SetXVelocity(x, vx) => position.x = x; velocity.x = vx
         case SetYVelocity(y, vy) => position.y = y; velocity.y = vy
+        case _ => super.onMessage(message)
+    }
+
+    override def onDie() : Unit = {
+        sendMessageTo(world, Unspawn(self))
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {

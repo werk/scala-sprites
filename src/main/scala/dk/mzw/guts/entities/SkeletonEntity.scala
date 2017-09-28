@@ -50,9 +50,10 @@ class SkeletonEntity(
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
         if(!distracted && Math.random() < 10 * delta) {
-            val angle = world.entities.collectFirst { case e : PlayerEntity => position.angleTo(e.position) }.get
-            temporary.setAngle(angle, speed)
-            sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
+            world.entities.collectFirst { case e : PlayerEntity => position.angleTo(e.position) }.foreach { angle =>
+                temporary.setAngle(angle, speed)
+                sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
+            }
         }
         delayedVelocity.delay(velocity, 5, 5, delta)
 
@@ -73,8 +74,9 @@ class SkeletonEntity(
         )
     }
 
-    override def onHit(world: WorldEntity, that: HittableEntity): Unit = that match {
-        case e : FlameEntity => sendMessageTo(this, Damage(5))
+    override def onHit(world : WorldEntity, that : HittableEntity) : Unit = that match {
+        case _ : FlameEntity => sendMessageTo(this, Damage(5))
+        case e : PlayerEntity => sendMessageTo(e, Damage(5))
         case _ =>
     }
 
