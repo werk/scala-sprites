@@ -11,13 +11,19 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
 
     override def internalUpdate(boundingBox : SpriteCanvas.BoundingBox, delta : Double) : Unit = {
         if(Math.random() < 0.3 * delta) {
-            val r = Math.random()
+            var r = Math.random()
             val v =
                 if(r < 0.25) Vector2d(boundingBox.x1 - 5, Math.random() * boundingBox.height)
                 else if(r < 0.50) Vector2d(boundingBox.x2 + 5, Math.random() * boundingBox.height)
                 else if(r < 0.75) Vector2d(Math.random() * boundingBox.width, boundingBox.y1 - 5)
                 else Vector2d(Math.random() * boundingBox.width, boundingBox.y2 + 5)
-            sendMessageTo(this, SpawnSkeleton(Self(), v))
+            r = Math.random()
+            val m =
+                if(r < 0.25) SpawnSkeleton(Self(), v)
+                else if(r < 0.50) SpawnSkeleton(Self(), v)
+                else if(r < 0.75) SpawnZombie(Self(), v)
+                else SpawnZombie(Self(), v)
+            sendMessageTo(this, m)
         }
         super.internalUpdate(boundingBox, delta)
     }
@@ -50,6 +56,8 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new PlayerEntity(thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
         case SpawnSkeleton(thatSelf, position) =>
             entities.push(new SkeletonEntity(thatSelf, position, sprites.skeleton))
+        case SpawnZombie(thatSelf, position) =>
+            entities.push(new SkeletonEntity(thatSelf, position, sprites.zombie))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(thatSelf, position, sprites.wall))
         case SpawnBarrel(thatSelf, position) =>
@@ -64,6 +72,7 @@ object GutsWorldEntity {
     case class Unspawn(self : Self) extends Message
     case class SpawnBunny(self : Self, position : Vector2d) extends Message
     case class SpawnSkeleton(self : Self, position : Vector2d) extends Message
+    case class SpawnZombie(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
