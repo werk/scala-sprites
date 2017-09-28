@@ -12,11 +12,12 @@ import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 class SkeletonEntity(
     val self : Self,
     val position : Vector2d,
+    val speed : Double,
     val skeletonImage : Double => Image
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with SolidEntity with ReceivingEntity {
 
     val velocity = Vector2d(0, 0)
-    velocity.setAngle(Math.random() * Math.PI * 2, 4)
+    velocity.setAngle(Math.random() * Math.PI * 2, speed)
     val delayedVelocity = Vector2d(0, 0)
     delayedVelocity.set(velocity)
 
@@ -43,12 +44,12 @@ class SkeletonEntity(
         if(collision.hitX || collision.hitY) {
             if(!distracted) lastCollision = Guts.secondsElapsed()
             val angle = Math.random() * Math.PI * 2
-            temporary.setAngle(angle, 4)
+            temporary.setAngle(angle, speed)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
         if(!distracted && Math.random() < 10 * delta) {
             val angle = world.entities.collectFirst { case e : PlayerEntity => position.angleTo(e.position) }.get
-            temporary.setAngle(angle, 4)
+            temporary.setAngle(angle, speed)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
         delayedVelocity.delay(velocity, 5, 5, delta)

@@ -55,9 +55,9 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
         case SpawnBunny(thatSelf, position) =>
             entities.push(new PlayerEntity(thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
         case SpawnSkeleton(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, sprites.skeleton))
+            entities.push(new SkeletonEntity(thatSelf, position, 4, sprites.skeleton))
         case SpawnZombie(thatSelf, position) =>
-            entities.push(new SkeletonEntity(thatSelf, position, sprites.zombie))
+            entities.push(new SkeletonEntity(thatSelf, position, 2, sprites.zombie))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(thatSelf, position, sprites.wall))
         case SpawnBarrel(thatSelf, position) =>
