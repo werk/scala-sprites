@@ -1,7 +1,7 @@
 package dk.mzw.guts
 
 import dk.mzw.guts.entities.GutsWorldEntity._
-import dk.mzw.guts.entities.{BunnyEntity, GutsWorldEntity, WallEntity}
+import dk.mzw.guts.entities.{PlayerEntity, GutsWorldEntity, WallEntity}
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}

@@ -1,6 +1,6 @@
 package dk.mzw.guts.entities
 
-import dk.mzw.guts.entities.BunnyEntity.{SetXVelocity, SetYVelocity}
+import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.entities.GutsWorldEntity.SpawnFlame
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
@@ -9,10 +9,11 @@ import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
 
-class BunnyEntity(
+class PlayerEntity(
     val self : Self,
     val position : Vector2d,
-    val sprite : Image
+    val walkingImage : Double => Image,
+    val shootingImage : Double => Image
 ) extends Entity
     with PawnEntity
     with CollidingEntity
@@ -24,7 +25,13 @@ class BunnyEntity(
     val speed = 4
     val size = Vector2d(0.8, 0.8)
     val velocity = Vector2d(0, 0)
+    var angle : Double = Math.PI * 0.5
+    var shooting = false
+    var walkingDistance : Double = 0
     val collision = Collision()
+
+    // Reserved registers
+    val previousPosition = Vector2d(0, 0)
 
     var leftArrow = false
     var rightArrow = false
@@ -82,22 +89,39 @@ class BunnyEntity(
             val shotCount = Math.round(delta * 100).toInt
             for(_ <- 0 until shotCount) {
                 val p = position.copy()
-                val a = velocity.angle
+                val a = angle
                 val s = Math.max(velocity.magnitude * 3, speed * 2)
                 sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
             }
         }
 
         temporary.set(velocity)
+        previousPosition.set(position)
         move(world, position, size, temporary, delta, collision)
+
+        if(velocity.magnitude == 0) {
+             walkingDistance = 0
+        } else {
+            temporary.set(position)
+            temporary.addMultiplied(previousPosition, -1)
+            walkingDistance = walkingDistance + temporary.magnitude
+        }
+
+        if(velocity.magnitude != 0) {
+            val velocityAngle = velocity.angle
+            val da = Math.atan2(Math.sin(velocityAngle - angle), Math.cos(velocityAngle - angle))
+            angle = angle + da * delta * 5
+        }
+
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
-        display.add(sprite, position.x, position.y, 0.8, 0)
+        val image = if(shooting) shootingImage(walkingDistance) else walkingImage(walkingDistance)
+        display.add(image, position.x, position.y, 0.8, angle - Math.PI * 0.5)
     }
 }
 
-object BunnyEntity {
+object PlayerEntity {
     case class SetXVelocity(x : Double, vx : Double) extends Entity.Message
     case class SetYVelocity(y : Double, vy : Double) extends Entity.Message
 }
