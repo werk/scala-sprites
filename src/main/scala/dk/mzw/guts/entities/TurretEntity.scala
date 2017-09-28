@@ -21,7 +21,9 @@ class TurretEntity(
 
     var health = 100.0
 
-    val size = Vector2d(0.8, 0.8)
+    val size = Vector2d(0.5, 0.5)
+
+    var fireBudget = 0.0
 
     override def onMessage(message: Message): Unit = message match {
         case SetAngle(a) => angle = a
@@ -29,22 +31,28 @@ class TurretEntity(
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
-        var distance = 10.0
-        var monster : PawnEntity = null
-        var i = 0
-        while(i < world.entities.length) {
-            world.entities(i) match {
-                case e : SkeletonEntity if e.position.distanceTo(position) < distance =>
-                    distance = e.position.distanceTo(position)
-                    monster = e
-                case _ =>
+        fireBudget = Math.min(2, fireBudget + delta * 20)
+        while(fireBudget > 1) {
+            fireBudget -= 1
+            var distance = 10.0
+            var monster: PawnEntity = null
+            var i = 0
+            while (i < world.entities.length) {
+                world.entities(i) match {
+                    case e: SkeletonEntity if e.position.distanceTo(position) < distance =>
+                        distance = e.position.distanceTo(position)
+                        monster = e
+                    case _ =>
+                }
+                i += 1
             }
-            i += 1
-        }
-        if(monster != null) {
-            val a = position.angleTo(monster.position)
-            sendMessageTo(this, SetAngle(a))
-            sendMessageTo(world, SpawnFlame(Self(), position.copy(), a, 6))
+            if (monster != null) {
+                val a = position.angleTo(monster.position)
+                sendMessageTo(this, SetAngle(a))
+                val p = position.copy()
+                p.add(Math.cos(a) * 0.4, Math.sin(a) * 0.4)
+                sendMessageTo(world, SpawnFlame(Self(), p, a, 6))
+            }
         }
     }
 
@@ -53,7 +61,7 @@ class TurretEntity(
             image = turretImage,
             x = position.x,
             y = position.y,
-            height = 1,
+            height = 0.9,
             angle = angle + Math.PI * 0.5,
             blending = Blending.top
         )
