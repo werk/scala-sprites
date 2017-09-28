@@ -15,6 +15,10 @@ object SpriteCanvas {
         def y1 : Double
         def x2 : Double
         def y2 : Double
+        def height = y2 - y1
+        def width = x2 - y1
+        def centerX = x1 + 0.5 * width
+        def centerY = y1 + 0.5 * height
     }
 
     case class Blending(

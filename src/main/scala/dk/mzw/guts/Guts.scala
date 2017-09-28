@@ -63,7 +63,7 @@ object Guts extends JSApp {
                 val now = secondsElapsed()
                 val delta = now - last
                 if(delta < 1) {
-                    world.internalUpdate(delta)
+                    world.internalUpdate(display.boundingBox, delta)
                     world.internalDraw(display, bunny.position.x, bunny.position.y)
                 }
                 dom.window.requestAnimationFrame{_ => loop(now)}
