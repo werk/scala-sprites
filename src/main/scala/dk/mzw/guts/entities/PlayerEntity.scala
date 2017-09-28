@@ -35,49 +35,22 @@ class PlayerEntity(
     // Reserved registers
     val previousPosition = Vector2d(0, 0)
 
-    var leftArrow = false
-    var rightArrow = false
-    var upArrow = false
-    var downArrow = false
-
     var space = false
+    var keyX : Int = 0
+    var keyY : Int = 0
 
     override def onInput(world : WorldEntity, keys : Keys) : Unit = {
         space = keys(Keys.space)
 
-        if(keys(Keys.leftArrow)) {
-            if (!leftArrow) {
-                leftArrow = true
-                rightArrow = false
-                sendMessageTo(this, SetXVelocity(position.x, -speed))
-            }
-        } else if(keys(Keys.rightArrow)) {
-            if(!rightArrow) {
-                rightArrow = true
-                leftArrow = false
-                sendMessageTo(this, SetXVelocity(position.x, speed))
-            }
-        } else if(leftArrow || rightArrow) {
-            leftArrow = false
-            rightArrow = false
-            sendMessageTo(this, SetXVelocity(position.x, 0))
-        }
-        if(keys(Keys.downArrow)) {
-            if(!downArrow) {
-                downArrow = true
-                upArrow = false
-                sendMessageTo(this, SetYVelocity(position.y, -speed))
-            }
-        } else if(keys(Keys.upArrow)) {
-            if(!upArrow) {
-                upArrow = true
-                downArrow = false
-                sendMessageTo(this, SetYVelocity(position.y, speed))
-            }
-        } else if(downArrow || upArrow) {
-            upArrow = false
-            downArrow = false
-            sendMessageTo(this, SetYVelocity(position.y, 0))
+        val newKeyX = keys.factor(Keys.leftArrow, Keys.rightArrow)
+        val newKeyY = keys.factor(Keys.downArrow, Keys.upArrow)
+        if(newKeyX != keyX || newKeyY != keyY) {
+            keyX = newKeyX
+            keyY = newKeyY
+            val l = Math.sqrt(keyX * keyX + keyY * keyY)
+            val f = if(l > 0) 1 / l * speed else 0
+            sendMessageTo(this, SetXVelocity(position.x, keyX * f))
+            sendMessageTo(this, SetYVelocity(position.y, keyY * f))
         }
     }
 

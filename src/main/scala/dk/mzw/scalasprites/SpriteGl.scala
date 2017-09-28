@@ -245,8 +245,10 @@ object SpriteGl {
         val texture = gl.createTexture()
         gl.bindTexture(TEXTURE_2D, texture)
         gl.texImage2D(TEXTURE_2D, 0, RGBA, RGBA, UNSIGNED_BYTE, loadedImage)
-        gl.texParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
-        gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR_MIPMAP_NEAREST)
+        //gl.texParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, LINEAR)
+        //gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, LINEAR_MIPMAP_NEAREST)
+        gl.texParameteri(TEXTURE_2D, TEXTURE_MAG_FILTER, NEAREST)
+        gl.texParameteri(TEXTURE_2D, TEXTURE_MIN_FILTER, NEAREST)
         gl.generateMipmap(TEXTURE_2D)
         gl.bindTexture(TEXTURE_2D, null)
         texture
