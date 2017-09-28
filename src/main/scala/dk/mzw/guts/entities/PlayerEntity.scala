@@ -9,6 +9,8 @@ import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
 
+import scala.util.Random
+
 class PlayerEntity(
     val self : Self,
     val position : Vector2d,
@@ -88,8 +90,14 @@ class PlayerEntity(
         if(space) {
             val shotCount = Math.round(delta * 100).toInt
             for(_ <- 0 until shotCount) {
+                val velocityUnit = Vector2d(Math.cos(angle), Math.sin(angle))
+                val gunSide = temporary
+                gunSide.set(velocityUnit.y * 0.2, -velocityUnit.x * 0.2)
                 val p = position.copy()
-                val a = angle
+                velocityUnit.multiply(0.5)
+                p.add(velocityUnit)
+                p.add(gunSide)
+                val a = (Random.nextDouble() - 0.5) * 0.2 + angle
                 val s = Math.max(velocity.magnitude * 3, speed * 2)
                 sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
             }

@@ -47,7 +47,7 @@ class SkeletonEntity(
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
         if(!distracted && Math.random() < 0.1) {
-            val angle = world.entities.collectFirst { case e : BunnyEntity => position.angleTo(e.position) }.get
+            val angle = world.entities.collectFirst { case e : PlayerEntity => position.angleTo(e.position) }.get
             temporary.setAngle(angle, 4)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
