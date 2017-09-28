@@ -20,9 +20,9 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             r = Math.random()
             val m =
                 if(r < 0.25) SpawnSkeleton(Self(), v)
-                else if(r < 0.50) SpawnSkeleton(Self(), v)
-                else if(r < 0.75) SpawnZombie(Self(), v)
-                else SpawnZombie(Self(), v)
+                else if(r < 0.50) SpawnZombie(Self(), v)
+                else if(r < 0.75) SpawnScorpion(Self(), v)
+                else SpawnWolf(Self(), v)
             sendMessageTo(this, m)
         }
         super.internalUpdate(boundingBox, delta)
@@ -58,6 +58,10 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new SkeletonEntity(thatSelf, position, 4, sprites.skeleton))
         case SpawnZombie(thatSelf, position) =>
             entities.push(new SkeletonEntity(thatSelf, position, 2, sprites.zombie))
+        case SpawnScorpion(thatSelf, position) =>
+            entities.push(new SkeletonEntity(thatSelf, position, 3, sprites.scorpion))
+        case SpawnWolf(thatSelf, position) =>
+            entities.push(new SkeletonEntity(thatSelf, position, 5, sprites.wolf))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(thatSelf, position, sprites.wall))
         case SpawnBarrel(thatSelf, position) =>
@@ -73,6 +77,8 @@ object GutsWorldEntity {
     case class SpawnBunny(self : Self, position : Vector2d) extends Message
     case class SpawnSkeleton(self : Self, position : Vector2d) extends Message
     case class SpawnZombie(self : Self, position : Vector2d) extends Message
+    case class SpawnScorpion(self : Self, position : Vector2d) extends Message
+    case class SpawnWolf(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
