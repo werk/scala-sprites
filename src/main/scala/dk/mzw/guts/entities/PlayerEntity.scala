@@ -1,8 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorpse, SpawnFlame, SpawnTurret, Unspawn}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnFlame, SpawnPellet, Unspawn}
+import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
@@ -101,7 +100,7 @@ class PlayerEntity(
                 val r = (Random.nextDouble() - 0.5) * 2
                 val a = r*r*r*r*r * 0.2 + angle
                 val s = velocity.magnitude + 15
-                sendMessageTo(world, SpawnPellet(Self("pellet-" + Math.random(), Entity.localClientId), gunPosition.copy(), a, s))
+                sendMessageTo(world, SpawnPellet(Self(), gunPosition.copy(), a, s))
             }
         }
 
