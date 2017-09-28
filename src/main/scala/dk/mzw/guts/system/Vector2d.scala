@@ -29,6 +29,7 @@ case class Vector2d(var x : Double, var y : Double) {
         setAngle(a5, m4)
     }
     def magnitude : Double = Math.sqrt(x*x + y*y)
+    def distanceTo(v : Vector2d) : Double = Math.sqrt((x - v.x) * (x - v.x) + (y - v.y) * (y - v.y))
     def angleTo(v : Vector2d) : Double = Math.atan2(v.y - y, v.x - x)
     def angle : Double = Math.atan2(y, x)
 }

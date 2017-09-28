@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnFlame, Unspawn}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorpse, SpawnFlame, SpawnTurret, Unspawn}
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
@@ -41,11 +41,16 @@ class PlayerEntity(
     val previousPosition = Vector2d(0, 0)
 
     var space = false
+    var enter = false
     var keyX : Int = 0
     var keyY : Int = 0
 
     override def onInput(world : WorldEntity, keys : Keys) : Unit = {
         space = keys(Keys.space)
+        if(!enter && keys(Keys.enter)) {
+            sendMessageTo(world, SpawnTurret(Self(), position.copy(), angle))
+        }
+        enter = keys(Keys.enter)
 
         val newKeyX = keys.factor(Keys.leftArrow, Keys.rightArrow)
         val newKeyY = keys.factor(Keys.downArrow, Keys.upArrow)
@@ -68,7 +73,7 @@ class PlayerEntity(
     override def onDie() : Unit = {
         sendMessageTo(world, Unspawn(self))
         val image = walkingImage(walkingDistance)
-        sendMessageTo(world, SpawnCorps(Self(), position, velocity.angle, 1, image))
+        sendMessageTo(world, SpawnCorpse(Self(), position, velocity.angle, 1, image))
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {

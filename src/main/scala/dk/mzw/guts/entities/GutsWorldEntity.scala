@@ -70,8 +70,10 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new BarrelEntity(this, thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
             entities.push(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
-        case SpawnCorps(thatSelf, position, angle, height, image) =>
-            entities.push(new CorpsEntity(this, thatSelf, position, angle, height, image))
+        case SpawnTurret(thatSelf, position, angle) =>
+            entities.push(new TurretEntity(this, thatSelf, position, angle, sprites.turret))
+        case SpawnCorpse(thatSelf, position, angle, height, image) =>
+            entities.push(new CorpseEntity(this, thatSelf, position, angle, height, image))
     }
 
 }
@@ -85,6 +87,7 @@ object GutsWorldEntity {
     case class SpawnWolf(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
+    case class SpawnTurret(self : Self, position : Vector2d, angle : Double) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
-    case class SpawnCorps(self : Self, position : Vector2d, angle : Double, height : Double, image : Image) extends Message
+    case class SpawnCorpse(self : Self, position : Vector2d, angle : Double, height : Double, image : Image) extends Message
 }

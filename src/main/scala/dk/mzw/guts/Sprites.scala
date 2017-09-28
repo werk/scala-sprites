@@ -12,11 +12,13 @@ class Sprites(loader : Loader) {
     val zombie = loader("assets/zombman.png").split(24, 4)
     val scorpion = loader("assets/scorpman.png").split(24, 4)
     val wolf = loader("assets/wolfman.png").split(24, 4)
+    val turret = loader("assets/big_gun.png")
 
     val topManAnimation = loader("assets/topman.png").split(24, 4)
     val topManShootingAnimation = loader("assets/topman-shooting.png").split(24, 4)
     val flameBrightImage = loader("assets/flame-bright.png")
     val flameRedImage = loader("assets/flame-red.png")
+
 }
 
 object Sprites {
