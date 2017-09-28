@@ -76,6 +76,7 @@ class SkeletonEntity(
 
     override def onHit(world : WorldEntity, that : HittableEntity) : Unit = that match {
         case _ : FlameEntity => sendMessageTo(this, Damage(0.1))
+        case _ : PelletEntity => sendMessageTo(this, Damage(1))
         case e : PlayerEntity => sendMessageTo(e, Damage(5))
         case _ =>
     }

@@ -9,7 +9,7 @@ import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 
 class FlameEntity(
-    val world : WorldEntity,
+             val world : WorldEntity,
     val self : Self,
     val position : Vector2d,
     val angle : Double,

@@ -17,6 +17,7 @@ class Sprites(loader : Loader) {
     val topManShootingAnimation = loader("assets/topman-shooting.png").split(24, 4)
     val flameBrightImage = loader("assets/flame-bright.png")
     val flameRedImage = loader("assets/flame-red.png")
+    val pelletImage = loader("assets/pellet.png")
 }
 
 object Sprites {

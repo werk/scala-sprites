@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnFlame, Unspawn}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnFlame, SpawnPellet, Unspawn}
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
@@ -39,13 +39,16 @@ class PlayerEntity(
 
     // Reserved registers
     val previousPosition = Vector2d(0, 0)
+    val gunPosition = Vector2d(0, 0)
 
-    var space = false
+    var primaryFire = false
+    var secondaryFire = false
     var keyX : Int = 0
     var keyY : Int = 0
 
     override def onInput(world : WorldEntity, keys : Keys) : Unit = {
-        space = keys(Keys.space)
+        primaryFire = keys(Keys.s)
+        secondaryFire = keys(Keys.a)
 
         val newKeyX = keys.factor(Keys.leftArrow, Keys.rightArrow)
         val newKeyY = keys.factor(Keys.downArrow, Keys.upArrow)
@@ -72,19 +75,27 @@ class PlayerEntity(
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
-        if(space) {
+        val vx = Math.cos(angle)
+        val vy = Math.sin(angle)
+        gunPosition.set(position)
+        gunPosition.add(vx * 0.5 + vy * 0.2, vy * 0.5 - vx * 0.2)
+
+        if(primaryFire) {
             val shotCount = Math.round(delta * 100).toInt
             for(_ <- 0 until shotCount) {
-                val velocityUnit = Vector2d(Math.cos(angle), Math.sin(angle))
-                val gunSide = temporary
-                gunSide.set(velocityUnit.y * 0.2, -velocityUnit.x * 0.2)
-                val p = position.copy()
-                velocityUnit.multiply(0.5)
-                p.add(velocityUnit)
-                p.add(gunSide)
                 val a = (Random.nextDouble() - 0.5) * 0.2 + angle
                 val s = Math.max(velocity.magnitude * 3, speed * 2)
-                sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), p, a, s))
+                sendMessageTo(world, SpawnFlame(Self("flame-" + Math.random(), Entity.localClientId), gunPosition.copy(), a, s))
+            }
+        }
+
+        if(secondaryFire) {
+            val shotCount = Math.round(delta * 100).toInt
+            for(_ <- 0 until shotCount) {
+                val r = (Random.nextDouble() - 0.5) * 2
+                val a = r*r*r*r*r * 0.2 + angle
+                val s = velocity.magnitude + 15
+                sendMessageTo(world, SpawnPellet(Self("pellet-" + Math.random(), Entity.localClientId), gunPosition.copy(), a, s))
             }
         }
 
