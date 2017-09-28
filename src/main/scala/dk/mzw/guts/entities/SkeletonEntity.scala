@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.{Guts, Sprites}
-import dk.mzw.guts.entities.GutsWorldEntity.Unspawn
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnSkeleton, Unspawn}
 import dk.mzw.guts.entities.MortalEntity.Damage
 import dk.mzw.guts.entities.SkeletonEntity.SetVelocity
 import dk.mzw.guts.system.CollidingEntity.Collision
@@ -74,12 +74,14 @@ class SkeletonEntity(
     }
 
     override def onHit(world: WorldEntity, that: HittableEntity): Unit = that match {
-        case e : FlameEntity => sendMessageTo(this, Damage(5))
+        case e : FlameEntity => sendMessageTo(this, Damage(0.1))
         case _ =>
     }
 
     override def onDie() = {
         sendMessageTo(world, Unspawn(self))
+        val age = Guts.secondsElapsed() - born
+        sendMessageTo(world, SpawnCorps(Self(), position, velocity.angle, 1, skeletonImage(age * 1.5)))
     }
 
 }

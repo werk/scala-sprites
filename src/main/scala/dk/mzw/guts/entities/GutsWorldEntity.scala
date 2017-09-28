@@ -5,7 +5,7 @@ import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.system.{Vector2d, WorldEntity}
 import dk.mzw.scalasprites.SpriteCanvas
-import dk.mzw.scalasprites.SpriteCanvas.Blending
+import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 
 class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 20) {
 
@@ -70,6 +70,8 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new BarrelEntity(this, thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
             entities.push(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
+        case SpawnCorps(thatSelf, position, angle, height, image) =>
+            entities.push(new CorpsEntity(this, thatSelf, position, angle, height, image))
     }
 
 }
@@ -84,4 +86,5 @@ object GutsWorldEntity {
     case class SpawnWall(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
+    case class SpawnCorps(self : Self, position : Vector2d, angle : Double, height : Double, image : Image) extends Message
 }
