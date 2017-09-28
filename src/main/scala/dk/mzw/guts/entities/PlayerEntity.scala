@@ -1,7 +1,7 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
-import dk.mzw.guts.entities.GutsWorldEntity.{SpawnFlame, Unspawn}
+import dk.mzw.guts.entities.GutsWorldEntity.{SpawnCorps, SpawnFlame, Unspawn}
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
@@ -67,6 +67,8 @@ class PlayerEntity(
 
     override def onDie() : Unit = {
         sendMessageTo(world, Unspawn(self))
+        val image = walkingImage(walkingDistance)
+        sendMessageTo(world, SpawnCorps(Self(), position, velocity.angle, 1, image))
     }
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
