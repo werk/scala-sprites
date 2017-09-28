@@ -23,7 +23,7 @@ object Entity {
         // TODO
     }
 
-    case class Self(id : String, clientId : String) {
+    case class Self(id : String = Math.random().toString, clientId : String = Entity.localClientId) {
         def log(text : String) : Unit = println(id + ": " + text)
         def fail(text : String) : Nothing = throw new RuntimeException(id + ": " + text)
     }

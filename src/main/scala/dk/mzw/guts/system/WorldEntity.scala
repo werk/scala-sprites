@@ -3,7 +3,7 @@ package dk.mzw.guts.system
 import dk.mzw.guts.Sprites
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.pyroman.Keys
-import dk.mzw.scalasprites.SpriteCanvas.Display
+import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Display}
 
 import scala.collection.mutable
 import scala.scalajs.js
@@ -16,7 +16,7 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
 
     val keys = new Keys()
 
-    def internalUpdate(delta : Double) : Unit = {
+    def internalUpdate(boundingBox : BoundingBox, delta : Double) : Unit = {
         var i = 0
         while(i < entities.length) {
             entities(i) match {

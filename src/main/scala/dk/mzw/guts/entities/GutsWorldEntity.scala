@@ -9,6 +9,19 @@ import dk.mzw.scalasprites.SpriteCanvas.Blending
 
 class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 20) {
 
+    override def internalUpdate(boundingBox : SpriteCanvas.BoundingBox, delta : Double) : Unit = {
+        if(Math.random() < 0.3 * delta) {
+            val r = Math.random()
+            val v =
+                if(r < 0.25) Vector2d(boundingBox.x1 - 5, Math.random() * boundingBox.height)
+                else if(r < 0.50) Vector2d(boundingBox.x2 + 5, Math.random() * boundingBox.height)
+                else if(r < 0.75) Vector2d(Math.random() * boundingBox.width, boundingBox.y1 - 5)
+                else Vector2d(Math.random() * boundingBox.width, boundingBox.y2 + 5)
+            sendMessageTo(this, SpawnSkeleton(Self(), v))
+        }
+        super.internalUpdate(boundingBox, delta)
+    }
+
     override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {
         val size = 6.3
         for(x <- (-4) to 4; y <- (-4) to 4) {

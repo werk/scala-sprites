@@ -13,7 +13,7 @@ class SkeletonEntity(
     val self : Self,
     val position : Vector2d,
     val skeletonImage : Double => Image
-) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with ReceivingEntity {
+) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity with SolidEntity with ReceivingEntity {
 
     val velocity = Vector2d(0, 0)
     velocity.setAngle(Math.random() * Math.PI * 2, 4)
@@ -46,7 +46,7 @@ class SkeletonEntity(
             temporary.setAngle(angle, 4)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
         }
-        if(!distracted && Math.random() < 0.1) {
+        if(!distracted && Math.random() < 10 * delta) {
             val angle = world.entities.collectFirst { case e : BunnyEntity => position.angleTo(e.position) }.get
             temporary.setAngle(angle, 4)
             sendMessageTo(this, SetVelocity(position.x, position.y, temporary.x, temporary.y))
