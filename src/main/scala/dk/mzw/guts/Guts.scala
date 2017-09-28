@@ -50,7 +50,7 @@ object Guts extends JSApp {
             SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 100, Math.random() * 100))
         }
 
-        val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(25, 25))
+        val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(1, 1))
 
         for(m <- walls ++ barrels ++ Seq(bunny, skeleton)) {
             world.sendMessageTo(world, m)
