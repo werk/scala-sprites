@@ -1,10 +1,12 @@
 package dk.mzw.guts.entities
 
+import dk.mzw.guts.Guts
 import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
+import dk.mzw.guts.utility.Normal
 import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
@@ -36,6 +38,9 @@ class PlayerEntity(
     var shooting = false
     var walkingDistance : Double = 0
     val collision = Collision()
+    var lastSecondaryFire = 0d
+    val coolDown = 1d
+
 
     // Reserved registers
     val previousPosition = Vector2d(0, 0)
@@ -94,12 +99,13 @@ class PlayerEntity(
             }
         }
 
-        if(secondaryFire) {
-            val shotCount = Math.round(delta * 100).toInt
+        val now = Guts.secondsElapsed()
+        if(secondaryFire && (now - lastSecondaryFire) >= coolDown) {
+            lastSecondaryFire = now
+            val shotCount = 100
             for(_ <- 0 until shotCount) {
-                val r = (Random.nextDouble() - 0.5) * 2
-                val a = r*r*r*r*r * 0.2 + angle
-                val s = velocity.magnitude + 15
+                val a = angle + Normal() * 0.1
+                val s = velocity.magnitude + 15 + Normal()
                 sendMessageTo(world, SpawnPellet(Self(), gunPosition.copy(), a, s))
             }
         }
