@@ -16,7 +16,7 @@ object SpriteCanvas {
         def x2 : Double
         def y2 : Double
         def height = y2 - y1
-        def width = x2 - y1
+        def width = x2 - x1
         def centerX = x1 + 0.5 * width
         def centerY = y1 + 0.5 * height
     }
@@ -162,6 +162,16 @@ object SpriteCanvas {
         private var addedSprites = 0
 
         val boundingBox = gl.boundingBox
+
+        def gameCoordinatesX(pixelX : Double) : Double = {
+            val rx = pixelX.toDouble / gl.canvas.clientWidth
+            boundingBox.width * (rx - 0.5)
+        }
+
+        def gameCoordinatesY(pixelY : Double) : Double = {
+            val ry = (gl.canvas.clientHeight - pixelY.toDouble) / gl.canvas.clientHeight
+            boundingBox.height * (ry - 0.5)
+        }
 
         def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
             if (addedSprites < spriteBuffer.length) {

@@ -8,7 +8,7 @@ import org.scalajs.dom.raw._
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Float32Array
 
-class SpriteGl(canvas : HTMLCanvasElement) {
+class SpriteGl(val canvas : HTMLCanvasElement) {
 
     val gl = SpriteGl.getContexts(canvas)
     private val mutableBoundingBox = MutableBoundingBox(-1, -1, 1, 1)

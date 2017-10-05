@@ -4,6 +4,7 @@ import dk.mzw.guts.Sprites
 import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.system.{Vector2d, WorldEntity}
+import dk.mzw.guts.utility.Mouse
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 
@@ -11,7 +12,7 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
 
     val world = this
 
-    override def internalUpdate(boundingBox : SpriteCanvas.BoundingBox, delta : Double) : Unit = {
+    override def internalUpdate(boundingBox : SpriteCanvas.BoundingBox, mouse : Mouse, delta : Double) : Unit = {
         if(Math.random() < 0.3 * delta) {
             var r = Math.random()
             val v =
@@ -27,7 +28,7 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
                 else SpawnWolf(Self(), v)
             sendMessageTo(this, m)
         }
-        super.internalUpdate(boundingBox, delta)
+        super.internalUpdate(boundingBox, mouse, delta)
     }
 
     override def internalDraw(display : SpriteCanvas.Display, centerX : Double, centerY : Double) : Unit = {

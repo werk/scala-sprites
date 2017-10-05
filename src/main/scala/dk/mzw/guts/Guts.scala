@@ -1,10 +1,11 @@
 package dk.mzw.guts
 
 import dk.mzw.guts.entities.GutsWorldEntity._
-import dk.mzw.guts.entities.{PlayerEntity, GutsWorldEntity, WallEntity}
+import dk.mzw.guts.entities.GutsWorldEntity
 import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
-import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}
+import dk.mzw.guts.system.{Entity, Vector2d}
+import dk.mzw.guts.utility.Mouse
 import dk.mzw.scalasprites.SpriteCanvas.Loader
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
@@ -57,13 +58,15 @@ object Guts extends JSApp {
         }
 
         loader.complete.foreach { display =>
+            val mouse = new Mouse(canvas, display.gameCoordinatesX, display.gameCoordinatesY)
+
             println("Loader complete")
 
             def loop(last : Double) : Unit = {
                 val now = secondsElapsed()
                 val delta = now - last
                 if(delta < 1) {
-                    world.internalUpdate(display.boundingBox, delta)
+                    world.internalUpdate(display.boundingBox, mouse, delta)
                     world.internalDraw(display, bunny.position.x, bunny.position.y)
                 }
                 dom.window.requestAnimationFrame{_ => loop(now)}

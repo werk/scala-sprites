@@ -1,12 +1,12 @@
 package dk.mzw.guts.entities
 
 import dk.mzw.guts.Guts
-import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.entities.GutsWorldEntity._
+import dk.mzw.guts.entities.PlayerEntity.{SetXVelocity, SetYVelocity}
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
-import dk.mzw.guts.utility.Normal
+import dk.mzw.guts.utility.{Mouse, Normal}
 import dk.mzw.pyroman.Keys
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.Image
@@ -51,17 +51,23 @@ class PlayerEntity(
     var enter = false
     var keyX : Int = 0
     var keyY : Int = 0
+    val mouseX : Double = 0
+    val mouseY : Double = 0
 
-    override def onInput(world : WorldEntity, keys : Keys) : Unit = {
-        primaryFire = keys(Keys.s)
-        secondaryFire = keys(Keys.a)
+    override def onInput(world : WorldEntity, keys : Keys, mouse : Mouse) : Unit = {
+        primaryFire = mouse.left
+        secondaryFire = keys(Keys.q)
+
+        // TODO should this be a message ?
+        angle = Math.atan2(mouse.y, mouse.x)
+
         if(!enter && keys(Keys.enter)) {
             sendMessageTo(world, SpawnTurret(Self(), position.copy(), angle))
         }
         enter = keys(Keys.enter)
 
-        val newKeyX = keys.factor(Keys.leftArrow, Keys.rightArrow)
-        val newKeyY = keys.factor(Keys.downArrow, Keys.upArrow)
+        val newKeyX = keys.factor(Keys.a, Keys.d)
+        val newKeyY = keys.factor(Keys.s, Keys.w)
         if(newKeyX != keyX || newKeyY != keyY) {
             keyX = newKeyX
             keyY = newKeyY
@@ -120,12 +126,6 @@ class PlayerEntity(
             temporary.set(position)
             temporary.addMultiplied(previousPosition, -1)
             walkingDistance = walkingDistance + temporary.magnitude
-        }
-
-        if(velocity.magnitude != 0) {
-            val velocityAngle = velocity.angle
-            val da = Math.atan2(Math.sin(velocityAngle - angle), Math.cos(velocityAngle - angle))
-            angle = angle + da * delta * 5
         }
 
     }
