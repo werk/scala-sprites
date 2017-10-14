@@ -6,7 +6,7 @@ import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system._
 import dk.mzw.scalasprites.SpriteCanvas
-import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
+import dk.mzw.scalasprites.SpriteCanvas.{Blending, CustomShader, Image}
 
 class FlameEntity(
              val world : WorldEntity,
@@ -15,7 +15,7 @@ class FlameEntity(
     val angle : Double,
     val speed : Double,
     val flameRedImage : Image,
-    val flameBrightImage : Image
+    val flameBrightImage : CustomShader
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity {
 
     val velocityAngle = angle + ((Math.random() - 0.5) * (Math.random() - 0.5)) * 0.5

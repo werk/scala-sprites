@@ -1,8 +1,17 @@
 package dk.mzw.guts
 
+import dk.mzw.accelemation.Language.{Image, R, Vec2, rgba}
+import dk.mzw.accelemation.util.Prelude.gaussianOne
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Loader}
 
 class Sprites(loader : Loader) {
+
+    val flame : R => Image = {variance : R => x : R => y : R =>
+        for {
+            d <- Vec2(x, y).magnitude
+            intensity <- gaussianOne(variance, d)
+        } yield rgba(intensity, intensity*0.9, intensity*0.4, 1)
+    }
 
     val wall = loader("assets/wall2.png", repeat = true)
     val floor = loader("assets/floor.png")
@@ -16,7 +25,7 @@ class Sprites(loader : Loader) {
 
     val topManAnimation = loader("assets/topman.png").split(24, 4)
     val topManShootingAnimation = loader("assets/topman-shooting.png").split(24, 4)
-    val flameBrightImage = loader("assets/flame-bright.png")
+    val flameBrightImage = loader(flame(0.2)) //loader("assets/flame-bright.png")
     val flameRedImage = loader("assets/flame-red.png")
     val pelletImage = loader("assets/pellet.png")
 

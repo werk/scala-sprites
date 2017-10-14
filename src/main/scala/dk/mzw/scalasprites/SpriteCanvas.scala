@@ -1,8 +1,10 @@
 package dk.mzw.scalasprites
 
+import dk.mzw.accelemation.Language
+import dk.mzw.accelemation.Language.Animation
+import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
-import org.scalajs.dom.raw.{WebGLRenderingContext => GL}
-import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture}
+import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLRenderingContext => GL}
 
 import scala.scalajs.js
 import scala.concurrent.Future
@@ -36,13 +38,18 @@ object SpriteCanvas {
         val substractive = Blending(GL.FUNC_SUBTRACT, GL.ONE, GL.ONE)
     }
 
-    trait Image{
+    trait CustomShader {
+        def shader : Shader
+    }
+
+    trait Image extends CustomShader {
         val url: String
         val top: Int
         val left: Int
         val width: Option[Int]
         val height: Option[Int]
         val repeat : Boolean
+        val shader : Shader
         def stamp : StampTexture
 
         def chop(top: Int = 0, left: Int = 0, width: Int = 0, height: Int = 0): Image
@@ -50,16 +57,28 @@ object SpriteCanvas {
         def split(width: Int, frames: Int): Double => Image
     }
 
+
+    private case class MutableCustomShader(
+        animation : Language.Image,
+        var shader : Shader = null
+    ) extends CustomShader
+
     class Loader(canvas: HTMLCanvasElement) {
         val gl = new SpriteGl(canvas)
-        gl.initSpriteProgram()
         private var images = List[MutableImage]()
+        private var animations = List[MutableCustomShader]()
         private var completed = false
 
-        def apply(imageIrl: String, repeat : Boolean = false): Image = {
-            val image = MutableImage(imageIrl, 0, 0, None, None, repeat)
+        def apply(imageUrl: String, repeat : Boolean = false) : Image = {
+            val image = MutableImage(imageUrl, 0, 0, None, None, repeat, gl.spriteShader)
             images ::= image
             image
+        }
+
+        def apply(animation : Language.Image) : CustomShader = {
+            val a = MutableCustomShader(animation)
+            animations ::= a
+            a
         }
 
         def complete: Future[Display] = {
@@ -95,6 +114,11 @@ object SpriteCanvas {
                     image.stamp = stamp
                 }
 
+                animations.foreach{a =>
+                    val shader = gl.initPixelProgram(a.animation)
+                    a.shader = shader
+                }
+
                 new Display(gl)
             }
         }
@@ -106,6 +130,7 @@ object SpriteCanvas {
             width: Option[Int],
             height: Option[Int],
             repeat : Boolean,
+            shader : Shader,
             var stamp : StampTexture = null
         ) extends Image {
 
@@ -133,7 +158,7 @@ object SpriteCanvas {
     }
 
     case class Sprite(
-        var image: Image,
+        var image : CustomShader,
         var x: Double,
         var y: Double,
         var height: Double,
@@ -173,7 +198,7 @@ object SpriteCanvas {
             boundingBox.height * (ry - 0.5)
         }
 
-        def add(image: Image, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
+        def add(image : CustomShader, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
             if (addedSprites < spriteBuffer.length) {
                 val sprite = spriteBuffer(addedSprites)
                 sprite.image = image
@@ -227,7 +252,7 @@ object SpriteCanvas {
             var i = 0
             while(i < addedSprites) {
                 val sprite = spriteBuffer(i)
-                if(segmentSprite.blending != sprite.blending) {
+                if(segmentSprite.blending != sprite.blending || segmentSprite.image.shader != sprite.image.shader) {
                     gl.drawSprites(spriteBuffer, segmentStart, segmentLength)
 
                     segmentStart = i

@@ -1,5 +1,9 @@
 package dk.mzw.pyroman
 
+import dk.mzw.accelemation.Language
+import dk.mzw.accelemation.Language.{Image, R, Time, Vec2, rgba}
+import dk.mzw.accelemation.util.Prelude.gaussianOne
+import dk.mzw.accelemation.Global._
 import dk.mzw.pyroman.PyroMan.{Flame, GameState, Player}
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Display, Loader}
 import org.scalajs.dom
@@ -11,10 +15,18 @@ import scala.util.Random
 
 class PyroMan(load : Loader, keys: Keys) {
 
+    val gaussBall : R => Image = {variance : R => x : R => y : R =>
+        for {
+            d <- Vec2(x, y).magnitude
+            intensity <- gaussianOne(variance, d)
+        } yield rgba(intensity, intensity*0.9, intensity*0.4, 1)
+    }.global("gaussBall")
+
     val topManAnimation = load("assets/topman.png").split(24, 4)
     val topManShootingAnimation = load("assets/topman-shooting.png").split(24, 4)
     val flameBrightImage = load("assets/flame-bright.png")
     val flameRedImage = load("assets/flame-red.png")
+    val ballAnimation = load(gaussBall(0.2))
 
     val clearColor = (0.3, 0.3, 0.3, 1.0)
 
@@ -42,7 +54,7 @@ class PyroMan(load : Loader, keys: Keys) {
 
             if (age < 0.9) {
                 display.add(
-                    image = flameBrightImage,
+                    image = ballAnimation,
                     x = shot.position.x,
                     y = shot.position.y,
                     height = 0.1 + parabola(age, shot.lifetime - 0.3),
