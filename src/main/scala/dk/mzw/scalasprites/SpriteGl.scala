@@ -143,7 +143,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         val to = from + spriteCount // Exclusive
         var spriteIndex = from
         while(spriteIndex < to) {
-            val Sprite(animation, cx, cy, h, angle, _, _, _) = sprites(spriteIndex)
+            val Sprite(animation, cx, cy, w0, h, angle, _, _, _) = sprites(spriteIndex)
 
             animation match {
                 case image : Image =>
@@ -156,7 +156,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
                         val ty = image.stamp.textureTop
                         val tw = image.stamp.textureWidth
                         val th = image.stamp.textureHeight
-                        val w = h * image.stamp.stampWidth.toDouble / image.stamp.stampHeight
+                        val w = if(w0 > 0) w0 else h * image.stamp.stampWidth.toDouble / image.stamp.stampHeight
                         val x1 = (cx - w/2).toFloat
                         val y1 = (cy - h/2).toFloat
                         val x2 = (x1 + w).toFloat
@@ -177,7 +177,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
                 case _ =>
                     val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
                     val c = coordinatesBufferArray
-                    val w = h // TODO
+                    val w = if(w0 > 0) w0 else h
                     val x1 = (cx - w/2).toFloat
                     val y1 = (cy - h/2).toFloat
                     val x2 = (x1 + w).toFloat

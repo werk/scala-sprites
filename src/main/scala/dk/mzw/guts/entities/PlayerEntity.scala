@@ -38,8 +38,12 @@ class PlayerEntity(
     var shooting = false
     var walkingDistance : Double = 0
     val collision = Collision()
+
     var lastSecondaryFire = 0d
-    val coolDown = 1d
+    val shotgunCoolDown = 1d
+
+    var lastTertiaryFire = 0d
+    val laserCoolDown = 3d
 
 
     // Reserved registers
@@ -48,6 +52,7 @@ class PlayerEntity(
 
     var primaryFire = false
     var secondaryFire = false
+    var tertiaryFire = false
     var enter = false
     var keyX : Int = 0
     var keyY : Int = 0
@@ -57,6 +62,7 @@ class PlayerEntity(
     override def onInput(world : WorldEntity, keys : Keys, mouse : Mouse) : Unit = {
         primaryFire = mouse.left
         secondaryFire = keys(Keys.q)
+        tertiaryFire = keys(Keys.e)
 
         // TODO should this be a message ?
         angle = Math.atan2(mouse.y, mouse.x)
@@ -106,7 +112,7 @@ class PlayerEntity(
         }
 
         val now = Guts.secondsElapsed()
-        if(secondaryFire && (now - lastSecondaryFire) >= coolDown) {
+        if(secondaryFire && (now - lastSecondaryFire) >= shotgunCoolDown) {
             lastSecondaryFire = now
             val shotCount = 100
             for(_ <- 0 until shotCount) {
@@ -114,6 +120,11 @@ class PlayerEntity(
                 val s = velocity.magnitude + 15 + Normal()
                 sendMessageTo(world, SpawnPellet(Self(), gunPosition.copy(), a, s))
             }
+        }
+
+        if(tertiaryFire && (now - lastTertiaryFire) >= laserCoolDown) {
+            lastTertiaryFire = now
+            sendMessageTo(world, SpawnLaserBeam(Self(), self.id))
         }
 
         temporary.set(velocity)

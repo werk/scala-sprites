@@ -161,6 +161,7 @@ object SpriteCanvas {
         var image : CustomShader,
         var x: Double,
         var y: Double,
+        var width: Double,
         var height: Double,
         var angle: Double,
         var depth : Double,
@@ -198,12 +199,13 @@ object SpriteCanvas {
             boundingBox.height * (ry - 0.5)
         }
 
-        def add(image : CustomShader, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top) {
+        def add(image : CustomShader, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top, width : Double = 0) {
             if (addedSprites < spriteBuffer.length) {
                 val sprite = spriteBuffer(addedSprites)
                 sprite.image = image
                 sprite.x = x
                 sprite.y = y
+                sprite.width = width
                 sprite.height = height
                 sprite.angle = angle
                 sprite.depth = depth
@@ -211,7 +213,7 @@ object SpriteCanvas {
                 sprite.index = addedSprites
             }
             else {
-                spriteBuffer.push(Sprite(image, x, y, height, angle, depth, blending, addedSprites))
+                spriteBuffer.push(Sprite(image, x, y, width, height, angle, depth, blending, addedSprites))
             }
             addedSprites += 1
         }

@@ -73,6 +73,11 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
         case SpawnPellet(thatSelf, position, angle, speed) =>
             entities.push(new PelletEntity(this, thatSelf, position, angle, speed, sprites.pelletImage))
+        case SpawnLaserBeam(thatSelf, shooterId) =>
+            entities.find(_.self.id == shooterId).foreach { shooter =>
+                val player = shooter.asInstanceOf[PlayerEntity]
+                entities.push(new LaserBeamEntity(this, thatSelf, player, sprites.laserBeamImage))
+            }
         case SpawnTurret(thatSelf, position, angle) =>
             entities.push(new TurretEntity(this, thatSelf, position, angle, sprites.turret))
         case SpawnCorpse(thatSelf, position, angle, height, image) =>
@@ -93,5 +98,6 @@ object GutsWorldEntity {
     case class SpawnTurret(self : Self, position : Vector2d, angle : Double) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
     case class SpawnPellet(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message
+    case class SpawnLaserBeam(self : Self, shooterId : String) extends Message
     case class SpawnCorpse(self : Self, position : Vector2d, angle : Double, height : Double, image : Image) extends Message
 }

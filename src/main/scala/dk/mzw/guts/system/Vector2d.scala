@@ -7,6 +7,7 @@ case class Vector2d(var x : Double, var y : Double) {
     def setAngle(angle : Double, magnitude : Double) : Unit = { this.x = Math.cos(angle) * magnitude; this.y = Math.sin(angle) * magnitude }
     def add(dx : Double, dy : Double) : Unit = { x += dx; y += dy }
     def add(v : Vector2d) : Unit = { x += v.x; y += v.y }
+    def sub(v : Vector2d) : Unit = { x -= v.x; y -= v.y }
     def addMultiplied(v : Vector2d, factor : Double) : Unit = { x += v.x * factor; y += v.y * factor }
     def multiply(a : Double) : Unit = { x *= a; y *= a }
     def unit() : Unit = if(x != 0 || y != 0) multiply(1 / magnitude)
