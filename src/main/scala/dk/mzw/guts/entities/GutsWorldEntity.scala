@@ -67,6 +67,8 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
             entities.push(new SkeletonEntity(this, thatSelf, position, 5, 200, sprites.wolf))
         case SpawnWall(thatSelf, position) =>
             entities.push(new WallEntity(this, thatSelf, position, sprites.wall))
+        case SpawnFloor(thatSelf, position) =>
+            entities.push(new FloorEntity(this, thatSelf, position, sprites.floor))
         case SpawnBarrel(thatSelf, position) =>
             entities.push(new BarrelEntity(this, thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
@@ -76,7 +78,7 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
         case SpawnLaserBeam(thatSelf, shooterId) =>
             entities.find(_.self.id == shooterId).foreach { shooter =>
                 val player = shooter.asInstanceOf[PlayerEntity]
-                entities.push(new LaserBeamEntity(this, thatSelf, player, sprites.laserBeamImage, sprites.flameBrightImage))
+                entities.push(new LaserBeamEntity(this, thatSelf, player, sprites.laserBeamImage, sprites.roundFlame))
             }
         case SpawnTurret(thatSelf, position, angle) =>
             entities.push(new TurretEntity(this, thatSelf, position, angle, sprites.turret))
@@ -94,6 +96,7 @@ object GutsWorldEntity {
     case class SpawnScorpion(self : Self, position : Vector2d) extends Message
     case class SpawnWolf(self : Self, position : Vector2d) extends Message
     case class SpawnWall(self : Self, position : Vector2d) extends Message
+    case class SpawnFloor(self : Self, position : Vector2d) extends Message
     case class SpawnBarrel(self : Self, position : Vector2d) extends Message
     case class SpawnTurret(self : Self, position : Vector2d, angle : Double) extends Message
     case class SpawnFlame(self : Self, position : Vector2d, angle : Double, speed : Double) extends Message

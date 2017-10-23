@@ -36,14 +36,14 @@ object Guts extends JSApp {
             SpawnWall(Self("wall-" + x + "," + y, Entity.localClientId), position)
         }
 
-        /*val floors = for {
+        val floors = for {
             x <- 0 until tileMapWidth
             y <- 0 until tileMapHeight
-            if false // tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
+            if tileMap.get(x + "," + y).contains(TownGenerator.floorTile)
         } yield {
             val position = Vector2d(x * tileMapSize, y * tileMapSize)
             SpawnFloor(Self("floor-" + x + "," + y, Entity.localClientId), position)
-        }*/
+        }
 
         val bunny = SpawnBunny(Self("nananana", Entity.localClientId), Vector2d(0, 0))
 
@@ -53,7 +53,7 @@ object Guts extends JSApp {
 
         val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(1, 1))
 
-        for(m <- walls ++ barrels ++ Seq(bunny, skeleton)) {
+        for(m <- walls ++ floors ++ barrels ++ Seq(bunny, skeleton)) {
             world.sendMessageTo(world, m)
         }
 
