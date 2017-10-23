@@ -12,7 +12,8 @@ class LaserBeamEntity(
     val world : WorldEntity,
     val self : Self,
     val shooter : PlayerEntity,
-    val image : CustomShader
+    val image : CustomShader,
+    val impact : CustomShader
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity {
 
     var lifeTime = 2
@@ -27,8 +28,17 @@ class LaserBeamEntity(
 
     override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
         position.set(shooter.position)
-        velocity.set(Math.cos(shooter.angle) * 1000, Math.sin(shooter.angle) * 1000)
-        move(world, position, size, velocity, delta, collision)
+        val availableDx = Math.cos(shooter.angle) * 10
+        val availableDy = Math.sin(shooter.angle) * 10
+        velocity.set(availableDx, availableDy)
+        move(world, position, size, velocity, 1, collision)
+        val dx = position.x - shooter.position.x
+        val dy = position.y - shooter.position.y
+        val usedDx = dx / availableDx
+        val usedDy = dy / availableDy
+        if(usedDx < usedDy) position.y = shooter.position.y + availableDy * usedDx
+        if(usedDx > usedDy) position.x = shooter.position.x + availableDx * usedDy
+
 
         center.set(position)
         center.sub(shooter.position)
@@ -49,6 +59,15 @@ class LaserBeamEntity(
             width = length,
             height = 0.3,
             angle = shooter.angle,
+            blending = Blending.additive
+        )
+        display.add(
+            image = impact,
+            x = position.x,
+            y = position.y,
+            width = 1,
+            height = 1,
+            angle = 0,
             blending = Blending.additive
         )
     }
