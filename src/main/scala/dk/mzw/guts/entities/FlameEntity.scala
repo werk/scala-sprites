@@ -51,8 +51,8 @@ class FlameEntity(
             blending = Blending.additive
         )
 
-        val brightHeight = 0.05 + parabola(age, lifeTime - 0.3)
-        if(brightHeight > 0.25) {
+        val brightHeight = 0.3 + parabola(age, lifeTime - 0.3)
+        if(brightHeight > 0.3) {
             display.add(
                 image = flameBrightImage,
                 x = position.x,

@@ -11,7 +11,8 @@ class Sprites(loader : Loader) {
         for {
             d <- Vec2(x, y).magnitude
             intensity <- gaussianOne(variance, d)
-        } yield rgba(intensity, intensity*0.9, intensity*0.4, 1)
+            i <- intensity
+        } yield rgba(i, i * 0.9, i * 0.4, 1)
     }
 
     val laserBeam : Image = {x : R => y : R =>
