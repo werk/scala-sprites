@@ -21,12 +21,12 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
                 else if(r < 0.75) Vector2d(Math.random() * boundingBox.width, boundingBox.y1 - 5)
                 else Vector2d(Math.random() * boundingBox.width, boundingBox.y2 + 5)
             r = Math.random()
-            /*val m =
+            val m =
                 if(r < 0.25) SpawnSkeleton(Self(), v)
                 else if(r < 0.50) SpawnZombie(Self(), v)
                 else if(r < 0.75) SpawnScorpion(Self(), v)
                 else SpawnWolf(Self(), v)
-            sendMessageTo(this, m)*/
+            sendMessageTo(this, m)
         }
         super.internalUpdate(boundingBox, mouse, delta)
     }
