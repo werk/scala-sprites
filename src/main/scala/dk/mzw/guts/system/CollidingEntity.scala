@@ -10,7 +10,7 @@ trait CollidingEntity extends PawnEntity {
 
     def canCollideWith(entity : Entity) : Boolean = true
 
-    def move(world : WorldEntity, position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision) : Unit = {
+    def move(world : WorldEntity, position : Vector2d, size : Vector2d, velocity : Vector2d, factor : Double, collision : Collision, maxMovement : Double = 100) : Unit = {
 
         val dx = velocity.x * factor
         val dy = velocity.y * factor
@@ -169,7 +169,6 @@ object CollidingEntity {
 
     case class Collision(var hitX : Boolean = false, var hitY : Boolean = false)
 
-    val maxMovement = 100
     val moveEpsilon = 0.0001
     val gapEpsilon = 0.00001
 

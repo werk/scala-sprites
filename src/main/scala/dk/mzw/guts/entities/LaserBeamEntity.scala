@@ -31,7 +31,7 @@ class LaserBeamEntity(
         val availableDx = Math.cos(shooter.angle) * 10
         val availableDy = Math.sin(shooter.angle) * 10
         velocity.set(availableDx, availableDy)
-        move(world, position, size, velocity, 1, collision)
+        move(world, position, size, velocity, 1, collision, 0.1)
         val dx = position.x - shooter.position.x
         val dy = position.y - shooter.position.y
         val usedDx = dx / availableDx
