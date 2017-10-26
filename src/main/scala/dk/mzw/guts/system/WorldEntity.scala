@@ -30,7 +30,6 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
             entities(i) match {
                 case e : ReceivingEntity =>
                     if(e.internalMessageQueue.length != 0) {
-                        //println("Messages for " + e.self + ":")
                         var j = 0
                         while(j < e.internalMessageQueue.length) {
                             e.onMessage(e.internalMessageQueue(j))

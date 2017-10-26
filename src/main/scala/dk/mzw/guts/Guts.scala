@@ -6,9 +6,10 @@ import dk.mzw.guts.procedural.TownGenerator
 import dk.mzw.guts.system.Entity.Self
 import dk.mzw.guts.system.{Entity, Vector2d}
 import dk.mzw.guts.utility.Mouse
+import dk.mzw.scalasprites.Measure
 import dk.mzw.scalasprites.SpriteCanvas.Loader
 import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLCanvasElement
+import org.scalajs.dom.raw.{HTMLCanvasElement, HTMLElement}
 
 import scala.scalajs.js.JSApp
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,19 +58,26 @@ object Guts extends JSApp {
             world.sendMessageTo(world, m)
         }
 
+        val measureElement = dom.document.getElementById("measure").asInstanceOf[HTMLElement]
+        def showMeasure(text : String): Unit = {
+            measureElement.textContent = text
+        }
+
+
         loader.complete.foreach { display =>
             val mouse = new Mouse(canvas, display.gameCoordinatesX, display.gameCoordinatesY)
 
-            println("Loader complete")
-
             def loop(last : Double) : Unit = {
                 val now = secondsElapsed()
-                val delta = now - last
-                if(delta < 1) {
-                    world.internalUpdate(display.boundingBox, mouse, delta)
-                    world.internalDraw(display, bunny.position.x, bunny.position.y)
+                Measure("loop") {
+                    val delta = now - last
+                    if (delta < 1) {
+                        Measure("internalUpdate")(world.internalUpdate(display.boundingBox, mouse, delta))
+                        Measure("internalDraw")(world.internalDraw(display, bunny.position.x, bunny.position.y))
+                    }
                 }
-                dom.window.requestAnimationFrame{_ => loop(now)}
+                Measure.whenResult(showMeasure)
+                dom.window.requestAnimationFrame { _ => loop(now) }
             }
             loop(secondsElapsed() - 0.01)
         }

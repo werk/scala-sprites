@@ -11,7 +11,6 @@ class Mouse(canvas : HTMLCanvasElement, gameCoordinatesX : Double => Double, gam
     canvas.onmousemove = {e : MouseEvent => {
         x = gameCoordinatesX(e.pageX)
         y = gameCoordinatesY(e.pageY)
-        println(s"(${e.pageX}, ${e.pageY}) => ($x, $y)")
     }}
 
     canvas.onmouseout = {_ : MouseEvent => {

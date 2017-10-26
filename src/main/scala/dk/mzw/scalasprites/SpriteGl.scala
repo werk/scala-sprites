@@ -123,7 +123,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         offsetY = -centerY * scaleY
     }
 
-    def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) {
+    def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = Measure("drawSprites"){
         if(spriteCount > vertexBuffersSpriteSize) resizeBuffers(spriteCount)
 
         // Blending
@@ -218,14 +218,14 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
         gl.vertexAttribPointer(shader.coordinatesAttributeLocation, coordinatesBufferItemSize, FLOAT, normalized = false, 0, 0)
         gl.enableVertexAttribArray(shader.coordinatesAttributeLocation)
-        gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW)
+        Measure("bufferData coordinates") (gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW))
 
         val fromR = from * vertexPerSprite * rotationsBufferItemSize
         val toR = to * vertexPerSprite * rotationsBufferItemSize
         gl.bindBuffer(ARRAY_BUFFER, rotationBuffer)
         gl.vertexAttribPointer(shader.rotationsAttributeLocation, rotationsBufferItemSize, FLOAT, normalized = false, 0, 0)
         gl.enableVertexAttribArray(shader.rotationsAttributeLocation)
-        gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW)
+        Measure("bufferData rotations") (gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW))
 
         gl.drawArrays(TRIANGLES, 0, spriteCount * vertexPerSprite)
     }
