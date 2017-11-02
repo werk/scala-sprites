@@ -3,6 +3,7 @@ package dk.mzw.guts.system
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.utility.Mouse
 import dk.mzw.pyroman.Keys
+import dk.mzw.scalasprites.Measure
 import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Display}
 
 import scala.scalajs.js
@@ -17,16 +18,16 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
 
     def internalUpdate(boundingBox : BoundingBox, mouse : Mouse, delta : Double) : Unit = {
         var i = 0
-        while(i < entities.length) {
+        Measure("Controlled") (while(i < entities.length) {
             entities(i) match {
                 case e : ControlledEntity if e.self.clientId == Entity.localClientId =>
                     e.onInput(this, keys, mouse)
                 case _ =>
             }
             i += 1
-        }
+        })
         i = 0
-        while(i < entities.length) {
+        Measure("Receiving") (while(i < entities.length) {
             entities(i) match {
                 case e : ReceivingEntity =>
                     if(e.internalMessageQueue.length != 0) {
@@ -40,11 +41,11 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
                 case _ =>
             }
             i += 1
-        }
+        })
         solidEntities.length = 0
         hittableEntities.length = 0
         i = 0
-        while(i < entities.length) {
+        Measure("Solid Hittable") (while(i < entities.length) {
             entities(i) match {
                 case e : SolidEntity => solidEntities.push(e)
                 case _ =>
@@ -54,19 +55,19 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
                 case _ =>
             }
             i += 1
-        }
+        })
         i = 0
-        while(i < entities.length) {
+        Measure("Updateable and Hitting") (while(i < entities.length) {
             entities(i) match {
-                case e : UpdateableEntity => e.onUpdate(this, delta)
+                case e : UpdateableEntity => Measure("onUpdate") (e.onUpdate(this, delta))
                 case _ =>
             }
             entities(i) match {
-                case e : HittingEntity => e.internalEmitHits(this, hittableEntities)
+                case e : HittingEntity => Measure("internalEmitHits") (e.internalEmitHits(this, hittableEntities))
                 case _ =>
             }
             i += 1
-        }
+        })
     }
 
     private val clearColor = (0.3, 0.3, 0.3, 1.0)

@@ -7,6 +7,12 @@ object Measure {
     private var currentTimer = new Timer
     private var t1 = now()
 
+    def frame[R](action : => R) : R = {
+        val r = currentTimer(action)
+        currentTimer.newFrame()
+        r
+    }
+
     def apply[R](label : String) (action : => R) : R = {
         val lastTimer = currentTimer
         currentTimer = currentTimer.subTimer(label)
@@ -34,9 +40,17 @@ object Measure {
 
 private class Timer {
     val timers = mutable.Map[String, Timer]()
-    var time = 0d
-    var maxTime = 0d
+    var totalTime = 0d
+    var totalFrameTime = 0d
+    var maxFrameTime = 0d
     var invocations = 0
+
+    def newFrame() : Unit = {
+        totalTime += totalFrameTime
+        maxFrameTime = Math.max(maxFrameTime, totalFrameTime)
+        totalFrameTime = 0
+        timers.values.foreach(_.newFrame())
+    }
 
     def subTimer(label: String): Timer = timers.getOrElseUpdate(label, new Timer)
 
@@ -44,17 +58,23 @@ private class Timer {
         val t1 = Measure.now()
         val r = action
         val dt = Measure.now() - t1
-        time += dt
-        maxTime = Math.max(maxTime, dt)
+        totalFrameTime += dt
+        maxFrameTime = Math.max(maxFrameTime, dt)
         invocations += 1
         r
     }
 
-    def showList(indent: String): List[String] = {
-        timers.toList.flatMap { case (label, timer) =>
-            f"$indent$label x ${timer.invocations}: ${timer.time / timer.invocations}%.2fms ${timer.maxTime}%.2fms" :: timer.showList("  " + indent)
-        }
+    private def show(indentation : String, label : String, frames : Int) : String = {
+        val x = invocations / frames
+        (left(indentation + label + (if(x > 1) s" * $x" else ""), 32) +
+            right(ms(totalTime / invocations), 10) + right(ms(maxFrameTime), 9) ::
+            timers.toList.map { case (l, timer) => timer.show("  " + indentation, l, frames) }).mkString("\n")
     }
 
-    def show : String = showList("").mkString("\n")
+    def show : String = show("", "Frame", invocations)
+
+    def ms(t : Double) = f"$t%.1f ms"
+    def left(s : String, width : Int) = s + " " * (width - s.length)
+    def right(s : String, width : Int) = " " * (width - s.length) + s
+
 }

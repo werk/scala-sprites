@@ -218,14 +218,14 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         gl.bindBuffer(ARRAY_BUFFER, coordinatesBuffer)
         gl.vertexAttribPointer(shader.coordinatesAttributeLocation, coordinatesBufferItemSize, FLOAT, normalized = false, 0, 0)
         gl.enableVertexAttribArray(shader.coordinatesAttributeLocation)
-        Measure("bufferData coordinates") (gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW))
+        gl.bufferData(ARRAY_BUFFER, coordinatesBufferArray.subarray(fromC, toC), DYNAMIC_DRAW)
 
         val fromR = from * vertexPerSprite * rotationsBufferItemSize
         val toR = to * vertexPerSprite * rotationsBufferItemSize
         gl.bindBuffer(ARRAY_BUFFER, rotationBuffer)
         gl.vertexAttribPointer(shader.rotationsAttributeLocation, rotationsBufferItemSize, FLOAT, normalized = false, 0, 0)
         gl.enableVertexAttribArray(shader.rotationsAttributeLocation)
-        Measure("bufferData rotations") (gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW))
+        gl.bufferData(ARRAY_BUFFER, rotationsBufferArray.subarray(fromR, toR), DYNAMIC_DRAW)
 
         gl.drawArrays(TRIANGLES, 0, spriteCount * vertexPerSprite)
     }

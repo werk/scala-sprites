@@ -69,7 +69,7 @@ object Guts extends JSApp {
 
             def loop(last : Double) : Unit = {
                 val now = secondsElapsed()
-                Measure("loop") {
+                Measure.frame {
                     val delta = now - last
                     if (delta < 1) {
                         Measure("internalUpdate")(world.internalUpdate(display.boundingBox, mouse, delta))
