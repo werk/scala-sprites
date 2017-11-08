@@ -16,17 +16,15 @@ trait HittingEntity extends PawnEntity {
         val y2 = position.y + size.y * 0.5
         var i = 0
         while(i < entities.length) {
-            Measure("test hit") {
-                val entity = entities(i)
-                val x3 = entity.position.x - entity.size.x * 0.5
-                val x4 = entity.position.x + entity.size.x * 0.5
-                val y3 = entity.position.y - entity.size.y * 0.5
-                val y4 = entity.position.y + entity.size.y * 0.5
-                if (x1 <= x4 && x3 <= x2 && y1 <= y4 && y3 <= y2) {
-                    onHit(world, entity)
-                }
-                i += 1
+            val entity = entities(i)
+            val x3 = entity.position.x - entity.size.x * 0.5
+            val x4 = entity.position.x + entity.size.x * 0.5
+            val y3 = entity.position.y - entity.size.y * 0.5
+            val y4 = entity.position.y + entity.size.y * 0.5
+            if (x1 <= x4 && x3 <= x2 && y1 <= y4 && y3 <= y2) {
+                onHit(world, entity)
             }
+            i += 1
         }
     }
 

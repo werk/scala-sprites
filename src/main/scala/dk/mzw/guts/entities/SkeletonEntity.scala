@@ -7,7 +7,7 @@ import dk.mzw.guts.entities.SkeletonEntity.SetVelocity
 import dk.mzw.guts.system.CollidingEntity.Collision
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.system._
-import dk.mzw.scalasprites.SpriteCanvas
+import dk.mzw.scalasprites.{Measure, SpriteCanvas}
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
 
 class SkeletonEntity(
@@ -38,7 +38,7 @@ class SkeletonEntity(
         case m => super.onMessage(m)
     }
 
-    override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
+    override def onUpdate(world : WorldEntity, delta : Double) : Unit =  Measure("Skeleton") {
         move(world, position, size, velocity, delta, collision)
         if(collision.hitX) velocity.y *= 0.2
         if(collision.hitY) velocity.x *= 0.2

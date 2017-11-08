@@ -104,23 +104,21 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         }
     }
 
-    var scaleX = 1d
-    var scaleY = 1d
-    var offsetX = 0d
-    var offsetY = 0d
+    var scale = js.Array[Double](1d, 1d)
+    var offset = js.Array[Double](0d, 0d)
 
     def resize(height : Double, centerX : Double, centerY : Double) : Unit = {
         SpriteGl.resize(gl)
         val aspectRatio = gl.canvas.clientHeight.toDouble / gl.canvas.clientWidth
-        scaleY = 2 / height
-        scaleX = scaleY * aspectRatio
+        scale(1) = 2 / height
+        scale(0) = scale(1) * aspectRatio
         val width = height / aspectRatio
         mutableBoundingBox.x1 = centerX - width * 0.5
         mutableBoundingBox.x2 = centerX + width * 0.5
         mutableBoundingBox.y1 = centerY - height * 0.5
         mutableBoundingBox.y2 = centerY + height * 0.5
-        offsetX = -centerX * scaleX
-        offsetY = -centerY * scaleY
+        offset(0) = -centerX * scale(0)
+        offset(1) = -centerY * scale(1)
     }
 
     def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = Measure("drawSprites"){
@@ -137,8 +135,8 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
 
         val shader = sprites(from).image.shader
         gl.useProgram(shader.program)
-        gl.uniform2fv(shader.scaleUniformLocation, js.Array[Double](scaleX, scaleY)) // TODO avoid allocation
-        gl.uniform2fv(shader.offsetUniformLocation, js.Array[Double](offsetX, offsetY))
+        gl.uniform2fv(shader.scaleUniformLocation, scale)
+        gl.uniform2fv(shader.offsetUniformLocation, offset)
 
         val to = from + spriteCount // Exclusive
         var spriteIndex = from

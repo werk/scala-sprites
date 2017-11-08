@@ -67,7 +67,11 @@ object Guts extends JSApp {
         loader.complete.foreach { display =>
             val mouse = new Mouse(canvas, display.gameCoordinatesX, display.gameCoordinatesY)
 
-            def loop(last : Double) : Unit = {
+            // This crazy stuff is done to avoid creating and allocating a new anonymous function for each call to requestAnimationFrame
+            var loopF : Double => Unit = null
+
+            var last : Double = secondsElapsed() - 0.01
+            def loop(_t : Double) : Unit = {
                 val now = secondsElapsed()
                 Measure.frame {
                     val delta = now - last
@@ -77,9 +81,11 @@ object Guts extends JSApp {
                     }
                 }
                 Measure.whenResult(showMeasure)
-                dom.window.requestAnimationFrame { _ => loop(now) }
+                last = now
+                dom.window.requestAnimationFrame(loopF)
             }
-            loop(secondsElapsed() - 0.01)
+            loopF = loop
+            loop(0)
         }
     }
 

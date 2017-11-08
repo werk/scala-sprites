@@ -1,5 +1,6 @@
 package dk.mzw.guts.system
 
+import dk.mzw.guts.entities.SkeletonEntity
 import dk.mzw.guts.system.Entity.{Message, Self}
 import dk.mzw.guts.utility.Mouse
 import dk.mzw.pyroman.Keys
@@ -59,6 +60,10 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
         i = 0
         Measure("Updateable and Hitting") (while(i < entities.length) {
             entities(i) match {
+                case e : UpdateableEntity with PawnEntity =>
+                    if (e.position.x > boundingBox.x1 - 10 && e.position.x < boundingBox.x2 + 10 &&
+                        e.position.y > boundingBox.y1 - 10 && e.position.y < boundingBox.y2 + 10
+                    ) Measure("onUpdate Pawn") (e.onUpdate(this, delta))
                 case e : UpdateableEntity => Measure("onUpdate") (e.onUpdate(this, delta))
                 case _ =>
             }
