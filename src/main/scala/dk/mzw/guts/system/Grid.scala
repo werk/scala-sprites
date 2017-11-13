@@ -4,7 +4,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 class Grid[T <: PawnEntity] {
-    private var grid = js.Dictionary[T | js.Array[T]]()
+    private val grid = js.Dictionary[T | js.Array[T]]()
     private val cellFactor = Vector2d(1 / 1, 1 / 1)
     private val temporary = js.Array[T]()
 
