@@ -38,7 +38,7 @@ class SkeletonEntity(
         case m => super.onMessage(m)
     }
 
-    override def onUpdate(world : WorldEntity, delta : Double) : Unit =  Measure("Skeleton") {
+    override def onUpdate(world : WorldEntity, delta : Double) : Unit = {
         move(world, position, size, velocity, delta, collision)
         if(collision.hitX) velocity.y *= 0.2
         if(collision.hitY) velocity.x *= 0.2

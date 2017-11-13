@@ -68,7 +68,7 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
                 case _ =>
             }
             entities(i) match {
-                case e : HittingEntity => Measure("internalEmitHits") (e.internalEmitHits(this, hittableEntities))
+                case e : HittingEntity => e.internalEmitHits(this, hittableEntities)
                 case _ =>
             }
             i += 1
