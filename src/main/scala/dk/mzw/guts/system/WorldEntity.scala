@@ -57,6 +57,7 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
             }
             i += 1
         })
+        Measure("GridEntity.rebuild") (Grid.rebuild(solidEntities))
         i = 0
         Measure("Updateable and Hitting") (while(i < entities.length) {
             entities(i) match {
