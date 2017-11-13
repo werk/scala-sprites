@@ -14,18 +14,18 @@ object Grid {
     def find(from : Vector2d, velocity : Vector2d, delta : Double, size : Vector2d) = {
         to.set(from)
         to.addMultiplied(velocity, delta)
-        val x1 = ((from.x - size.x) * Grid.cellFactor.x).toInt
-        val x2 = ((to.x + size.x) * Grid.cellFactor.x).toInt
-        val y1 = ((from.y - size.y) * Grid.cellFactor.y).toInt
-        val y2 = ((to.y + size.y) * Grid.cellFactor.y).toInt
-        var x = x1
-        var y = y1
+        val x1 = Math.floor((from.x - size.x * 0.5) * Grid.cellFactor.x - CollidingEntity.gapEpsilon).toInt
+        val x2 = Math.ceil((to.x + size.x * 0.5) * Grid.cellFactor.x + CollidingEntity.gapEpsilon).toInt
+        val y1 = Math.floor((from.y - size.y * 0.5) * Grid.cellFactor.y - CollidingEntity.gapEpsilon).toInt
+        val y2 = Math.ceil((to.y + size.y * 0.5) * Grid.cellFactor.y + CollidingEntity.gapEpsilon).toInt
         foundCount = 0
+        var x = x1
         while(x <= x2) {
+            var y = y1
             while(y <= y2) {
                 val k = x + "," + y
                 if(Grid.grid.contains(k)) {
-                    var entities = Grid.grid(k)
+                    val entities = Grid.grid(k)
                     var i = 0
                     while(i < entities.length) {
                         found(foundCount) = entities(i)
@@ -44,13 +44,13 @@ object Grid {
         var i = 0
         while(i < entities.length) {
             val e = entities(i)
-            val x1 = ((e.position.x - e.size.x) * cellFactor.x).toInt
-            val x2 = ((e.position.x + e.size.x) * cellFactor.x).toInt
-            val y1 = ((e.position.y - e.size.y) * cellFactor.y).toInt
-            val y2 = ((e.position.y + e.size.y) * cellFactor.y).toInt
+            val x1 = Math.floor((e.position.x - e.size.x * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+            val x2 = Math.ceil((e.position.x + e.size.x * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+            val y1 = Math.floor((e.position.y - e.size.y * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.y).toInt
+            val y2 = Math.ceil((e.position.y + e.size.y * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.y).toInt
             var x = x1
-            var y = y1
             while(x <= x2) {
+                var y = y1
                 while(y <= y2) {
                     val k = x + "," + y
                     if(grid.contains(k)) {

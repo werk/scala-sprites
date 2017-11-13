@@ -22,7 +22,6 @@ trait CollidingEntity extends PawnEntity {
             return
         }
 
-        val entities = world.solidEntities
         val r1 = position
         var hitX : Entity = null
         var hitY : Entity = null
