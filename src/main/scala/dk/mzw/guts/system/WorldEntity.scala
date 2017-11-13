@@ -15,6 +15,9 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
     val hittableEntities = js.Array[HittableEntity]()
     val entities = js.Array[Entity](this)
 
+    val solidGrid = new Grid[SolidEntity]()
+    val hittableGrid = new Grid[HittableEntity]()
+
     val keys = new Keys()
 
     def internalUpdate(boundingBox : BoundingBox, mouse : Mouse, delta : Double) : Unit = {
@@ -57,7 +60,10 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
             }
             i += 1
         })
-        Measure("GridEntity.rebuild") (Grid.rebuild(solidEntities))
+        Measure("Grid.rebuild") {
+            solidGrid.rebuild(solidEntities)
+            hittableGrid.rebuild(hittableEntities)
+        }
         i = 0
         Measure("Updateable and Hitting") (while(i < entities.length) {
             entities(i) match {
@@ -65,7 +71,9 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
                     if (e.position.x > boundingBox.x1 - 10 && e.position.x < boundingBox.x2 + 10 &&
                         e.position.y > boundingBox.y1 - 10 && e.position.y < boundingBox.y2 + 10
                     ) Measure("onUpdate Pawn") (e.onUpdate(this, delta))
-                case e : UpdateableEntity => Measure("onUpdate") (e.onUpdate(this, delta))
+                    //solidGrid.add(e)
+                case e : UpdateableEntity =>
+                    Measure("onUpdate") (e.onUpdate(this, delta))
                 case _ =>
             }
             entities(i) match {

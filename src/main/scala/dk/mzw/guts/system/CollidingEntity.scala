@@ -26,7 +26,7 @@ trait CollidingEntity extends PawnEntity {
         var hitX : Entity = null
         var hitY : Entity = null
 
-        Grid.find(position, velocity, factor, size)
+        world.solidGrid.find(position, velocity, factor, size)
 
         if(dx < -moveEpsilon) {
             val x0 = r1.x - size.x * 0.5
@@ -34,9 +34,9 @@ trait CollidingEntity extends PawnEntity {
             val a1 = r1.y - size.y * 0.5
             val a2 = r1.y + size.y * 0.5
             var i = 0
-            while(i < Grid.foundCount) {
+            while(i < world.solidGrid.foundCount) {
                 Measure.count("collide -dx")
-                Grid.found(i) match {
+                world.solidGrid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x + r2.size.x * 0.5
                         if(x2 <= x0) {
@@ -60,9 +60,9 @@ trait CollidingEntity extends PawnEntity {
             val a1 = r1.y - size.y * 0.5
             val a2 = r1.y + size.y * 0.5
             var i = 0
-            while(i < Grid.foundCount) {
+            while(i < world.solidGrid.foundCount) {
                 Measure.count("collide +dx")
-                Grid.found(i) match {
+                world.solidGrid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x - r2.size.x * 0.5
                         if (x2 >= x0) {
@@ -87,9 +87,9 @@ trait CollidingEntity extends PawnEntity {
             val a1 = r1.x - size.x * 0.5
             val a2 = r1.x + size.x * 0.5
             var i = 0
-            while(i < Grid.foundCount) {
+            while(i < world.solidGrid.foundCount) {
                 Measure.count("collide -dy")
-                Grid.found(i) match {
+                world.solidGrid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y + r2.size.y * 0.5
                         if (y2 <= y0) {
@@ -113,9 +113,9 @@ trait CollidingEntity extends PawnEntity {
             val a1 = r1.x - size.x * 0.5
             val a2 = r1.x + size.x * 0.5
             var i = 0
-            while(i < Grid.foundCount) {
+            while(i < world.solidGrid.foundCount) {
                 Measure.count("collide +dy")
-                Grid.found(i) match {
+                world.solidGrid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y - r2.size.y * 0.5
                         if (y2 >= y0) {
