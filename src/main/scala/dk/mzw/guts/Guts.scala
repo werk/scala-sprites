@@ -46,15 +46,23 @@ object Guts extends JSApp {
             SpawnFloor(Self("floor-" + x + "," + y, Entity.localClientId), position)
         }
 
-        val bunny = SpawnBunny(Self("nananana", Entity.localClientId), Vector2d(0, 0))
+        val player = SpawnPlayer(Self("nananana", Entity.localClientId), Vector2d(0, 0))
 
         val barrels = for(_ <- 1 to 20) yield {
             SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 100, Math.random() * 100))
         }
 
-        val skeleton = SpawnSkeleton(Self(Math.random().toString, Entity.localClientId), Vector2d(1, 1))
+        val skeletons = for(_ <- 1 to 100) yield {
+            var r = Math.random()
+            val v = Vector2d((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100)
+            r = Math.random()
+            if(r < 0.25) SpawnSkeleton(Self(), v)
+            else if(r < 0.50) SpawnZombie(Self(), v)
+            else if(r < 0.75) SpawnScorpion(Self(), v)
+            else SpawnWolf(Self(), v)
+        }
 
-        for(m <- walls ++ floors ++ barrels ++ Seq(bunny, skeleton)) {
+        for(m <- walls ++ floors ++ barrels ++ skeletons ++ Seq(player)) {
             world.sendMessageTo(world, m)
         }
 
@@ -77,7 +85,7 @@ object Guts extends JSApp {
                     val delta = now - last
                     if (delta < 1) {
                         Measure("internalUpdate")(world.internalUpdate(display.boundingBox, mouse, delta))
-                        Measure("internalDraw")(world.internalDraw(display, bunny.position.x, bunny.position.y))
+                        Measure("internalDraw")(world.internalDraw(display, player.position.x, player.position.y))
                     }
                 }
                 Measure.whenResult(showMeasure)
