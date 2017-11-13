@@ -32,7 +32,7 @@ class Grid[T <: PawnEntity] {
                         var seen = false
                         var j = 0
                         while(j < foundCount) {
-                            seen = seen || (found(i) == e)
+                            seen = seen || (found(j) == e)
                             j += 1
                         }
                         if(!seen) {
