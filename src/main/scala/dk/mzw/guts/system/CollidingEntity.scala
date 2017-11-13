@@ -4,6 +4,7 @@ import dk.mzw.guts.system.CollidingEntity.Collision
 
 import scala.scalajs.js
 import CollidingEntity._
+import dk.mzw.scalasprites.Measure
 
 /** An entity that gets blocked by other solid entities */
 trait CollidingEntity extends PawnEntity {
@@ -35,6 +36,7 @@ trait CollidingEntity extends PawnEntity {
             val a2 = r1.y + size.y * 0.5
             var i = 0
             while(i < Grid.foundCount) {
+                Measure.count("collide -dx")
                 Grid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x + r2.size.x * 0.5
@@ -60,6 +62,7 @@ trait CollidingEntity extends PawnEntity {
             val a2 = r1.y + size.y * 0.5
             var i = 0
             while(i < Grid.foundCount) {
+                Measure.count("collide +dx")
                 Grid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val x2 = r2.position.x - r2.size.x * 0.5
@@ -86,6 +89,7 @@ trait CollidingEntity extends PawnEntity {
             val a2 = r1.x + size.x * 0.5
             var i = 0
             while(i < Grid.foundCount) {
+                Measure.count("collide -dy")
                 Grid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y + r2.size.y * 0.5
@@ -111,6 +115,7 @@ trait CollidingEntity extends PawnEntity {
             val a2 = r1.x + size.x * 0.5
             var i = 0
             while(i < Grid.foundCount) {
+                Measure.count("collide +dy")
                 Grid.found(i) match {
                     case r2 : SolidEntity if r2 != r1 && canCollideWith(r2) =>
                         val y2 = r2.position.y - r2.size.y * 0.5

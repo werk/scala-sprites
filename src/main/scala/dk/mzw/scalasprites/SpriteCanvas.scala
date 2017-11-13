@@ -1,7 +1,6 @@
 package dk.mzw.scalasprites
 
 import dk.mzw.accelemation.Language
-import dk.mzw.accelemation.Language.Animation
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLRenderingContext => GL}

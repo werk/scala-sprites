@@ -16,6 +16,7 @@ trait HittingEntity extends PawnEntity {
         val y2 = position.y + size.y * 0.5
         var i = 0
         while(i < entities.length) {
+            Measure.count("internalEmitHits loop")
             val entity = entities(i)
             val x3 = entity.position.x - entity.size.x * 0.5
             val x4 = entity.position.x + entity.size.x * 0.5

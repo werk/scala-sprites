@@ -6,10 +6,18 @@ import scala.scalajs.js
 object Measure {
     private var currentTimer = new Timer
     private var t1 = now()
+    private var counts = mutable.Map[String, Int]()
+
+    var frames = 0
+
+    def count(label : String) = {
+        counts.put(label, counts.getOrElse(label, 0) + 1)
+    }
 
     def frame[R](action : => R) : R = {
         val r = currentTimer(action)
         currentTimer.newFrame()
+        frames += 1
         r
     }
 
@@ -30,9 +38,12 @@ object Measure {
     }
 
     private def resetAndShow() : String = {
-        val s = currentTimer.show
+        val timers = currentTimer.show
+        val counters = counts.map{case (label, c) => f"\n$label: ${c.toDouble / frames}%.1f"}.mkString
         currentTimer = new Timer
-        s
+        frames = 0
+        counts = mutable.Map()
+        timers + "\n" + counters
     }
 
     def now() = js.Dynamic.global.performance.now().asInstanceOf[Double]
