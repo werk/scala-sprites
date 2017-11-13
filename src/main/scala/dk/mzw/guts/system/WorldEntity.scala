@@ -71,7 +71,10 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
                     if (e.position.x > boundingBox.x1 - 10 && e.position.x < boundingBox.x2 + 10 &&
                         e.position.y > boundingBox.y1 - 10 && e.position.y < boundingBox.y2 + 10
                     ) Measure("onUpdate Pawn") (e.onUpdate(this, delta))
-                    //solidGrid.add(e)
+                    e match {
+                        case e1 : SolidEntity => solidGrid.add(e1)
+                        case e1 : HittableEntity => hittableGrid.add(e1)
+                    }
                 case e : UpdateableEntity =>
                     Measure("onUpdate") (e.onUpdate(this, delta))
                 case _ =>

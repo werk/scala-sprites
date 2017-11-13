@@ -28,8 +28,17 @@ class Grid[T <: PawnEntity] {
                     val entities = grid(k)
                     var i = 0
                     while(i < entities.length) {
-                        found(foundCount) = entities(i)
-                        foundCount += 1
+                        val e = entities(i)
+                        var seen = false
+                        var j = 0
+                        while(j < foundCount) {
+                            seen = seen || (found(i) == e)
+                            j += 1
+                        }
+                        if(!seen) {
+                            found(foundCount) = e
+                            foundCount += 1
+                        }
                         i += 1
                     }
                 }
