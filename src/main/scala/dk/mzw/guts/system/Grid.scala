@@ -16,10 +16,10 @@ class Grid[T <: PawnEntity] {
     def find(from : Vector2d, velocity : Vector2d, delta : Double, size : Vector2d) = {
         to.set(from)
         to.addMultiplied(velocity, delta)
-        val x1 = Math.floor((from.x - size.x * 0.5) * cellFactor.x - CollidingEntity.gapEpsilon).toInt
-        val x2 = Math.ceil((to.x + size.x * 0.5) * cellFactor.x + CollidingEntity.gapEpsilon).toInt
-        val y1 = Math.floor((from.y - size.y * 0.5) * cellFactor.y - CollidingEntity.gapEpsilon).toInt
-        val y2 = Math.ceil((to.y + size.y * 0.5) * cellFactor.y + CollidingEntity.gapEpsilon).toInt
+        val x1 = ((from.x - size.x * 0.5) * cellFactor.x - CollidingEntity.gapEpsilon).toInt
+        val x2 = ((to.x + size.x * 0.5) * cellFactor.x + CollidingEntity.gapEpsilon).toInt
+        val y1 = ((from.y - size.y * 0.5) * cellFactor.y - CollidingEntity.gapEpsilon).toInt
+        val y2 = ((to.y + size.y * 0.5) * cellFactor.y + CollidingEntity.gapEpsilon).toInt
         foundCount = 0
         var x = x1
         while(x <= x2) {
@@ -29,7 +29,7 @@ class Grid[T <: PawnEntity] {
                 if(grid.contains(k)) {
                     val entities = grid(k) match {
                         case g : js.Array[T] => g
-                        case g : T => temporary(0) = g; temporary
+                        case g => temporary(0) = g.asInstanceOf[T]; temporary
                     }
                     var i = 0
                     while(i < entities.length) {
@@ -64,10 +64,10 @@ class Grid[T <: PawnEntity] {
     }
 
     def add(e : T) = {
-        val x1 = Math.floor((e.position.x - e.size.x * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.x).toInt
-        val x2 = Math.ceil((e.position.x + e.size.x * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.x).toInt
-        val y1 = Math.floor((e.position.y - e.size.y * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.y).toInt
-        val y2 = Math.ceil((e.position.y + e.size.y * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.y).toInt
+        val x1 = ((e.position.x - e.size.x * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+        val x2 = ((e.position.x + e.size.x * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+        val y1 = ((e.position.y - e.size.y * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.y).toInt
+        val y2 = ((e.position.y + e.size.y * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.y).toInt
         var x = x1
         while(x <= x2) {
             var y = y1
@@ -76,7 +76,7 @@ class Grid[T <: PawnEntity] {
                 if(grid.contains(k)) {
                     grid(k) match {
                         case g : js.Array[T] => g.push(e)
-                        case g : T => grid(k) = js.Array(g, e)
+                        case g => grid(k) = js.Array(g.asInstanceOf[T], e)
                     }
                 } else {
                     grid(k) = e
