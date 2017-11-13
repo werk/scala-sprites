@@ -1,10 +1,12 @@
 package dk.mzw.guts.system
 
 import scala.scalajs.js
+import scala.scalajs.js.|
 
 class Grid[T <: PawnEntity] {
-    private var grid = js.Dictionary[js.Array[T]]()
+    private var grid = js.Dictionary[T | js.Array[T]]()
     private val cellFactor = Vector2d(1 / 1, 1 / 1)
+    private val temporary = js.Array[T]()
 
     var found = js.Array[T]()
     var foundCount = 0
@@ -25,7 +27,10 @@ class Grid[T <: PawnEntity] {
             while(y <= y2) {
                 val k = x + "," + y
                 if(grid.contains(k)) {
-                    val entities = grid(k)
+                    val entities = grid(k) match {
+                        case g : js.Array[T] => g
+                        case g : T => temporary(0) = g; temporary
+                    }
                     var i = 0
                     while(i < entities.length) {
                         val e = entities(i)
@@ -49,7 +54,7 @@ class Grid[T <: PawnEntity] {
     }
 
     def rebuild(entities : js.Array[T]) = {
-        grid = js.Dictionary[js.Array[T]]()
+        grid = js.Dictionary[T | js.Array[T]]()
         var i = 0
         while(i < entities.length) {
             val e = entities(i)
@@ -69,9 +74,12 @@ class Grid[T <: PawnEntity] {
             while(y <= y2) {
                 val k = x + "," + y
                 if(grid.contains(k)) {
-                    grid(k).push(e)
+                    grid(k) match {
+                        case g : js.Array[T] => g.push(e)
+                        case g : T => grid(k) = js.Array(g, e)
+                    }
                 } else {
-                    grid(k) = js.Array(e)
+                    grid(k) = e
                 }
                 y += 1
             }
