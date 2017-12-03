@@ -1,6 +1,6 @@
 package dk.mzw.guts
 
-import dk.mzw.accelemation.Language.{Image, R, Vec2, Vec3, rgba}
+import dk.mzw.accelemation.Language.{Animation, Image, R, Vec2, Vec3, rgba}
 import dk.mzw.accelemation.Math
 import dk.mzw.accelemation.util.Prelude
 import dk.mzw.accelemation.util.Prelude.gaussianOne
@@ -16,9 +16,9 @@ class Sprites(loader : Loader) {
         } yield rgba(i, i * 0.9, i * 0.4, 1)
     }
 
-    val laserBeam : Image = {x : R => y : R =>
+    val laserBeam : Animation = {t => x : R => y : R =>
         for {
-            s <- Math.sin(x * 99) * 0.2
+            s <- Math.sin(x * 45 + t * 13) * 0.4
             w <- gaussianOne(0.05, y + s) + gaussianOne(0.05, y - s)
             b <- gaussianOne(0.4, y)
         } yield rgba(0.5*w, 0.5*w + 0.2*b, 0.2*w + 0.9*b, 1)

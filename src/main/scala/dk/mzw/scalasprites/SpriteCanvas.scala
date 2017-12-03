@@ -1,6 +1,8 @@
 package dk.mzw.scalasprites
 
 import dk.mzw.accelemation.Language
+import dk.mzw.accelemation.Language.R
+import dk.mzw.accelemation.internal.Internal.{Uniform, UniformU}
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLRenderingContext => GL}
@@ -58,7 +60,8 @@ object SpriteCanvas {
 
 
     private case class MutableCustomShader(
-        animation : Language.Image,
+        image : Language.Image,
+        uniform : Option[Uniform[Double]],
         var shader : Shader = null
     ) extends CustomShader
 
@@ -75,9 +78,21 @@ object SpriteCanvas {
         }
 
         def apply(animation : Language.Image) : CustomShader = {
-            val a = MutableCustomShader(animation)
+            val a = MutableCustomShader(animation, None)
             animations ::= a
             a
+        }
+
+        def apply(f : R => Language.Image) : Double => CustomShader = {
+            val u = new Uniform[Double]("u", 0)
+            val r = Language.liftUniformR(u)
+            val a = MutableCustomShader(f(r), Some(u))
+            animations ::= a
+
+            {v : Double =>
+                u.value = v
+                a
+            }
         }
 
         def complete: Future[Display] = {
@@ -114,7 +129,7 @@ object SpriteCanvas {
                 }
 
                 animations.foreach{a =>
-                    val shader = gl.initPixelProgram(a.animation)
+                    val shader = gl.initPixelProgram(a.image, a.uniform)
                     a.shader = shader
                 }
 

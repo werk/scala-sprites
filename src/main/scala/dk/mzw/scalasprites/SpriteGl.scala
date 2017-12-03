@@ -2,6 +2,7 @@ package dk.mzw.scalasprites
 
 import dk.mzw.accelemation.{Compile, Language}
 import dk.mzw.accelemation.internal.Internal
+import dk.mzw.accelemation.internal.Internal.Uniform
 import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Image, Sprite}
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
@@ -41,8 +42,8 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
 
     resizeBuffers(vertexBuffersSpriteSize)
 
-    def initSpriteProgram(fragmentCode : String) : Shader = {
-        val vertexCode = """
+    def initSpriteProgram(fragmentCode : String, uniform : Option[Uniform[Double]]) : Shader = {
+        val vertexCode = s"""
             attribute vec4 a_coordinates;
             attribute vec3 a_rotation;
             uniform vec2 u_scale;
@@ -70,6 +71,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
             samplerUniformLocation = gl.getUniformLocation(program, "u_sampler"),
             scaleUniformLocation = gl.getUniformLocation(program, "u_scale"),
             offsetUniformLocation = gl.getUniformLocation(program, "u_offset"),
+            parameter1UniformLocation = uniform.map(u => gl.getUniformLocation(program, u.name) -> u),
             coordinatesAttributeLocation = gl.getAttribLocation(program, "a_coordinates"),
             rotationsAttributeLocation = gl.getAttribLocation(program, "a_rotation")
         )
@@ -86,12 +88,12 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
               gl_FragColor = texture2D(u_sampler, v_textureCoordinates);
             }
         """
-        initSpriteProgram(fragmentCode)
+        initSpriteProgram(fragmentCode, None)
     }
 
-    def initPixelProgram(f : Language.Image) : Shader = {
+    def initPixelProgram(f : Language.Image, uniform : Option[Uniform[Double]]) : Shader = {
         val fragmentSource = Compile.image(f, Language.Vec2(Internal.BuiltIn("v_textureCoordinates")))
-        initSpriteProgram(fragmentSource)
+        initSpriteProgram(fragmentSource, uniform)
     }
 
     def clear(clearColor : (Double, Double, Double, Double)) = SpriteGl.clear(gl, clearColor)
@@ -121,6 +123,10 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         offset(1) = -centerY * scale(1)
     }
 
+    private val setParameterUniform :((WebGLUniformLocation, Uniform[Double])) => Unit = {pair =>
+        gl.uniform1f(pair._1, pair._2.value)
+    }
+
     def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = Measure("drawSprites"){
         if(spriteCount > vertexBuffersSpriteSize) resizeBuffers(spriteCount)
 
@@ -137,6 +143,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         gl.useProgram(shader.program)
         gl.uniform2fv(shader.scaleUniformLocation, scale)
         gl.uniform2fv(shader.offsetUniformLocation, offset)
+        shader.parameter1UniformLocation.foreach(setParameterUniform)
 
         val to = from + spriteCount // Exclusive
         var spriteIndex = from
@@ -244,6 +251,7 @@ object SpriteGl {
         samplerUniformLocation : WebGLUniformLocation,
         scaleUniformLocation : WebGLUniformLocation,
         offsetUniformLocation : WebGLUniformLocation,
+        parameter1UniformLocation : Option[(WebGLUniformLocation, Uniform[Double])],
         coordinatesAttributeLocation : Int,
         rotationsAttributeLocation : Int
     )

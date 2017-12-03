@@ -12,12 +12,13 @@ class LaserBeamEntity(
     val world : WorldEntity,
     val self : Self,
     val shooter : PlayerEntity,
-    val image : CustomShader,
+    val beamEffect : Double => CustomShader,
     val impact : CustomShader
 ) extends Entity with DrawableEntity with UpdateableEntity with PawnEntity with CollidingEntity with HittableEntity {
 
     var lifeTime = 2
     val born = Guts.secondsElapsed()
+    var age = 0d
     val position = Vector2d(0, 0)
     val size = Vector2d(0.1, 0.1)
     val velocity = Vector2d(0, 0)
@@ -46,14 +47,15 @@ class LaserBeamEntity(
         center.multiply(0.5)
         center.add(shooter.position)
 
-        if(Guts.secondsElapsed() - born > lifeTime) {
+        age = Guts.secondsElapsed() - born
+        if(age > lifeTime) {
             sendMessageTo(world, Unspawn(self))
         }
     }
 
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
         display.add(
-            image = image,
+            image = beamEffect(age),
             x = center.x,
             y = center.y,
             width = length,

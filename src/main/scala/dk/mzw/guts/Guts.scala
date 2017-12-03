@@ -52,7 +52,7 @@ object Guts extends JSApp {
             SpawnBarrel(Self(Math.random().toString, Entity.localClientId), Vector2d(Math.random() * 100, Math.random() * 100))
         }
 
-        val skeletons = for(_ <- 1 to 100) yield {
+        val skeletons = for(_ <- 1 to 10) yield {
             var r = Math.random()
             val v = Vector2d((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100)
             r = Math.random()
