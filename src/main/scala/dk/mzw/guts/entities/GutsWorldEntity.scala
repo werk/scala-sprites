@@ -3,7 +3,7 @@ package dk.mzw.guts.entities
 import dk.mzw.guts.Sprites
 import dk.mzw.guts.entities.GutsWorldEntity._
 import dk.mzw.guts.system.Entity.{Message, Self}
-import dk.mzw.guts.system.{Vector2d, WorldEntity}
+import dk.mzw.guts.system.{Entity, Vector2d, WorldEntity}
 import dk.mzw.guts.utility.Mouse
 import dk.mzw.scalasprites.SpriteCanvas
 import dk.mzw.scalasprites.SpriteCanvas.{Blending, Image}
@@ -35,40 +35,47 @@ class GutsWorldEntity(self : Self, sprites : Sprites) extends WorldEntity(self, 
         case Unspawn(thatSelf) =>
             var i = 0
             while(i < entities.length) {
-                if(entities(i).self == thatSelf) {
+                val e = entities(i)
+                if(e.self == thatSelf) {
+                    internalRemoveEntityFromGrids(e)
                     entities.splice(i, 1)
                 }
                 i += 1
             }
         case SpawnPlayer(thatSelf, position) =>
-            entities.push(new PlayerEntity(this, thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
+            addEntity(new PlayerEntity(this, thatSelf, position, sprites.topManAnimation, sprites.topManShootingAnimation))
         case SpawnSkeleton(thatSelf, position) =>
-            entities.push(new SkeletonEntity(this, thatSelf, position, 4, 80, sprites.skeleton))
+            addEntity(new SkeletonEntity(this, thatSelf, position, 4, 80, sprites.skeleton))
         case SpawnZombie(thatSelf, position) =>
-            entities.push(new SkeletonEntity(this, thatSelf, position, 2, 120, sprites.zombie))
+            addEntity(new SkeletonEntity(this, thatSelf, position, 2, 120, sprites.zombie))
         case SpawnScorpion(thatSelf, position) =>
-            entities.push(new SkeletonEntity(this, thatSelf, position, 5, 20, sprites.scorpion))
+            addEntity(new SkeletonEntity(this, thatSelf, position, 5, 20, sprites.scorpion))
         case SpawnWolf(thatSelf, position) =>
-            entities.push(new SkeletonEntity(this, thatSelf, position, 1.5, 200, sprites.wolf))
+            addEntity(new SkeletonEntity(this, thatSelf, position, 1.5, 200, sprites.wolf))
         case SpawnWall(thatSelf, position) =>
-            entities.push(new WallEntity(this, thatSelf, position, sprites.wall))
+            addEntity(new WallEntity(this, thatSelf, position, sprites.wall))
         case SpawnFloor(thatSelf, position) =>
-            entities.push(new FloorEntity(this, thatSelf, position, sprites.floor))
+            addEntity(new FloorEntity(this, thatSelf, position, sprites.floor))
         case SpawnBarrel(thatSelf, position) =>
-            entities.push(new BarrelEntity(this, thatSelf, position, sprites.barrel))
+            addEntity(new BarrelEntity(this, thatSelf, position, sprites.barrel))
         case SpawnFlame(thatSelf, position, angle, speed) =>
-            entities.push(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
+            addEntity(new FlameEntity(this, thatSelf, position, angle, speed, sprites.flameRedImage, sprites.flameBrightImage))
         case SpawnPellet(thatSelf, position, angle, speed) =>
-            entities.push(new PelletEntity(this, thatSelf, position, angle, speed, sprites.pelletImage))
+            addEntity(new PelletEntity(this, thatSelf, position, angle, speed, sprites.pelletImage))
         case SpawnLaserBeam(thatSelf, shooterId) =>
             entities.find(_.self.id == shooterId).foreach { shooter =>
                 val player = shooter.asInstanceOf[PlayerEntity]
-                entities.push(new LaserBeamEntity(this, thatSelf, player, sprites.laserBeamImage, sprites.roundFlame))
+                addEntity(new LaserBeamEntity(this, thatSelf, player, sprites.laserBeamImage, sprites.roundFlame))
             }
         case SpawnTurret(thatSelf, position, angle) =>
-            entities.push(new TurretEntity(this, thatSelf, position, angle, sprites.turret))
+            addEntity(new TurretEntity(this, thatSelf, position, angle, sprites.turret))
         case SpawnCorpse(thatSelf, position, angle, height, image) =>
-            entities.push(new CorpseEntity(this, thatSelf, position, angle, height, image))
+            addEntity(new CorpseEntity(this, thatSelf, position, angle, height, image))
+    }
+    
+    private def addEntity(entity : Entity) = {
+        entities.push(entity)
+        internalAddEntityToGrids(entity)
     }
 
 }

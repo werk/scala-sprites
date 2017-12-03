@@ -11,8 +11,6 @@ import scala.scalajs.js
 
 abstract class WorldEntity(val self : Self, val screenHeight : Double) extends Entity with ReceivingEntity {
 
-    val solidEntities = js.Array[SolidEntity]()
-    val hittableEntities = js.Array[HittableEntity]()
     val entities = js.Array[Entity](this)
 
     val solidGrid = new Grid[SolidEntity]()
@@ -46,46 +44,49 @@ abstract class WorldEntity(val self : Self, val screenHeight : Double) extends E
             }
             i += 1
         })
-        solidEntities.length = 0
-        hittableEntities.length = 0
-        i = 0
-        Measure("Solid Hittable") (while(i < entities.length) {
-            entities(i) match {
-                case e : SolidEntity => solidEntities.push(e)
-                case _ =>
-            }
-            entities(i) match {
-                case e : HittableEntity => hittableEntities.push(e)
-                case _ =>
-            }
-            i += 1
-        })
-        Measure("Grid.rebuild") {
-            solidGrid.rebuild(solidEntities)
-            hittableGrid.rebuild(hittableEntities)
-        }
         i = 0
         Measure("Updateable and Hitting") (while(i < entities.length) {
             entities(i) match {
                 case e : UpdateableEntity with PawnEntity =>
                     if (e.position.x > boundingBox.x1 - 10 && e.position.x < boundingBox.x2 + 10 &&
                         e.position.y > boundingBox.y1 - 10 && e.position.y < boundingBox.y2 + 10
-                    ) Measure("onUpdate Pawn") (e.onUpdate(this, delta))
-                    e match {
-                        case e1 : SolidEntity => solidGrid.add(e1)
-                        case e1 : HittableEntity => hittableGrid.add(e1)
+                    ) Measure("onUpdate Pawn") {
+                        internalRemoveEntityFromGrids(e)
+                        e.onUpdate(this, delta)
+                        internalAddEntityToGrids(e)
                     }
                 case e : UpdateableEntity =>
                     Measure("onUpdate") (e.onUpdate(this, delta))
                 case _ =>
             }
             entities(i) match {
-                //case e : HittingEntity => e.internalEmitHits(this, hittableEntities)
                 case e : HittingEntity => e.internalEmitHits(this)
                 case _ =>
             }
             i += 1
         })
+    }
+
+    def internalRemoveEntityFromGrids(entity : Entity) = {
+        entity match {
+            case e : SolidEntity => solidGrid.remove(e)
+            case _ =>
+        }
+        entity match {
+            case e : HittableEntity => hittableGrid.remove(e)
+            case _ =>
+        }
+    }
+
+    def internalAddEntityToGrids(entity : Entity) = {
+        entity match {
+            case e : SolidEntity => solidGrid.add(e)
+            case _ =>
+        }
+        entity match {
+            case e : HittableEntity => hittableGrid.add(e)
+            case _ =>
+        }
     }
 
     private val clearColor = (0.3, 0.3, 0.3, 1.0)

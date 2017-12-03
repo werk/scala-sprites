@@ -4,7 +4,7 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 class Grid[T <: PawnEntity] {
-    private var grid = js.Dictionary[T | js.Array[T]]()
+    private val grid = js.Dictionary[T | js.Array[T]]()
     private val cellFactor = Vector2d(1 / 1, 1 / 1)
     private val temporary = js.Array[T]()
 
@@ -53,13 +53,34 @@ class Grid[T <: PawnEntity] {
         }
     }
 
-    def rebuild(entities : js.Array[T]) = {
-        grid = js.Dictionary[T | js.Array[T]]()
-        var i = 0
-        while(i < entities.length) {
-            val e = entities(i)
-            add(e)
-            i += 1
+    def remove(e : T) = {
+        val x1 = ((e.position.x - e.size.x * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+        val x2 = ((e.position.x + e.size.x * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.x).toInt
+        val y1 = ((e.position.y - e.size.y * 0.5 - CollidingEntity.gapEpsilon) * cellFactor.y).toInt
+        val y2 = ((e.position.y + e.size.y * 0.5 + CollidingEntity.gapEpsilon) * cellFactor.y).toInt
+        var x = x1
+        while(x <= x2) {
+            var y = y1
+            while(y <= y2) {
+                val k = x + "," + y
+                if(grid.contains(k)) {
+                    grid(k) match {
+                        case g : js.Array[T] =>
+                            var i = 0
+                            while(i < g.length) {
+                                if(g(i) == e) {
+                                    if(g.length == 1) grid.delete(k)
+                                    else g.splice(i, 1)
+                                    i = g.length
+                                }
+                                i += 1
+                            }
+                        case g => grid.delete(k)
+                    }
+                }
+                y += 1
+            }
+            x += 1
         }
     }
 
