@@ -56,6 +56,10 @@ class LaserBeamEntity(
     override def onDraw(display : SpriteCanvas.Display) : Unit = {
         display.add(
             image = beamEffect(age),
+            imageX = -1,
+            imageY = -1,
+            imageWidth = length.toFloat,
+            imageHeight = 2,
             x = center.x,
             y = center.y,
             width = length,

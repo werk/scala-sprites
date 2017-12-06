@@ -18,7 +18,7 @@ class Sprites(loader : Loader) {
 
     val laserBeam : Animation = {t => x : R => y : R =>
         for {
-            s <- Math.sin(x * 45 + t * 13) * 0.4
+            s <- Math.sin(x * 45 - t * 23) * 0.2
             w <- gaussianOne(0.05, y + s) + gaussianOne(0.05, y - s)
             b <- gaussianOne(0.4, y)
         } yield rgba(0.5*w, 0.5*w + 0.2*b, 0.2*w + 0.9*b, 1)

@@ -148,7 +148,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         val to = from + spriteCount // Exclusive
         var spriteIndex = from
         while(spriteIndex < to) {
-            val Sprite(animation, cx, cy, w0, h, angle, _, _, _) = sprites(spriteIndex)
+            val Sprite(animation, imageX, imageY, imageWidth, imageHeight, cx, cy, w0, h, angle, _, _, _) = sprites(spriteIndex)
 
             animation match {
                 case image : Image =>
@@ -161,7 +161,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
                         val ty = image.stamp.textureTop
                         val tw = image.stamp.textureWidth
                         val th = image.stamp.textureHeight
-                        val w = if(w0 > 0) w0 else h * image.stamp.stampWidth.toDouble / image.stamp.stampHeight
+                        val w = if(w0 > 0) w0 else h * image.stamp.stampAspectRatio
                         val x1 = (cx - w/2).toFloat
                         val y1 = (cy - h/2).toFloat
                         val x2 = (x1 + w).toFloat
@@ -187,10 +187,10 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
                     val y1 = (cy - h/2).toFloat
                     val x2 = (x1 + w).toFloat
                     val y2 = (y1 + h).toFloat
-                    val tx1 = -1f
-                    val ty1 = -1f
-                    val tx2 = 1f
-                    val ty2 = 1f
+                    val tx1 = imageX
+                    val ty1 = imageY
+                    val tx2 = tx1 + imageWidth
+                    val ty2 = ty1 + imageHeight
                     c.update(i +  0, x1); c.update(i +  1, y1); c.update(i +  2, tx1); c.update(i +  3, ty1)
                     c.update(i +  4, x1); c.update(i +  5, y2); c.update(i +  6, tx1); c.update(i +  7, ty2)
                     c.update(i +  8, x2); c.update(i +  9, y2); c.update(i + 10, tx2); c.update(i + 11, ty2)

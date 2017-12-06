@@ -2,7 +2,7 @@ package dk.mzw.scalasprites
 
 import dk.mzw.accelemation.Language
 import dk.mzw.accelemation.Language.R
-import dk.mzw.accelemation.internal.Internal.{Uniform, UniformU}
+import dk.mzw.accelemation.internal.Internal.Uniform
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLRenderingContext => GL}
@@ -112,12 +112,7 @@ object SpriteCanvas {
                     val atlasHeight = atlas.height
 
                     val stamp = StampTexture(
-                        stampLeft = stampLeft,
-                        stampTop = stampTop,
-                        stampWidth = stampWidth,
-                        stampHeight = stampHeight,
-                        atlasWidth = atlasWidth,
-                        atlasHeight = atlasHeight,
+                        stampAspectRatio = stampWidth.toDouble / stampHeight,
                         texture = texture,
                         textureLeft = stampLeft.toDouble / atlasWidth,
                         textureTop = stampTop.toDouble / atlasHeight,
@@ -173,6 +168,10 @@ object SpriteCanvas {
 
     case class Sprite(
         var image : CustomShader,
+        var imageX : Float,
+        var imageY : Float,
+        var imageWidth : Float,
+        var imageHeight : Float,
         var x: Double,
         var y: Double,
         var width: Double,
@@ -184,12 +183,7 @@ object SpriteCanvas {
     )
 
     case class StampTexture(
-        stampLeft: Int,
-        stampTop: Int,
-        stampWidth: Int,
-        stampHeight: Int,
-        atlasWidth: Int,
-        atlasHeight: Int,
+        stampAspectRatio : Double,
         texture: WebGLTexture,
         textureLeft : Double,
         textureTop : Double,
@@ -213,10 +207,27 @@ object SpriteCanvas {
             boundingBox.height * (ry - 0.5)
         }
 
-        def add(image : CustomShader, x: Double, y: Double, height: Double, angle: Double, depth : Double = 0, blending : Blending = Blending.top, width : Double = 0) {
+        def add(
+            image : CustomShader,
+            x: Double,
+            y: Double,
+            height: Double,
+            angle: Double,
+            depth : Double = 0,
+            blending : Blending = Blending.top,
+            width : Double = 0,
+            imageX : Double = -1,
+            imageY : Double = -1,
+            imageWidth : Double = 2,
+            imageHeight : Double = 2
+        ) {
             if (addedSprites < spriteBuffer.length) {
                 val sprite = spriteBuffer(addedSprites)
                 sprite.image = image
+                sprite.imageX = imageX.toFloat
+                sprite.imageY = imageY.toFloat
+                sprite.imageWidth = imageWidth.toFloat
+                sprite.imageHeight = imageHeight.toFloat
                 sprite.x = x
                 sprite.y = y
                 sprite.width = width
@@ -227,7 +238,7 @@ object SpriteCanvas {
                 sprite.index = addedSprites
             }
             else {
-                spriteBuffer.push(Sprite(image, x, y, width, height, angle, depth, blending, addedSprites))
+                spriteBuffer.push(Sprite(image, imageX.toFloat, imageY.toFloat, imageWidth.toFloat, imageHeight.toFloat, x, y, width, height, angle, depth, blending, addedSprites))
             }
             addedSprites += 1
         }
