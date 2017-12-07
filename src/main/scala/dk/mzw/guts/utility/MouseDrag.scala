@@ -8,7 +8,7 @@ class MouseDrag[T](
     gameCoordinatesY : Double => Double,
     dragStart : (Double, Double) => Option[T],
     dragContinue : (T, Double, Double) => Unit,
-    dragEnd : T => Unit
+    dragEnd : (T, Double, Double) => Unit
 ) {
 
     var x = 0d
@@ -19,8 +19,7 @@ class MouseDrag[T](
 
     private def stopDrag(): Unit = {
         dragged.foreach{ t =>
-            dragContinue(t, x, y)
-            dragEnd(t)
+            dragEnd(t, x, y)
             dragged = None
         }
     }

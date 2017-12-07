@@ -15,13 +15,16 @@ object Puzzle extends JSApp {
         var x : Double,
         var y : Double,
         imageX : Double,
-        imageY : Double
+        imageY : Double,
+        var group : List[Piece]
     )
 
     case class GrabbedPiece(
+        piece : Piece,
         grabX : Double,
         grabY : Double,
-        piece : Piece
+        initialX : Double,
+        initialY : Double
     )
 
     def main(): Unit = {
@@ -29,29 +32,48 @@ object Puzzle extends JSApp {
         val loader = new Loader(canvas)
         val animation = loader(Animations.ballz)
         val floor = loader("assets/floor.png")
-        var pieces = for{
-            ix <- 0 to 9
-            x = ix.toDouble / 10 * 2 - 0.9
-            iy <- 0 to 9
-            y = iy.toDouble / 10 * 2 - 0.9
-            //if (ix % 2) == (iy % 2)
-        } yield Piece(
-            x = x,
-            y = y,
-            imageX = x,
-            imageY = y
-        )
+
+        val size = 4
+        val edge = 2.0 / size
+        val halfEdge = edge / 2.0
+        val halfSize = size / 2.0
+
+        def center(x : Double) = (Math.round(x * halfSize + 0.5) - 0.5) / halfSize
+
+        val positions = (for{
+            ix <- 0 until size
+            x = center(ix.toDouble / size * 2 - 1 + halfEdge)
+            iy <- 0 until size
+            y = center(iy.toDouble / size * 2 - 1 + halfEdge)
+        } yield (x, y)).toList
+
+        val pieces = positions.zip(scala.util.Random.shuffle(positions)).map{case ((x, y), (x2, y2)) =>
+            val piece = Piece(
+                x = x2,
+                y = y2,
+                imageX = x - halfEdge,
+                imageY = y - halfEdge,
+                group = List()
+            )
+            piece.group = List(piece)
+            piece
+        }
+
+        def findPiece(x : Double, y : Double, notThis : Option[Piece] = None) : Option[Piece] = {
+            pieces.find{p =>
+                p.x - halfEdge < x && x < p.x + halfEdge &&
+                    p.y - halfEdge < y && y < p.y + halfEdge && !notThis.contains(p)
+            }
+        }
 
         def dragStart(x : Double, y : Double) : Option[GrabbedPiece] = {
-            val piece = pieces.find{p =>
-                p.x - 0.1 < x && x < p.x + 0.1 &&
-                p.y - 0.1 < y && y < p.y + 0.1
-            }
-            piece.map{p =>
+            findPiece(x, y).map{p =>
                 GrabbedPiece(
+                    p,
                     x - p.x,
                     y - p.y,
-                    p
+                    initialX = p.x,
+                    initialY = p.y
                 )
             }
         }
@@ -61,7 +83,19 @@ object Puzzle extends JSApp {
             p.piece.y = y - p.grabY
         }
 
-        def dragEnd(p : GrabbedPiece) {}
+        def dragEnd(g : GrabbedPiece, x : Double, y : Double): Unit = {
+            if(x < -1 || 1 < x || y < -1 || 1 < y) {
+                g.piece.x = g.initialX
+                g.piece.y = g.initialY
+            } else {
+                findPiece(x, y, Some(g.piece)).foreach { other =>
+                    other.x = g.initialX
+                    other.y = g.initialY
+                }
+                g.piece.x = center(x)
+                g.piece.y = center(y)
+            }
+        }
 
         loader.complete.foreach { display =>
             val mouse = new MouseDrag[GrabbedPiece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, dragStart, dragContinue, dragEnd)
@@ -79,12 +113,12 @@ object Puzzle extends JSApp {
                         image = image,
                         imageX = piece.imageX,
                         imageY = piece.imageY,
-                        imageWidth = 0.2,
-                        imageHeight = 0.2,
+                        imageWidth = edge,
+                        imageHeight = edge,
                         x = piece.x,
                         y = piece.y,
-                        width = 0.2,
-                        height = 0.2,
+                        width = edge,
+                        height = edge,
                         angle = 0,
                         blending = Blending.additive
                     )

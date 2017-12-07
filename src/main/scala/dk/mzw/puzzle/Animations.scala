@@ -10,6 +10,6 @@ object Animations {
         val center = Vec2(Math.cos(t), Math.sin(t)) * 0.5
         val d = Math.length(Vec2(center.x - x, center.y - y))
         val phi = Math.atan(y, x)
-        hsva(phi / (Math.pi * 2) + t * 0.1, 0.7, 1.0 - d, 1)
+        hsva(phi / (Math.pi * 2) + t * 0.1, 0.7, 1.0 - d * 0.7, 1)
     }
 }
