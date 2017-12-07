@@ -47,7 +47,7 @@ object Puzzle extends JSApp {
             y = center(iy.toDouble / size * 2 - 1 + halfEdge)
         } yield (x, y)).toList
 
-        val pieces = positions.zip(scala.util.Random.shuffle(positions)).map{case ((x, y), (x2, y2)) =>
+        val pieces = positions.zip(/*scala.util.Random.shuffle*/(positions)).map{case ((x, y), (x2, y2)) =>
             val piece = Piece(
                 x = x2,
                 y = y2,
