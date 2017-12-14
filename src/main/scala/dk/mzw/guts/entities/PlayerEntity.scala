@@ -56,8 +56,6 @@ class PlayerEntity(
     var enter = false
     var keyX : Int = 0
     var keyY : Int = 0
-    val mouseX : Double = 0
-    val mouseY : Double = 0
 
     override def onInput(world : WorldEntity, keys : Keys, mouse : Mouse) : Unit = {
         primaryFire = mouse.left
@@ -65,7 +63,7 @@ class PlayerEntity(
         tertiaryFire = keys(Keys.e)
 
         // TODO should this be a message ?
-        angle = Math.atan2(mouse.y, mouse.x)
+        angle = Math.atan2(mouse.y - position.y, mouse.x - position.x)
 
         if(!enter && keys(Keys.enter)) {
             sendMessageTo(world, SpawnTurret(Self(), position.copy(), angle))

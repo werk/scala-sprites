@@ -18,8 +18,8 @@ class MouseDrag[T](
     private var dragged : Option[(T, Double, Double)] = None
 
     private def stopDrag(): Unit = {
-        dragged.foreach{case (t, startX, startY) =>
-            dragEnd(t, x - startX, y - startY)
+        dragged.foreach{case (t, _, _) =>
+            dragEnd(t, x, y)
             dragged = None
         }
     }
@@ -27,8 +27,8 @@ class MouseDrag[T](
     canvas.onmousemove = {e : MouseEvent => {
         x = gameCoordinatesX(e.pageX)
         y = gameCoordinatesY(e.pageY)
-        dragged.foreach{case (t, _, _) =>
-            dragContinue(t, x, y)
+        dragged.foreach{case (t, startX, startY) =>
+            dragContinue(t, x - startX, y - startY)
         }
     }}
 

@@ -13,4 +13,11 @@ object Animations {
         //val n = (simplexNoise(Vec3(t * 0.1, x, y)) - 0.5) * 0.2
         hsva(phi / (Math.pi * 2) + t * 0.1, 0.7, 1.0 - d * 0.7, 1)
     }
+
+    val cursor : Image = {x => y =>
+        val d = Math.length(Vec2(x, y))
+        val i = Math.smoothstep(1, 0, d)
+        rgba(i, i, i, 1)
+    }
+
 }

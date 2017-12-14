@@ -198,13 +198,15 @@ object SpriteCanvas {
         val boundingBox = gl.boundingBox
 
         def gameCoordinatesX(pixelX : Double) : Double = {
-            val rx = pixelX.toDouble / gl.canvas.clientWidth
-            boundingBox.width * (rx - 0.5)
+            val rx = pixelX / gl.canvas.clientWidth
+            //boundingBox.width * (rx - 0.5)
+            rx * boundingBox.width + boundingBox.x1
         }
 
         def gameCoordinatesY(pixelY : Double) : Double = {
-            val ry = (gl.canvas.clientHeight - pixelY.toDouble) / gl.canvas.clientHeight
-            boundingBox.height * (ry - 0.5)
+            val ry = (gl.canvas.clientHeight - pixelY) / gl.canvas.clientHeight
+            //boundingBox.height * (ry - 0.5)
+            ry * boundingBox.height + boundingBox.y1
         }
 
         def add(

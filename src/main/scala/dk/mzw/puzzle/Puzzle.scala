@@ -16,9 +16,10 @@ object Puzzle extends JSApp {
         val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
         val loader = new Loader(canvas)
         val animation = loader(Animations.ballz)
+        val cursor = loader(Animations.cursor)
         val floor = loader("assets/floor.png")
 
-        val size = 5
+        val size = 4
         val borderMin = -0.5
         val borderMax = size - 0.5
         val board = new Board(size)
@@ -36,23 +37,17 @@ object Puzzle extends JSApp {
 
         def dragEnd(p : Piece, x : Double, y : Double): Unit = {
             if(x < borderMin || borderMax < x || y < borderMin || borderMax < y) {
-                p.group.offsetX = 0
-                p.group.offsetY = 0
             } else {
-                val inTheWay = p.group.pieces.toList.flatMap{member =>
-                    val offset = board.center(member.current._1 + p.group.offsetX, member.current._2 + p.group.offsetY)
-                    board.pieces.get(offset)
-                }
-
-                p.group.pieces.toList.foreach{moved =>
+                p.group.pieces.foreach{moved =>
                     val offset = board.center(moved.current._1 + p.group.offsetX, moved.current._2 + p.group.offsetY)
                     board.pieces.get(offset).foreach{blocking =>
-                        val movedCurrent = moved.current
-                        moved.current = blocking.current
-                        blocking.current = movedCurrent
+                        board.swap(blocking, moved)
                     }
                 }
             }
+            p.group.offsetX = 0
+            p.group.offsetY = 0
+            board.reGroup()
         }
 
         loader.complete.foreach { display =>
@@ -82,7 +77,9 @@ object Puzzle extends JSApp {
                         blending = Blending.additive
                     )
                 }
-                display.draw((0,0,0,1), size, centerX = -0.5, centerY = -0.5)
+                display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
+                val center = size * 0.5 - 0.5
+                display.draw((0,0,0,1), size, centerX = center, centerY = center)
                 dom.window.requestAnimationFrame(loopF)
             }
             loopF = loop
@@ -107,6 +104,18 @@ class Board(size : Int) {
 
     def center(x : Double, y : Double) = (Math.round(x).toInt, Math.round(y).toInt)
     def findPiece(x : Double, y : Double) : Option[Piece] = pieces.get(center(x, y))
+
+    def swap(p1 : Piece, p2 : Piece): Unit = {
+        if(p1 != p2) {
+            pieces -= p1.current
+            pieces -= p2.current
+            val currentP1 = p1.current
+            p1.current = p2.current
+            p2.current = currentP1
+            pieces += p1.current -> p1
+            pieces += p2.current -> p2
+        }
+    }
 
     def reGroup() = {
         pieces = pieces.map{case (_, p) =>
