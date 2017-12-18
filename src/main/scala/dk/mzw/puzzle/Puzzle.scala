@@ -19,57 +19,28 @@ object Puzzle extends JSApp {
         val cursor = loader(Animations.cursor)
         val floor = loader("assets/floor.png")
 
-        val size = 4
-        val borderMin = -0.5
-        val borderMax = size - 0.5
+        val size = 10
         val board = new Board(size)
 
-
-        def dragStart(x : Double, y : Double) : Option[Piece] = {
-            println(x, y)
-            board.findPiece(x, y)
-        }
-
-        def dragContinue(p : Piece, dx : Double, dy : Double) {
-            p.group.offsetX = dx
-            p.group.offsetY = dy
-        }
-
-        def dragEnd(p : Piece, x : Double, y : Double): Unit = {
-            if(x < borderMin || borderMax < x || y < borderMin || borderMax < y) {
-            } else {
-                val directionX = Math.signum(p.group.offsetX)
-                val directionY = Math.signum(p.group.offsetY)
-                val sorted = p.group.members.sortBy(p => (-directionX * p.current._1, -directionY * p.current._2))
-                sorted.foreach{moved =>
-                    val offset = board.center(moved.current._1 + p.group.offsetX, moved.current._2 + p.group.offsetY)
-                    board.pieces.get(offset).foreach{blocking =>
-                        board.swap(blocking, moved)
-                    }
-                }
-            }
-            p.group.offsetX = 0
-            p.group.offsetY = 0
-            board.reGroup()
-        }
-
         loader.complete.foreach { display =>
-            val mouse = new MouseDrag[Piece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, dragStart, dragContinue, dragEnd)
+            val mouse = new MouseDrag[Piece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, board.findPiece, board.drag, board.move)
 
             // This crazy stuff is done to avoid creating and allocating a new anonymous function for each call to requestAnimationFrame
             var loopF : Double => Unit = null
             val imagePieceHalfSize = 1.0 / size
             val imagePieceSize = imagePieceHalfSize * 2
             val start : Double = secondsElapsed() - 0.01
+            val oneOverSize = 1.0 / size
             def loop(_t : Double) : Unit = {
                 val t = start - secondsElapsed()
                 display.add(floor, -10, -10, 1, 0) // TODO remove
                 val image = animation(t)
-                board.pieces.values.foreach{piece =>
+                val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
+                sorted.foreach{piece =>
                     display.add(
                         image = image,
-                        imageX = (0.5 + piece.home._1) * 2 / size - 1,
-                        imageY = (0.5 + piece.home._2) * 2 / size - 1,
+                        imageX = (0.5 + piece.home._1) * 2 / size - 1 - oneOverSize,
+                        imageY = (0.5 + piece.home._2) * 2 / size - 1 - oneOverSize,
                         imageWidth = imagePieceSize,
                         imageHeight = imagePieceSize,
                         x = piece.current._1 + piece.group.offsetX,
@@ -77,7 +48,7 @@ object Puzzle extends JSApp {
                         width = 1,
                         height = 1,
                         angle = 0,
-                        blending = Blending.additive
+                        blending = Blending.top
                     )
                 }
                 display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
@@ -106,9 +77,35 @@ class Board(size : Int) {
     reGroup()
 
     def center(x : Double, y : Double) = (Math.round(x).toInt, Math.round(y).toInt)
+
     def findPiece(x : Double, y : Double) : Option[Piece] = pieces.get(center(x, y))
 
-    def swap(p1 : Piece, p2 : Piece): Unit = {
+    def drag(p : Piece, dx : Double, dy : Double) {
+        p.group.offsetX = dx
+        p.group.offsetY = dy
+    }
+
+    def move(p : Piece): Unit = {
+        val offsetX = Math.round(p.group.offsetX).toInt
+        val offsetY = Math.round(p.group.offsetY).toInt
+        val allInside = p.group.members.forall { moved =>
+            val offset = (moved.current._1 + offsetX, moved.current._2 + offsetY)
+            pieces.contains(offset)
+        }
+        if(allInside) {
+            val directionX = Math.signum(offsetX)
+            val directionY = Math.signum(offsetY)
+            val sorted = p.group.members.sortBy(p => (-directionX * p.current._1, -directionY * p.current._2))
+            sorted.foreach{moved =>
+                val offset = (moved.current._1 + offsetX, moved.current._2 + offsetY)
+                val blocking = pieces(offset)
+                swap(blocking, moved)
+            }
+        }
+        reGroup()
+    }
+
+    private def swap(p1 : Piece, p2 : Piece): Unit = {
         if(p1 != p2) {
             pieces -= p1.current
             pieces -= p2.current
@@ -120,7 +117,7 @@ class Board(size : Int) {
         }
     }
 
-    def reGroup() = {
+    private def reGroup() = {
         pieces = pieces.map{case (_, p) =>
             p.group = Group(List(p), 0, 0)
             p.current -> p
@@ -144,14 +141,12 @@ class Board(size : Int) {
             val piece1 = pieces(p1)
             val piece2 = pieces(p2)
             if(piece1.delta == piece2.delta) {
-                val members = piece1.group.members ++ piece2.group.members
-                val group = piece1.group.copy(members = members)
-                members.foreach(_.group = group)
+                if(piece1.group != piece2.group) {
+                    val members = piece1.group.members ++ piece2.group.members
+                    val group = piece1.group.copy(members = members)
+                    members.foreach(_.group = group)
+                }
             }
-        }
-        println("Re-grouped:")
-        pieces.foreach { case (_, p) =>
-            println(s"  ${p.home} -> ${p.current}: GROUP-${p.group.id} ${p.group.members.map(_.home).mkString(", ")}")
         }
     }
 }
