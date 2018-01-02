@@ -1,64 +1,56 @@
 package dk.mzw.puzzle
 
-import dk.mzw.guts.Guts.secondsElapsed
 import dk.mzw.guts.utility.MouseDrag
 import dk.mzw.puzzle.Board._
-import dk.mzw.scalasprites.SpriteCanvas.{Blending, Loader}
-import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLCanvasElement
+import dk.mzw.scalasprites.SpriteCanvas._
 
-import scala.scalajs.js.JSApp
-import scala.concurrent.ExecutionContext.Implicits.global
+object Puzzle extends GameLoop("spriteCanvas")  {
 
-object Puzzle extends JSApp {
+    var animation : Double => CustomShader = _
+    var cursor : CustomShader = _
+    var floor : CustomShader = _
 
-    def main(): Unit = {
-        val canvas = dom.document.getElementById("spriteCanvas").asInstanceOf[HTMLCanvasElement]
-        val loader = new Loader(canvas)
-        val animation = loader(Animations.ballz)
-        val cursor = loader(Animations.cursor)
-        val floor = loader("assets/floor.png")
+    val size = 10
+    val board = new Board(size)
 
-        val size = 10
-        val board = new Board(size)
+    var mouse : MouseDrag[Piece] = _
+    val imagePieceHalfSize = 1.0 / size
+    val imagePieceSize = imagePieceHalfSize * 2
+    val oneOverSize = 1.0 / size
 
-        loader.complete.foreach { display =>
-            val mouse = new MouseDrag[Piece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, board.findPiece, board.drag, board.move)
 
-            // This crazy stuff is done to avoid creating and allocating a new anonymous function for each call to requestAnimationFrame
-            var loopF : Double => Unit = null
-            val imagePieceHalfSize = 1.0 / size
-            val imagePieceSize = imagePieceHalfSize * 2
-            val start : Double = secondsElapsed() - 0.01
-            val oneOverSize = 1.0 / size
-            def loop(_t : Double) : Unit = {
-                val t = start - secondsElapsed()
-                display.add(floor, -10, -10, 1, 0) // TODO remove
-                val image = animation(t)
-                val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
-                sorted.foreach{piece =>
-                    display.add(
-                        image = image,
-                        imageX = (0.5 + piece.home._1) * 2 / size - 1 - oneOverSize,
-                        imageY = (0.5 + piece.home._2) * 2 / size - 1 - oneOverSize,
-                        imageWidth = imagePieceSize,
-                        imageHeight = imagePieceSize,
-                        x = piece.current._1 + piece.group.offsetX,
-                        y = piece.current._2 + piece.group.offsetY,
-                        width = 1,
-                        height = 1,
-                        angle = 0,
-                        blending = Blending.top
-                    )
-                }
-                display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
-                val center = size * 0.5 - 0.5
-                display.draw((0,0,0,1), size, centerX = center, centerY = center)
-                dom.window.requestAnimationFrame(loopF)
-            }
-            loopF = loop
-            loop(0)
+    override def load(loader: Loader): Unit = {
+        animation = loader(Animations.ballz)
+        cursor = loader(Animations.cursor)
+        floor = loader("assets/floor.png")
+    }
+
+    override def onLoad(display: Display): Unit = {
+        mouse = new MouseDrag[Piece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, board.findPiece, board.drag, board.move)
+    }
+
+    override def update(display: Display, t: Double): Unit = {
+        display.add(floor, -10, -10, 1, 0) // TODO remove
+        val image = animation(t)
+        val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
+        sorted.foreach{piece =>
+            display.add(
+                image = image,
+                imageX = (0.5 + piece.home._1) * 2 / size - 1 - oneOverSize,
+                imageY = (0.5 + piece.home._2) * 2 / size - 1 - oneOverSize,
+                imageWidth = imagePieceSize,
+                imageHeight = imagePieceSize,
+                x = piece.current._1 + piece.group.offsetX,
+                y = piece.current._2 + piece.group.offsetY,
+                width = 1,
+                height = 1,
+                angle = 0,
+                blending = Blending.top
+            )
         }
+        display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
+        val center = size * 0.5 - 0.5
+        display.draw((0,0,0,1), size, centerX = center, centerY = center)
     }
 }
 
