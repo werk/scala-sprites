@@ -14,12 +14,15 @@ object Animations {
         hsva(phi / (Math.pi * 2) + t * 0.1, 0.7, 1.0 - d * 0.7, 1)
     }
 
-    def makePiece(a : Animation) : R => R => R => R => Animation = {top => left => bottom => right => t => x => y =>
-        val border = {
-            val i = Math.smoothstep(0.5, 1, x)
-            rgba(i, i, i, 1)
-        }
-        a(t)(x)(y) + border
+    val edges : R => R => R => R => Image = {top => left => bottom => right => x => y =>
+        val s = 0.95
+        val i = Math.max(
+            Math.smoothstep(s, 1, x) * right,
+            Math.smoothstep(s, 1, -x) * left,
+            Math.smoothstep(s, 1, y) * top,
+            Math.smoothstep(s, 1, -y) * bottom
+        )
+        rgba(i, i, i, 1)
     }
 
     val cursor : Image = {x => y =>

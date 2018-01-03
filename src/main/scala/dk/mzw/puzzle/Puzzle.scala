@@ -6,7 +6,8 @@ import dk.mzw.scalasprites.SpriteCanvas._
 
 object Puzzle extends GameLoop("spriteCanvas")  {
 
-    var animation : Double => Double => Double => Double => Double => CustomShader = _
+    var animation : Double => CustomShader = _
+    var edges : Double => Double => Double => Double => CustomShader = _
     var cursor : CustomShader = _
     var floor : CustomShader = _
 
@@ -20,7 +21,8 @@ object Puzzle extends GameLoop("spriteCanvas")  {
 
 
     override def load(loader: Loader): Unit = {
-        animation = loader.f5(Animations.makePiece(Animations.ballz))
+        animation = loader(Animations.ballz)
+        edges = loader.f4(Animations.edges)
         cursor = loader(Animations.cursor)
         floor = loader("assets/floor.png")
     }
@@ -31,21 +33,33 @@ object Puzzle extends GameLoop("spriteCanvas")  {
 
     override def update(display: Display, t: Double): Unit = {
         display.add(floor, -10, -10, 1, 0) // TODO remove
-        val image = animation(0)(0)(0)(0)(t)
+        val image = animation(t)
+        val edge = edges(0.5)(0.5)(0.5)(0.5)
         val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
         sorted.foreach{piece =>
+            val x = piece.current._1 + piece.group.offsetX
+            val y = piece.current._2 + piece.group.offsetY
             display.add(
                 image = image,
                 imageX = (0.5 + piece.home._1) * 2 / size - 1 - oneOverSize,
                 imageY = (0.5 + piece.home._2) * 2 / size - 1 - oneOverSize,
                 imageWidth = imagePieceSize,
                 imageHeight = imagePieceSize,
-                x = piece.current._1 + piece.group.offsetX,
-                y = piece.current._2 + piece.group.offsetY,
+                x = x,
+                y = y,
                 width = 1,
                 height = 1,
                 angle = 0,
                 blending = Blending.top
+            )
+            display.add(
+                image = edge,
+                x = x,
+                y = y,
+                width = 1,
+                height = 1,
+                angle = 0,
+                blending = Blending.additive
             )
         }
         display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
@@ -62,7 +76,7 @@ class Board(size : Int) {
             y <- 0 until size
         } yield (x, y)
 
-        positions.zip(/*scala.util.Random.shuffle*/(positions)).map{case (home, current) =>
+        positions.zip(scala.util.Random.shuffle(positions)).map{case (home, current) =>
             current -> Piece(home, current, Group(List(), 0, 0))
         }.toMap
     }
