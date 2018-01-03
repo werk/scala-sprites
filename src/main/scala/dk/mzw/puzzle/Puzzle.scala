@@ -6,7 +6,7 @@ import dk.mzw.scalasprites.SpriteCanvas._
 
 object Puzzle extends GameLoop("spriteCanvas")  {
 
-    var animation : Double => CustomShader = _
+    var animation : Double => Double => Double => Double => Double => CustomShader = _
     var cursor : CustomShader = _
     var floor : CustomShader = _
 
@@ -20,7 +20,7 @@ object Puzzle extends GameLoop("spriteCanvas")  {
 
 
     override def load(loader: Loader): Unit = {
-        animation = loader(Animations.ballz)
+        animation = loader.f5(Animations.makePiece(Animations.ballz))
         cursor = loader(Animations.cursor)
         floor = loader("assets/floor.png")
     }
@@ -31,7 +31,7 @@ object Puzzle extends GameLoop("spriteCanvas")  {
 
     override def update(display: Display, t: Double): Unit = {
         display.add(floor, -10, -10, 1, 0) // TODO remove
-        val image = animation(t)
+        val image = animation(0)(0)(0)(0)(t)
         val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
         sorted.foreach{piece =>
             display.add(
@@ -62,7 +62,7 @@ class Board(size : Int) {
             y <- 0 until size
         } yield (x, y)
 
-        positions.zip(scala.util.Random.shuffle(positions)).map{case (home, current) =>
+        positions.zip(/*scala.util.Random.shuffle*/(positions)).map{case (home, current) =>
             current -> Piece(home, current, Group(List(), 0, 0))
         }.toMap
     }
