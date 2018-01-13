@@ -12,7 +12,7 @@ abstract class GameLoop(canvasId : String) extends JSApp {
 
     def load(loader : Loader)
     def onLoad(display : Display)
-    def update(display : Display, t : Double)
+    def update(display : Display, t : Double, dt : Double)
 
     var canvas : HTMLCanvasElement = _
 
@@ -27,10 +27,13 @@ abstract class GameLoop(canvasId : String) extends JSApp {
 
             // This crazy stuff is done to avoid creating and allocating a new anonymous function for each call to requestAnimationFrame
             var loopF : Double => Unit = null
-            val start : Double = secondsElapsed() - 0.01
+            val start : Double = secondsElapsed()
+            var t0 = start
             def loop(_t : Double) : Unit = {
-                val t = start - secondsElapsed()
-                update(display, t)
+                val t = secondsElapsed() - start
+                val dt = t - t0
+                t0 = t
+                update(display, t, dt)
                 dom.window.requestAnimationFrame(loopF)
             }
             loopF = loop

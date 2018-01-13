@@ -59,9 +59,10 @@ object SpriteCanvas {
     }
 
 
-    private case class MutableCustomShader(
+    case class MutableCustomShader(
         image : Language.Image,
         uniforms : List[Uniform[Double]],
+        uniformValues : List[Double] = List(),
         var shader : Shader = null
     ) extends CustomShader
 
@@ -89,10 +90,7 @@ object SpriteCanvas {
             val a = MutableCustomShader(f(r), List(u))
             animations ::= a
 
-            {v : Double =>
-                u.value = v
-                a
-            }
+            {v => a.copy(uniformValues = List(v))}
         }
 
         // TODO generalize this
@@ -102,11 +100,7 @@ object SpriteCanvas {
             val a = MutableCustomShader(f(Language.liftUniformR(u1))(Language.liftUniformR(u2)), List(u1, u2))
             animations ::= a
 
-            {v1 => v2 =>
-                u1.value = v1
-                u2.value = v2
-                a
-            }
+            {v1 => v2 => a.copy(uniformValues = List(v1, v2))}
         }
 
         def f3(f : R => R => R => Language.Image) : Double => Double => Double => CustomShader = {
@@ -116,12 +110,7 @@ object SpriteCanvas {
             val a = MutableCustomShader(f(Language.liftUniformR(u1))(Language.liftUniformR(u2))(Language.liftUniformR(u3)), List(u1, u2, u3))
             animations ::= a
 
-            {v1 => v2 => v3 =>
-                u1.value = v1
-                u2.value = v2
-                u3.value = v3
-                a
-            }
+            {v1 => v2 => v3 => a.copy(uniformValues = List(v1, v2, v3))}
         }
 
         def f4(f : R => R => R => R => Language.Image) : Double => Double => Double => Double => CustomShader = {
@@ -132,13 +121,7 @@ object SpriteCanvas {
             val a = MutableCustomShader(f(Language.liftUniformR(u1))(Language.liftUniformR(u2))(Language.liftUniformR(u3))(Language.liftUniformR(u4)), List(u1, u2, u3, u4))
             animations ::= a
 
-            {v1 => v2 => v3 => v4 =>
-                u1.value = v1
-                u2.value = v2
-                u3.value = v3
-                u4.value = v4
-                a
-            }
+            {v1 => v2 => v3 => v4 => a.copy(uniformValues = List(v1, v2, v3, v4))}
         }
 
         def f5(f : R => R => R => R => R => Language.Image) : Double => Double => Double => Double => Double => CustomShader = {
@@ -150,14 +133,7 @@ object SpriteCanvas {
             val a = MutableCustomShader(f(Language.liftUniformR(u1))(Language.liftUniformR(u2))(Language.liftUniformR(u3))(Language.liftUniformR(u4))(Language.liftUniformR(u5)), List(u1, u2, u3, u4, u5))
             animations ::= a
 
-            {v1 => v2 => v3 => v4 => v5 =>
-                u1.value = v1
-                u2.value = v2
-                u3.value = v3
-                u4.value = v4
-                u5.value = v5
-                a
-            }
+            {v1 => v2 => v3 => v4 => v5 => a.copy(uniformValues = List(v1, v2, v3, v4, v5))}
         }
 
         def complete: Future[Display] = {

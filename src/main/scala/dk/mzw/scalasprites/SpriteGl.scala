@@ -3,7 +3,7 @@ package dk.mzw.scalasprites
 import dk.mzw.accelemation.{Compile, Language}
 import dk.mzw.accelemation.internal.Internal
 import dk.mzw.accelemation.internal.Internal.Uniform
-import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Image, Sprite}
+import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Image, MutableCustomShader, Sprite}
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
 import org.scalajs.dom.raw.WebGLRenderingContext._
@@ -71,7 +71,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
             samplerUniformLocation = gl.getUniformLocation(program, "u_sampler"),
             scaleUniformLocation = gl.getUniformLocation(program, "u_scale"),
             offsetUniformLocation = gl.getUniformLocation(program, "u_offset"),
-            parameterUniformLocations = uniforms.map(u => gl.getUniformLocation(program, u.name) -> u),
+            parameterUniformLocations = uniforms.map(u => gl.getUniformLocation(program, u.name)),
             coordinatesAttributeLocation = gl.getAttribLocation(program, "a_coordinates"),
             rotationsAttributeLocation = gl.getAttribLocation(program, "a_rotation")
         )
@@ -92,6 +92,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
     }
 
     def initPixelProgram(f : Language.Image, uniforms : List[Uniform[Double]]) : Shader = {
+        println(s"initPixelProgram")
         val fragmentSource = Compile.image(f, Language.Vec2(Internal.BuiltIn("v_textureCoordinates")))
         initSpriteProgram(fragmentSource, uniforms)
     }
@@ -123,8 +124,8 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         offset(1) = -centerY * scale(1)
     }
 
-    private val setParameterUniform :((WebGLUniformLocation, Uniform[Double])) => Unit = {pair =>
-        gl.uniform1f(pair._1, pair._2.value)
+    private val setParameterUniform :((WebGLUniformLocation, Double)) => Unit = {pair =>
+        gl.uniform1f(pair._1, pair._2)
     }
 
     def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = Measure("drawSprites"){
@@ -143,7 +144,11 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         gl.useProgram(shader.program)
         gl.uniform2fv(shader.scaleUniformLocation, scale)
         gl.uniform2fv(shader.offsetUniformLocation, offset)
-        shader.parameterUniformLocations.foreach(setParameterUniform)
+        sprites(from).image match {
+            case m : MutableCustomShader =>
+                shader.parameterUniformLocations.zip(m.uniformValues).foreach(setParameterUniform)
+            case _ =>
+        }
 
         val to = from + spriteCount // Exclusive
         var spriteIndex = from
@@ -153,32 +158,28 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
             animation match {
                 case image : Image =>
                     activateTexture(image.stamp.texture, shader)
-
                     // Update coordinate data
-
-                    {
-                        val tx = image.stamp.textureLeft
-                        val ty = image.stamp.textureTop
-                        val tw = image.stamp.textureWidth
-                        val th = image.stamp.textureHeight
-                        val w = if(w0 > 0) w0 else h * image.stamp.stampAspectRatio
-                        val x1 = (cx - w/2).toFloat
-                        val y1 = (cy - h/2).toFloat
-                        val x2 = (x1 + w).toFloat
-                        val y2 = (y1 + h).toFloat
-                        val tx1 = tx.toFloat
-                        val ty1 = (ty + th).toFloat
-                        val tx2 = (tx1 + tw).toFloat
-                        val ty2 = ty.toFloat
-                        val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
-                        val c = coordinatesBufferArray
-                        c.update(i +  0, x1); c.update(i +  1, y1); c.update(i +  2, tx1); c.update(i +  3, ty1)
-                        c.update(i +  4, x1); c.update(i +  5, y2); c.update(i +  6, tx1); c.update(i +  7, ty2)
-                        c.update(i +  8, x2); c.update(i +  9, y2); c.update(i + 10, tx2); c.update(i + 11, ty2)
-                        c.update(i + 12, x1); c.update(i + 13, y1); c.update(i + 14, tx1); c.update(i + 15, ty1)
-                        c.update(i + 16, x2); c.update(i + 17, y2); c.update(i + 18, tx2); c.update(i + 19, ty2)
-                        c.update(i + 20, x2); c.update(i + 21, y1); c.update(i + 22, tx2); c.update(i + 23, ty1)
-                    }
+                    val tx = image.stamp.textureLeft
+                    val ty = image.stamp.textureTop
+                    val tw = image.stamp.textureWidth
+                    val th = image.stamp.textureHeight
+                    val w = if(w0 > 0) w0 else h * image.stamp.stampAspectRatio
+                    val x1 = (cx - w/2).toFloat
+                    val y1 = (cy - h/2).toFloat
+                    val x2 = (x1 + w).toFloat
+                    val y2 = (y1 + h).toFloat
+                    val tx1 = tx.toFloat
+                    val ty1 = (ty + th).toFloat
+                    val tx2 = (tx1 + tw).toFloat
+                    val ty2 = ty.toFloat
+                    val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
+                    val c = coordinatesBufferArray
+                    c.update(i +  0, x1); c.update(i +  1, y1); c.update(i +  2, tx1); c.update(i +  3, ty1)
+                    c.update(i +  4, x1); c.update(i +  5, y2); c.update(i +  6, tx1); c.update(i +  7, ty2)
+                    c.update(i +  8, x2); c.update(i +  9, y2); c.update(i + 10, tx2); c.update(i + 11, ty2)
+                    c.update(i + 12, x1); c.update(i + 13, y1); c.update(i + 14, tx1); c.update(i + 15, ty1)
+                    c.update(i + 16, x2); c.update(i + 17, y2); c.update(i + 18, tx2); c.update(i + 19, ty2)
+                    c.update(i + 20, x2); c.update(i + 21, y1); c.update(i + 22, tx2); c.update(i + 23, ty1)
                 case _ =>
                     val i = spriteIndex * vertexPerSprite * coordinatesBufferItemSize
                     val c = coordinatesBufferArray
@@ -251,7 +252,7 @@ object SpriteGl {
         samplerUniformLocation : WebGLUniformLocation,
         scaleUniformLocation : WebGLUniformLocation,
         offsetUniformLocation : WebGLUniformLocation,
-        parameterUniformLocations : List[(WebGLUniformLocation, Uniform[Double])],
+        parameterUniformLocations : List[WebGLUniformLocation],
         coordinatesAttributeLocation : Int,
         rotationsAttributeLocation : Int
     )

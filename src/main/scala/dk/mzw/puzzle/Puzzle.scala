@@ -11,14 +11,13 @@ object Puzzle extends GameLoop("spriteCanvas")  {
     var cursor : CustomShader = _
     var floor : CustomShader = _
 
-    val size = 10
+    val size = 3
     val board = new Board(size)
 
     var mouse : MouseDrag[Piece] = _
     val imagePieceHalfSize = 1.0 / size
     val imagePieceSize = imagePieceHalfSize * 2
     val oneOverSize = 1.0 / size
-
 
     override def load(loader: Loader): Unit = {
         animation = loader(Animations.ballz)
@@ -27,14 +26,13 @@ object Puzzle extends GameLoop("spriteCanvas")  {
         floor = loader("assets/floor.png")
     }
 
-    override def onLoad(display: Display): Unit = {
+    override def onLoad(display : Display): Unit = {
         mouse = new MouseDrag[Piece](canvas, display.gameCoordinatesX, display.gameCoordinatesY, board.findPiece, board.drag, board.move)
     }
 
-    override def update(display: Display, t: Double): Unit = {
+    override def update(display : Display, t : Double, dt : Double): Unit = {
         display.add(floor, -10, -10, 1, 0) // TODO remove
         val image = animation(t)
-        val edge = edges(0.5)(0.5)(0.5)(0.5)
         val sorted = board.pieces.values.toList.sortBy(p => p.group.offsetX != 0 || p.group.offsetY != 0)
         sorted.foreach{piece =>
             val x = piece.current._1 + piece.group.offsetX
@@ -52,6 +50,11 @@ object Puzzle extends GameLoop("spriteCanvas")  {
                 angle = 0,
                 blending = Blending.top
             )
+            piece.connectedTop.update(dt)
+            piece.connectedLeft.update(dt)
+            piece.connectedBottom.update(dt)
+            piece.connectedRight.update(dt)
+            val edge = edges(piece.connectedTop.value)(piece.connectedLeft.value)(piece.connectedBottom.value)(piece.connectedRight.value)
             display.add(
                 image = edge,
                 x = x,
@@ -59,7 +62,7 @@ object Puzzle extends GameLoop("spriteCanvas")  {
                 width = 1,
                 height = 1,
                 angle = 0,
-                blending = Blending.additive
+                blending = Blending.top
             )
         }
         display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
@@ -77,7 +80,7 @@ class Board(size : Int) {
         } yield (x, y)
 
         positions.zip(scala.util.Random.shuffle(positions)).map{case (home, current) =>
-            current -> Piece(home, current, Group(List(), 0, 0))
+            current -> Piece(home, current)
         }.toMap
     }
     reGroup()
@@ -147,6 +150,14 @@ class Board(size : Int) {
             val piece1 = pieces(p1)
             val piece2 = pieces(p2)
             if(piece1.delta == piece2.delta) {
+                if(p1._1 < p2._1) {
+                    piece1.connectedRight.active = true
+                    piece2.connectedLeft.active = true
+                }
+                if(p1._2 < p2._2) {
+                    piece1.connectedTop.active = true
+                    piece2.connectedBottom.active = true
+                }
                 if(piece1.group != piece2.group) {
                     val members = piece1.group.members ++ piece2.group.members
                     val group = piece1.group.copy(members = members)
@@ -161,7 +172,11 @@ object Board {
     case class Piece(
         home : (Int, Int),
         var current : (Int, Int),
-        var group : Group
+        var group : Group = Group(List(), 0, 0),
+        var connectedTop : Transition = Transition(),
+        var connectedLeft : Transition = Transition(),
+        var connectedBottom : Transition = Transition(),
+        var connectedRight : Transition = Transition()
     ) {
         def delta : (Int, Int) = (current._1 - home._1, current._2 - home._2)
     }
@@ -173,4 +188,13 @@ object Board {
         var offsetY : Double,
         id : Double = {groupId += 1; groupId}
     )
+}
+
+case class Transition(
+    var value : Double = 0,
+    var active : Boolean = false
+) {
+    def update(dt : Double) : Unit = {
+        if(active) value = Math.min(1, value + dt)
+    }
 }
