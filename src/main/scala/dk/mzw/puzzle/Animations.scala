@@ -3,6 +3,8 @@ package dk.mzw.puzzle
 import dk.mzw.accelemation.Language._
 import dk.mzw.accelemation.Math
 import dk.mzw.accelemation.util.Prelude._
+import dk.mzw.accelemation.util.Combinators._
+import dk.mzw.accelemation.Global._
 
 object Animations {
 
@@ -38,5 +40,36 @@ object Animations {
         val i = Math.smoothstep(1, 0, d)
         rgba(i, i, i, 1)
     }
+
+    def lines(t : R, x : R) : R = {
+        if_(Math.mod(x + t, 100) < 1, 1 : R, 0 : R)
+    }
+
+    val rand = {n : R =>
+        Math.fract(Math.sin(n) * 43758.5453123)
+    }.global("rand")
+
+    val cosOne = {x : R =>
+        (Math.cos(x) + 1) * 0.5
+    }.global("cosOne")
+
+    val cars : Animation = {t => x => y =>
+        val size = 10
+        val speed = 0.5 * size
+        val yi = Math.floor(y * size)
+        val dx = rand(yi) * 1337
+        val ft = (rand(yi) + 0.5) * speed
+        val i = lines(t * ft, (x + dx) * size)
+        hsva(rand(yi), 0, i * 0.5, 1)
+    }
+
+    val moreCars = addition (addition (rotate(Math.pi * 0.5) (cars)) (cars)) (ballz)
+
+    val rings : Animation = fromPolarCoordinates{t => r => phi =>
+        val i = if_(Math.mod(r * 50 + t + Math.sin(phi * 5), 5) < 1, 1 : R, 0 : R)
+        hsva(t * 0.1 + r, r, i, 1)
+    }
+
+
 
 }

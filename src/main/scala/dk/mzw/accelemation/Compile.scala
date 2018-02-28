@@ -59,7 +59,7 @@ object Compile {
             val vs = "varying vec2 v_textureCoordinates;" // TODO
             val functions = sorted.map(_.source).mkString("\n")
             val source =
-s"""precision mediump float;
+s"""precision highp float;
 $us
 $vs
 

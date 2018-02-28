@@ -4,7 +4,7 @@ import dk.mzw.accelemation.{Compile, Language}
 import dk.mzw.accelemation.internal.Internal
 import dk.mzw.accelemation.internal.Internal.Uniform
 import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Image, MutableCustomShader, Sprite}
-import dk.mzw.scalasprites.SpriteGl.Shader
+import dk.mzw.scalasprites.SpriteGl.{Precision, Shader}
 import org.scalajs.dom
 import org.scalajs.dom.raw.WebGLRenderingContext._
 import org.scalajs.dom.raw._
@@ -15,6 +15,12 @@ import scala.scalajs.js.typedarray.Float32Array
 class SpriteGl(val canvas : HTMLCanvasElement) {
 
     val gl = SpriteGl.getContexts(canvas)
+
+    val fragmentShaderPrecision = {
+        val format = gl.getShaderPrecisionFormat(FRAGMENT_SHADER, HIGH_FLOAT)
+        Precision(format.rangeMin, format.rangeMax, format.precision)
+    }
+
     private val mutableBoundingBox = MutableBoundingBox(-1, -1, 1, 1)
     val boundingBox : BoundingBox = mutableBoundingBox
 
@@ -246,6 +252,12 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
 }
 
 object SpriteGl {
+
+    case class Precision(
+        minRange : Int,
+        maxRange : Int,
+        precision : Int
+    )
 
     case class Shader(
         program: WebGLProgram,

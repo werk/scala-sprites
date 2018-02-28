@@ -1,6 +1,5 @@
 package dk.mzw.puzzle
 
-import dk.mzw.guts.utility.MouseDrag
 import dk.mzw.puzzle.Board._
 import dk.mzw.scalasprites.SpriteCanvas._
 
@@ -11,7 +10,7 @@ object Puzzle extends GameLoop("spriteCanvas")  {
     var cursor : CustomShader = _
     var floor : CustomShader = _
 
-    val size = 3
+    val size = 5
     val board = new Board(size)
 
     var mouse : MouseDrag[Piece] = _
@@ -20,7 +19,7 @@ object Puzzle extends GameLoop("spriteCanvas")  {
     val oneOverSize = 1.0 / size
 
     override def load(loader: Loader): Unit = {
-        animation = loader(Animations.ballz)
+        animation = loader(Animations.moreCars)
         edges = loader.f4(Animations.edges)
         cursor = loader(Animations.cursor)
         floor = loader("assets/floor.png")
@@ -67,7 +66,8 @@ object Puzzle extends GameLoop("spriteCanvas")  {
         }
         display.add(cursor, mouse.x, mouse.y, 0.1, 0, blending = Blending.additive)
         val center = size * 0.5 - 0.5
-        display.draw((0,0,0,1), size, centerX = center, centerY = center)
+        val h = size * Math.max(1, display.boundingBox.height / display.boundingBox.width)
+        display.draw((0,0,0,1), height = h, centerX = center, centerY = center)
     }
 }
 
