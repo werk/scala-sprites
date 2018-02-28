@@ -1,8 +1,8 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.accelemation.{Compile, Language}
-import dk.mzw.accelemation.internal.Internal
-import dk.mzw.accelemation.internal.Internal.Uniform
+import dk.mzw.scalashading.{Compile, Language}
+import dk.mzw.scalashading.internal.Internal
+import dk.mzw.scalashading.internal.Internal.Uniform
 import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Image, MutableCustomShader, Sprite}
 import dk.mzw.scalasprites.SpriteGl.{Precision, Shader}
 import org.scalajs.dom
@@ -134,7 +134,7 @@ class SpriteGl(val canvas : HTMLCanvasElement) {
         gl.uniform1f(pair._1, pair._2)
     }
 
-    def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = Measure("drawSprites"){
+    def drawSprites(sprites : js.Array[Sprite], from : Int, spriteCount : Int) : Unit = {
         if(spriteCount > vertexBuffersSpriteSize) resizeBuffers(spriteCount)
 
         // Blending

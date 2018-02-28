@@ -1,8 +1,8 @@
 package dk.mzw.scalasprites
 
-import dk.mzw.accelemation.Language
-import dk.mzw.accelemation.Language.R
-import dk.mzw.accelemation.internal.Internal.Uniform
+import dk.mzw.scalashading.Language
+import dk.mzw.scalashading.Language.R
+import dk.mzw.scalashading.internal.Internal.Uniform
 import dk.mzw.scalasprites.SpriteGl.Shader
 import org.scalajs.dom
 import org.scalajs.dom.raw.{HTMLCanvasElement, WebGLTexture, WebGLRenderingContext => GL}

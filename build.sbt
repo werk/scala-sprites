@@ -1,7 +1,9 @@
 enablePlugins(ScalaJSPlugin)
 
-name := "ScalaSprites"
+name := "scala-sprites"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.4"
 
-libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.2"
+
+libraryDependencies += "dk.mzw.scalashading" %%% "scala-shading" % "0.1.0"
