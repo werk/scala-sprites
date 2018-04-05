@@ -84,7 +84,7 @@ object SpriteCanvas {
             a
         }
 
-        def apply(f : R => Language.Image) : Double => CustomShader = {
+        def u1(f : R => Language.Image) : Double => CustomShader = {
             val u = new Uniform[Double]("u", 0)
             val r = Language.liftUniformR(u)
             val a = MutableCustomShader(f(r), List(u))
@@ -94,7 +94,7 @@ object SpriteCanvas {
         }
 
         // TODO generalize this
-        def f2(f : R => R => Language.Image) : Double => Double => CustomShader = {
+        def u2(f : R => R => Language.Image) : Double => Double => CustomShader = {
             val u1 = new Uniform[Double]("u1", 0)
             val u2 = new Uniform[Double]("u2", 0)
             val a = MutableCustomShader(f(Language.liftUniformR(u1))(Language.liftUniformR(u2)), List(u1, u2))
@@ -103,7 +103,7 @@ object SpriteCanvas {
             {v1 => v2 => a.copy(uniformValues = List(v1, v2))}
         }
 
-        def f3(f : R => R => R => Language.Image) : Double => Double => Double => CustomShader = {
+        def u3(f : R => R => R => Language.Image) : Double => Double => Double => CustomShader = {
             val u1 = new Uniform[Double]("u1", 0)
             val u2 = new Uniform[Double]("u2", 0)
             val u3 = new Uniform[Double]("u3", 0)
@@ -113,7 +113,7 @@ object SpriteCanvas {
             {v1 => v2 => v3 => a.copy(uniformValues = List(v1, v2, v3))}
         }
 
-        def f4(f : R => R => R => R => Language.Image) : Double => Double => Double => Double => CustomShader = {
+        def u4(f : R => R => R => R => Language.Image) : Double => Double => Double => Double => CustomShader = {
             val u1 = new Uniform[Double]("u1", 0)
             val u2 = new Uniform[Double]("u2", 0)
             val u3 = new Uniform[Double]("u3", 0)
@@ -124,7 +124,7 @@ object SpriteCanvas {
             {v1 => v2 => v3 => v4 => a.copy(uniformValues = List(v1, v2, v3, v4))}
         }
 
-        def f5(f : R => R => R => R => R => Language.Image) : Double => Double => Double => Double => Double => CustomShader = {
+        def u5(f : R => R => R => R => R => Language.Image) : Double => Double => Double => Double => Double => CustomShader = {
             val u1 = new Uniform[Double]("u1", 0)
             val u2 = new Uniform[Double]("u2", 0)
             val u3 = new Uniform[Double]("u3", 0)
