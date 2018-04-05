@@ -322,7 +322,7 @@ object SpriteCanvas {
             var i = 0
             while(i < addedSprites) {
                 val sprite = spriteBuffer(i)
-                if(segmentSprite.blending != sprite.blending || segmentSprite.image.shader != sprite.image.shader) {
+                if(true/*segmentSprite.blending != sprite.blending || segmentSprite.image.shader != sprite.image.shader*/) {
                     gl.drawSprites(spriteBuffer, segmentStart, segmentLength)
 
                     segmentStart = i
