@@ -139,7 +139,7 @@ object SpriteCanvas {
         def complete: Future[Display] = {
             // TODO remove duplicates
             PackImages(images).map { case (atlas, mapping) =>
-                dom.document.body.appendChild(atlas) // TODO remove this
+                //dom.document.body.appendChild(atlas) // TODO remove this
                 completed = true
                 val texture = gl.bindTexture(atlas)
 
